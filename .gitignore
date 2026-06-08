@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.pnpm-home/
+.npm-cache/
+
+# Build output
+dist/
+.next/
+out/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!apps/**/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Prototype generated output remains on disk but should not be treated as source.
+prototype/dist/

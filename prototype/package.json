@@ -1,0 +1,13 @@
+{
+  "name": "raina-phase-one-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "node scripts/lint-lite.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "build": "tsc && node scripts/build.mjs",
+    "dev": "node scripts/dev-server.mjs"
+  }
+}

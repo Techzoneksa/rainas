@@ -1,0 +1,27 @@
+:root {
+  --raina-color-primary-yellow: #ffce00;
+  --raina-color-charcoal-black: #171717;
+  --raina-color-main-background: #f8f8f6;
+  --raina-color-card-background: #ffffff;
+  --raina-color-secondary-background: #f1f1ed;
+  --raina-color-primary-text: #171717;
+  --raina-color-secondary-text: #6b6b66;
+  --raina-color-muted-text: #9a9a94;
+  --raina-color-light-border: #e6e6e0;
+  --raina-color-strong-border: #d2d2cb;
+  --raina-color-support-purple: #5b3fd6;
+  --raina-color-light-purple: #eeeafe;
+  --raina-color-success: #2e9d68;
+  --raina-color-error: #d94a4a;
+  --raina-color-warning: #f59e0b;
+  --raina-color-information: #3478f6;
+  --raina-radius-sm: 8px;
+  --raina-radius-md: 12px;
+  --raina-radius-lg: 16px;
+  --raina-radius-xl: 20px;
+  --raina-shadow-subtle: 0 8px 22px rgba(23, 23, 23, 0.045);
+  --raina-shadow-elevated: 0 12px 30px rgba(23, 23, 23, 0.07);
+  --raina-font-arabic:
+    "IBM Plex Sans Arabic", "Tajawal", "Cairo", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}

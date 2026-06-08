@@ -1,0 +1,10 @@
+{
+  "extends": "@raina/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "@raina/typescript-config/library.json",
+  "include": ["src/**/*.ts"]
+}

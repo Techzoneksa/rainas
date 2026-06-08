@@ -1,0 +1,13 @@
+node_modules/
+.pnpm-store/
+.pnpm-home/
+.npm-cache/
+.git/
+.next/
+dist/
+coverage/
+pnpm-lock.yaml
+apps/**/next-env.d.ts
+prototype/
+prototype/dist/
+PRD_*.pdf

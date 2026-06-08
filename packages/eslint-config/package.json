@@ -1,0 +1,19 @@
+{
+  "name": "@raina/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base": "./base.mjs",
+    "./next": "./next.mjs",
+    "./nestjs": "./nestjs.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.2.7",
+    "@typescript-eslint/eslint-plugin": "8.60.1",
+    "@typescript-eslint/parser": "8.60.1",
+    "eslint": "10.4.1",
+    "typescript-eslint": "8.60.1"
+  }
+}

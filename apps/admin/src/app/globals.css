@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@import "@raina/design-tokens/tokens.css";
+
+html {
+  direction: rtl;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--raina-color-main-background);
+  color: var(--raina-color-primary-text);
+  font-family: var(--raina-font-arabic);
+  text-align: start;
+}
+
+::selection {
+  background: var(--raina-color-primary-yellow);
+  color: var(--raina-color-charcoal-black);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--raina-color-support-purple), transparent 60%);
+  outline-offset: 3px;
+}
+
+.foundation-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.foundation-panel {
+  width: min(100%, 560px);
+  border: 1px solid var(--raina-color-light-border);
+  border-radius: var(--raina-radius-xl);
+  background: var(--raina-color-card-background);
+  box-shadow: var(--raina-shadow-subtle);
+  padding: 24px;
+}
+
+.foundation-badge {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--raina-color-light-purple);
+  color: var(--raina-color-support-purple);
+  font-weight: 700;
+  padding-inline: 14px;
+}
+
+.foundation-title {
+  margin: 18px 0 8px;
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.foundation-copy {
+  margin: 0;
+  color: var(--raina-color-secondary-text);
+  line-height: 1.8;
+}
+
+.foundation-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: 20px;
+}
+
+.foundation-link {
+  min-height: 44px;
+  border-radius: var(--raina-radius-md);
+  border: 1px solid var(--raina-color-light-border);
+  color: var(--raina-color-primary-text);
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 14px;
+  text-decoration: none;
+}
