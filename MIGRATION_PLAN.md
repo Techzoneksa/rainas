@@ -38,10 +38,11 @@ Preserve these from the current prototype:
 - RTL behavior and mobile-first intent.
 - Existing route inventory.
 - Demo product/category/post/user data as seed reference.
-- Main user flows: splash, onboarding, OTP, guest mode, discovery, product, post, save, lists, follow, comments, drafts, compare, profile, settings.
+- Main user flows: splash, onboarding, OTP, guest mode, discovery, product, post, save, lists, follow, comments, drafts, profile, settings.
 - Color tokens and general visual language.
 - No Likes rule.
 - Rating from 1 to 10.
+- Current LocalStorage migration keeps saves, lists, following, comments, drafts, notifications, and settings while ignoring old side-by-side product weighing data.
 
 ## Rewrite
 
@@ -65,7 +66,7 @@ Rewrite these in target architecture:
 5. Build backend data model and API contract.
 6. Seed backend with current demo data.
 7. Rebuild web flows feature by feature in Next.js.
-8. Compare each rebuilt flow against prototype.
+8. Validate each rebuilt flow against prototype behavior.
 9. Add admin dashboard.
 10. Add Flutter foundations and feature parity.
 11. Retire prototype only after explicit approval.
@@ -92,7 +93,6 @@ Rewrite these in target architecture:
 - Drafts.
 - Profile edit.
 - Settings.
-- Comparison.
 - Legal pages.
 - Arabic RTL responsive UI.
 - No Likes.

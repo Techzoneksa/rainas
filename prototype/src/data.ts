@@ -226,7 +226,7 @@ export const users: DemoUser[] = [
     title: "قهوة ومعدات منزلية",
     city: "الدمام",
     avatarTone: "green",
-    bio: "أقارن أدوات القهوة من ناحية الطعم والتنظيف والقيمة."
+    bio: "أوثق أدوات القهوة من ناحية الطعم والتنظيف والقيمة."
   }
 ];
 
@@ -235,6 +235,7 @@ export const posts: Post[] = [
     id: "post-001",
     productId: "product-1",
     author: "noura_reviews",
+    publicListId: "public-skincare-daily",
     rating: 9,
     title: "أكثر مرطب رجعت له في الشتاء",
     body:
@@ -261,6 +262,7 @@ export const posts: Post[] = [
     id: "post-002",
     productId: "product-2",
     author: "noura_reviews",
+    publicListId: "public-skincare-daily",
     rating: 9,
     title: "أنقذني بعد التقشير الخفيف",
     body:
@@ -292,6 +294,7 @@ export const posts: Post[] = [
     id: "post-004",
     productId: "product-6",
     author: "faisal_coffee",
+    publicListId: "public-coffee-gifts",
     rating: 8,
     title: "أبسط طريقة لقهوة باردة ثابتة",
     body:
@@ -312,8 +315,8 @@ export const initialNotifications: NotificationItem[] = [
   },
   {
     id: "note-2",
-    title: "منتجك في المقارنة",
-    body: "أصبح لديك منتجان في صفحة المقارنة.",
+    title: "قائمة عامة جديدة",
+    body: "أضيف منتج محفوظ إلى قائمة ناشر عامة يمكنك فتحها من الملف الشخصي.",
     createdAt: "قبل ساعة",
     read: false
   },

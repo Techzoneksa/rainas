@@ -51,6 +51,7 @@ export interface Post {
   id: string;
   productId: string;
   author: string;
+  publicListId?: string;
   rating: number;
   title: string;
   body: string;
@@ -61,8 +62,12 @@ export interface Post {
 
 export interface SavedList {
   id: string;
+  ownerUsername: string;
   name: string;
   description: string;
+  purpose: "personal_save" | "publisher_public";
+  visibility: "private" | "public";
+  coverTone?: "cream" | "mint" | "rose" | "sky" | "sand" | "violet";
   productIds: string[];
   postIds: string[];
 }
@@ -70,6 +75,7 @@ export interface SavedList {
 export interface DraftPost {
   id: string;
   productId: string;
+  publicListId?: string;
   rating: number;
   title: string;
   body: string;
@@ -113,8 +119,8 @@ export interface AppState {
   savedProductIds: string[];
   savedPostIds: string[];
   savedLists: SavedList[];
+  publicLists: SavedList[];
   followingUsernames: string[];
-  compareProductIds: string[];
   commentsByPostId: Record<string, CommentItem[]>;
   commentsByProductId: Record<string, CommentItem[]>;
   drafts: DraftPost[];

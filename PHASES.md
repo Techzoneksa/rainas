@@ -187,23 +187,23 @@ Rollback: disable publishing while keeping drafts.
 
 Out of phase: admin reporting UI beyond needed moderation hooks.
 
-## Phase 9 — Comparison
+## Phase 9 — Saves and Public Lists Hardening
 
-Goal: implement product comparison.
+Goal: harden personal saves, publisher public lists, and profile list visibility.
 
-Scope: compare state, compare API, compare page, save comparison, share comparison.
+Scope: personal save organization, private list permissions, public publisher lists, post-to-list linking, and migration parity from prototype behavior.
 
-Dependencies: product APIs.
+Dependencies: user interaction and content creation modules.
 
-Risks: guest vs authenticated state sync.
+Risks: confusing private personal lists with public publisher lists.
 
-Tests: add/remove/share/save comparison.
+Tests: save to private list, remove from private list, open public list, link post to public list, verify unauthorized private-list access.
 
-Acceptance criteria: comparison is core flow and persists where appropriate.
+Acceptance criteria: personal saves remain private, publisher lists are public, and post list chips resolve to public list routes.
 
-Definition of Done: parity with prototype comparison plus API support.
+Definition of Done: web/API behavior matches approved prototype list behavior.
 
-Rollback: local-only comparison fallback for guest.
+Rollback: hide public-list linking while keeping private saves.
 
 Out of phase: purchase recommendations.
 
@@ -291,7 +291,7 @@ Out of phase: full mobile features.
 
 Goal: implement mobile feature parity.
 
-Scope: entry flow, home, search, products, posts, saves, lists, following, comments, create post, compare, notifications, profile.
+Scope: entry flow, home, search, products, posts, saves, lists, following, comments, create post, notifications, profile.
 
 Dependencies: Flutter foundation and stable API.
 

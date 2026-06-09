@@ -4,7 +4,8 @@ import type { AppState, CommentItem, DraftPost, Post, Product, SavedList } from 
 
 type SheetState =
   | { kind: "auth"; path: string }
-  | { kind: "addToList"; productId: string }
+  | { kind: "addToList"; targetType: "product" | "post"; targetId: string }
+  | { kind: "postActions"; postId: string }
   | { kind: "report"; target: string; title: string }
   | { kind: "filters" }
   | { kind: "sort" };
@@ -14,6 +15,7 @@ interface UiState {
   sheet: SheetState | null;
   formError: string;
   savedView: "products" | "posts" | "lists";
+  profileView: "posts" | "publicLists" | "saved";
 }
 
 interface RouteResult {
@@ -34,7 +36,8 @@ let ui: UiState = {
   toast: "",
   sheet: null,
   formError: "",
-  savedView: "products"
+  savedView: "products",
+  profileView: "posts"
 };
 
 const iconPaths = {
@@ -49,7 +52,7 @@ const iconPaths = {
   star: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z" />',
   message: '<path d="M21 12a8 8 0 0 1-8 8H6l-3 2 .9-4A8 8 0 1 1 21 12Z" />',
   users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />',
-  scale: '<path d="M12 3v18" /><path d="M5 7h14" /><path d="m6 7-3 7h6z" /><path d="m18 7-3 7h6z" />',
+  more: '<circle cx="5" cy="12" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="19" cy="12" r="1.7" />',
   flag: '<path d="M5 21V4" /><path d="M5 4h12l-1.5 4L17 12H5" />',
   check: '<path d="m20 6-11 11-5-5" />',
   close: '<path d="M18 6 6 18M6 6l12 12" />',
@@ -170,6 +173,37 @@ function postById(id: string): Post | undefined {
   return allPosts().find((post) => post.id === id);
 }
 
+function publicListById(id: string): SavedList | undefined {
+  return state.publicLists.find((list) => list.id === id && list.visibility === "public");
+}
+
+function publicListsForUser(username: string): SavedList[] {
+  return state.publicLists.filter((list) => list.ownerUsername === username && list.visibility === "public");
+}
+
+function personalSavedLists(): SavedList[] {
+  return state.savedLists.filter((list) => list.ownerUsername === state.profile.username && list.purpose === "personal_save" && list.visibility === "private");
+}
+
+function publicListPath(list: SavedList): string {
+  return list.ownerUsername === state.profile.username ? `/profile/public-lists/${list.id}` : `/profile/${list.ownerUsername}/lists/${list.id}`;
+}
+
+function publicListsForPost(post: Post): SavedList[] {
+  const ownerLists = publicListsForUser(post.author);
+  const primary = post.publicListId ? publicListById(post.publicListId) : undefined;
+  const related = ownerLists.filter((list) => list.postIds.includes(post.id) || list.productIds.includes(post.productId));
+  return [primary, ...related]
+    .filter((list): list is SavedList => Boolean(list))
+    .filter((list, index, listSet) => listSet.findIndex((item) => item.id === list.id) === index);
+}
+
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 4) return "05•••••567";
+  return `05•••••${digits.slice(-3)}`;
+}
+
 function commentsForPost(post: Post): CommentItem[] {
   return state.commentsByPostId[post.id] ?? post.comments;
 }
@@ -186,6 +220,8 @@ function isProtected(path: string): boolean {
     path === "/notifications" ||
     path === "/profile" ||
     path === "/profile/edit" ||
+    path.startsWith("/profile/saved") ||
+    path === "/profile/public-lists" ||
     path.startsWith("/saved") ||
     path.startsWith("/settings")
   );
@@ -212,6 +248,10 @@ function render(): void {
     ${ui.toast ? `<div class="toast">${icon("check", true)}<span>${html(ui.toast)}</span></div>` : ""}
     ${ui.sheet ? renderSheet(ui.sheet) : ""}
   `;
+  if (path === "/verify-otp") {
+    updateOtpSubmit();
+    app.querySelector<HTMLInputElement>("[data-otp-input]")?.focus();
+  }
 }
 
 function buildRoute(path: string): RouteResult {
@@ -249,11 +289,14 @@ function buildRoute(path: string): RouteResult {
   if (path.startsWith("/post/")) return renderPostRoute(path);
   if (path === "/create") return { title: "إنشاء تجربة", subtitle: "اكتب تجربة قابلة للحفظ أو النشر", body: renderCreate(), active: "create" };
   if (path === "/drafts") return { title: "المسودات", subtitle: "تجارب محفوظة محليا", body: renderDrafts(), active: "create", showBack: true };
-  if (path === "/compare") return { title: "المقارنة", subtitle: "اختيار أوضح قبل القرار", body: renderCompare(), active: "compare" };
-  if (path === "/saved") return { title: "المحفوظات", subtitle: "منتجات ومنشورات وقوائم", body: renderSaved(), active: "saved" };
-  if (path === "/saved/lists") return { title: "القوائم", subtitle: "نظم المنتجات والمنشورات", body: renderLists(), active: "saved", showBack: true };
-  if (path.startsWith("/saved/lists/")) return renderListRoute(path);
-  if (path === "/following") return { title: "المتابعة", subtitle: "حسابات وتجارب جديدة", body: renderFollowing(), active: "profile" };
+  if (path === "/saved" || path === "/profile/saved") return { title: "المحفوظات", subtitle: "حفظ شخصي داخل حسابك فقط", body: renderSaved(), active: "profile", showBack: true };
+  if (path === "/saved/lists" || path === "/profile/saved/lists") return { title: "قوائم الحفظ", subtitle: "قوائم شخصية لا تظهر للزوار", body: renderLists(), active: "profile", showBack: true };
+  if (path.startsWith("/saved/lists/") || path.startsWith("/profile/saved/lists/")) return renderListRoute(path);
+  if (path === "/profile/public-lists") return { title: "قوائمي العامة", subtitle: "قوائم تظهر للزوار في ملفك", body: renderPublicLists(state.profile.username), active: "profile", showBack: true };
+  if (path.startsWith("/profile/public-lists/")) return renderPublicListRoute(path);
+  if (path.includes("/lists/")) return renderPublicListRoute(path);
+  if (path.endsWith("/lists")) return renderPublicListsRoute(path);
+  if (path === "/following") return { title: "المتابعون", subtitle: "منشورات الحسابات التي تتابعها", body: renderFollowing(), active: "following" };
   if (path === "/notifications") return { title: "الإشعارات", subtitle: "تعليقات وتنبيهات العرض", body: renderNotifications(), active: "profile" };
   if (path === "/profile") return { title: "ملفي", subtitle: state.profile.username, body: renderProfile(), active: "profile" };
   if (path === "/profile/edit") return { title: "تعديل الملف", subtitle: "بيانات محفوظة محليا", body: renderEditProfile(), active: "profile", showBack: true };
@@ -298,8 +341,7 @@ function renderDesktopRail(active: string): string {
     ["home", "/home", "الرئيسية", "home"],
     ["search", "/search", "البحث", "search"],
     ["create", "/create", "إنشاء", "plus"],
-    ["compare", "/compare", "المقارنة", "scale"],
-    ["saved", "/saved", "الحفظ", "bookmark"],
+    ["following", "/following", "المتابعون", "users"],
     ["profile", "/profile", "حسابي", "user"]
   ] as const;
 
@@ -326,7 +368,7 @@ function renderBottomNav(active: string): string {
     ["home", "/home", "الرئيسية", "home"],
     ["search", "/search", "بحث", "search"],
     ["create", "/create", "إنشاء", "plus"],
-    ["saved", "/saved", "الحفظ", "bookmark"],
+    ["following", "/following", "المتابعون", "users"],
     ["profile", "/profile", "حسابي", "user"]
   ] as const;
 
@@ -348,9 +390,9 @@ function renderBottomNav(active: string): string {
 function activeFromPath(path: string): string {
   if (path.startsWith("/search") || path.startsWith("/category") || path.startsWith("/product")) return "search";
   if (path.startsWith("/create") || path.startsWith("/drafts")) return "create";
-  if (path.startsWith("/saved")) return "saved";
+  if (path.startsWith("/following")) return "following";
+  if (path.startsWith("/saved")) return "profile";
   if (path.startsWith("/profile") || path.startsWith("/settings") || path.startsWith("/notifications")) return "profile";
-  if (path.startsWith("/compare")) return "compare";
   return "home";
 }
 
@@ -359,7 +401,7 @@ function renderSplash(): string {
     <section class="center-screen">
       <div class="brand-stack">
         <img class="brand-logo" src="${assetPath("raina_logo.svg")}" alt="شعار رأينا Raina" />
-        <p class="brand-subtitle">مجتمع عربي لاكتشاف المنتجات وقراءة التجارب ومقارنة الخيارات قبل قرار الشراء.</p>
+        <p class="brand-subtitle">مجتمع عربي لاكتشاف المنتجات وقراءة التجارب وحفظ الخيارات قبل قرار الشراء.</p>
       </div>
       <div class="hero-panel">
         <div class="skeleton" aria-label="تحميل تجريبي">
@@ -377,7 +419,7 @@ function renderOnboarding(): string {
   const slides = [
     ["اكتشف المنتجات", "تصفح تصنيفات وتجارب عربية مرتبطة بالسوق السعودي والخليجي."],
     ["اقرأ قبل القرار", "شاهد تقييمات من 10، مميزات، ملاحظات، وتعليقات من المجتمع."],
-    ["قارن واحفظ", "ضع المنتجات في مقارنة واضحة ونظم ما يهمك داخل قوائم."]
+    ["احفظ ونظم", "احفظ المنتجات والمنشورات التي تهمك داخل قوائم شخصية."]
   ];
 
   return `
@@ -433,23 +475,47 @@ function renderLogin(): string {
 }
 
 function renderOtp(): string {
+  const phone = maskPhone(state.session.phone || state.profile.phone);
+  const errorClass = ui.formError ? " otp-error" : "";
   return `
     <section class="center-screen">
       <div class="brand-stack">
-        <div class="brand-mark" aria-hidden="true">1234</div>
-        <h1 class="brand-title">رمز التحقق</h1>
-        <p class="brand-subtitle">استخدم الرمز التجريبي الثابت لإكمال الدخول.</p>
+        <div class="brand-mark" aria-hidden="true">#</div>
+        <h1 class="brand-title">أدخل رمز التحقق</h1>
+        <p class="brand-subtitle">أرسلنا رمزًا من 4 أرقام إلى رقم جوالك ${html(phone)}</p>
       </div>
       <form class="panel" data-form="otp">
         <div class="field">
-          <label for="otp">OTP</label>
-          <input id="otp" name="otp" inputmode="numeric" maxlength="4" value="${demoOtp}" aria-describedby="otp-help" />
-          <span id="otp-help" class="caption">الرمز التجريبي: ${demoOtp}</span>
+          <label>رمز التحقق</label>
+          <div class="otp-grid${errorClass}" dir="ltr" aria-describedby="otp-help">
+            ${[0, 1, 2, 3]
+              .map(
+                (index) => `
+                  <input
+                    class="otp-input"
+                    name="otp-${index}"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    autocomplete="${index === 0 ? "one-time-code" : "off"}"
+                    maxlength="1"
+                    data-otp-input
+                    data-index="${index}"
+                    aria-label="الخانة ${index + 1}"
+                  />
+                `
+              )
+              .join("")}
+          </div>
+          <span id="otp-help" class="caption">رمز التحقق التجريبي: ${demoOtp}</span>
+          <span class="caption">يمكنك طلب رمز جديد بعد 30 ثانية.</span>
         </div>
         ${ui.formError ? `<p class="error-text">${html(ui.formError)}</p>` : ""}
-        <button class="primary-button" type="submit">تحقق وادخل</button>
+        <button class="primary-button" type="submit" data-otp-submit disabled>تحقق وادخل</button>
       </form>
-      <button class="text-button" data-action="nav" data-path="/login">تغيير الرقم</button>
+      <div class="button-row">
+        <button class="secondary-button" data-action="resend-otp">إعادة إرسال</button>
+        <button class="text-button" data-action="nav" data-path="/login">تغيير رقم الجوال</button>
+      </div>
     </section>
   `;
 }
@@ -478,7 +544,7 @@ function renderHome(): string {
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">منتجات مقترحة</h2>
-        <button class="text-button" data-action="nav" data-path="/compare">المقارنة</button>
+        <button class="text-button" data-action="nav" data-path="/profile/saved">المحفوظات</button>
       </div>
       <div class="grid">
         ${featuredProducts.map((product) => renderProductCard(product, "full")).join("")}
@@ -501,7 +567,7 @@ function renderDemoNotice(): string {
   return `
     <div class="notice">
       ${icon("check")}
-      <p class="body-copy">وضع العرض يعمل محليا. الحفظ، التعليقات، المسودات، الإعدادات، والمقارنة تبقى بعد تحديث الصفحة.</p>
+      <p class="body-copy">وضع العرض يعمل محليا. الحفظ، المتابعة، التعليقات، المسودات، القوائم، والإعدادات تبقى بعد تحديث الصفحة.</p>
     </div>
   `;
 }
@@ -518,7 +584,7 @@ function renderSearch(): string {
       const text = `${product.name} ${product.brand} ${product.summary} ${product.tags.join(" ")}`;
       return text.toLocaleLowerCase("ar").includes(query.toLocaleLowerCase("ar"));
     })
-    .sort((a, b) => (sort === "price" ? a.priceRange.localeCompare(b.priceRange, "ar") : b.rating - a.rating));
+    .sort((a, b) => (sort === "price" ? (a.priceRange > b.priceRange ? 1 : a.priceRange < b.priceRange ? -1 : 0) : b.rating - a.rating));
 
   return `
     <form class="search-bar" data-form="search">
@@ -621,11 +687,7 @@ function renderProductDetail(product: Product): string {
       </div>
       <div class="button-row">
         ${renderSaveProductButton(product.id)}
-        ${renderCompareButton(product.id)}
-      </div>
-      <div class="button-row">
-        <button class="secondary-button" data-action="open-add-list" data-product-id="${product.id}">${icon("bookmark", true)} إضافة لقائمة</button>
-        <button class="danger-button" data-action="report" data-target="product:${product.id}" data-title="${html(product.name)}">${icon("flag", true)} إبلاغ</button>
+        <button class="secondary-button" data-action="open-add-list" data-target-type="product" data-target-id="${product.id}">${icon("bookmark", true)} إضافة إلى قائمة حفظ</button>
       </div>
 
       <section class="panel">
@@ -707,12 +769,11 @@ function renderPostRoute(path: string): RouteResult {
 
 function renderPostDetail(post: Post): string {
   const product = productById(post.productId);
-  const author = userByUsername(post.author) ?? users[0];
   const comments = commentsForPost(post);
   return `
     <article class="grid">
       <div class="post-card">
-        ${renderUserLine(author.username)}
+        ${renderPostHeader(post)}
         <div class="split">
           <h2 class="post-title">${html(post.title)}</h2>
           ${renderRating(post.rating)}
@@ -720,13 +781,10 @@ function renderPostDetail(post: Post): string {
         <p class="post-body">${html(post.body)}</p>
         <div class="tag-row">${post.tags.map((tag) => `<span class="tag">${html(tag)}</span>`).join("")}</div>
         ${product ? `<button class="chip" data-action="nav" data-path="/product/${product.slug}">المنتج: ${html(product.name)}</button>` : ""}
+        ${renderPublicListChip(post)}
         <div class="button-row">
+          <button class="secondary-button" data-action="nav" data-path="/post/${post.id}">${icon("message", true)} التعليقات ${comments.length}</button>
           ${renderSavePostButton(post.id)}
-          <button class="secondary-button" data-action="follow-user" data-username="${author.username}">${icon("users", true)} ${state.followingUsernames.includes(author.username) ? "إلغاء المتابعة" : "متابعة"}</button>
-        </div>
-        <div class="button-row">
-          <button class="primary-button" data-action="share" data-path="/post/${post.id}">${icon("share", true)} مشاركة</button>
-          <button class="danger-button" data-action="report" data-target="post:${post.id}" data-title="${html(post.title)}">${icon("flag", true)} إبلاغ</button>
         </div>
       </div>
       <section class="panel">
@@ -746,6 +804,7 @@ function renderPostDetail(post: Post): string {
 }
 
 function renderCreate(): string {
+  const ownPublicLists = publicListsForUser(state.profile.username);
   return `
     <form class="grid" data-form="draft">
       <div class="panel">
@@ -768,6 +827,25 @@ function renderCreate(): string {
           <textarea id="body" name="body" placeholder="اكتب مدة الاستخدام، النتيجة، والملاحظات المهمة"></textarea>
         </div>
         ${ui.formError ? `<p class="error-text">${html(ui.formError)}</p>` : ""}
+      </div>
+      <div class="panel">
+        <h2 class="section-title">إضافة المنتج إلى قائمة عامة</h2>
+        <p class="body-copy section">ستظهر هذه القائمة للزوار في ملفك الشخصي.</p>
+        <div class="field section">
+          <label for="public-list">اختر قائمة عامة موجودة</label>
+          <select id="public-list" name="publicListId">
+            <option value="">بدون قائمة</option>
+            ${ownPublicLists.map((list) => `<option value="${list.id}">${html(list.name)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field">
+          <label for="public-list-name">أو أنشئ قائمة عامة جديدة</label>
+          <input id="public-list-name" name="publicListName" placeholder="مثال: عطور مناسبة للمناسبات" />
+        </div>
+        <div class="field">
+          <label for="public-list-description">وصف اختياري</label>
+          <input id="public-list-description" name="publicListDescription" placeholder="ما الذي يجمع عناصر هذه القائمة؟" />
+        </div>
       </div>
       <div class="button-row">
         <button class="secondary-button" name="intent" value="draft" type="submit">${icon("bookmark", true)} حفظ كمسودة</button>
@@ -792,12 +870,14 @@ function renderDrafts(): string {
 
 function renderDraftCard(draft: DraftPost): string {
   const product = productById(draft.productId);
+  const list = draft.publicListId ? publicListById(draft.publicListId) : undefined;
   return `
     <article class="post-card">
       <span class="caption">آخر تحديث: ${html(draft.updatedAt)}</span>
       <h2 class="post-title">${html(draft.title)}</h2>
       <p class="post-body">${html(draft.body)}</p>
       ${product ? `<span class="tag">${html(product.name)}</span>` : ""}
+      ${list ? `<span class="tag">قائمة عامة: ${html(list.name)}</span>` : ""}
       <div class="button-row">
         <button class="primary-button" data-action="publish-draft" data-draft-id="${draft.id}">${icon("check", true)} نشر</button>
         <button class="danger-button" data-action="delete-draft" data-draft-id="${draft.id}">${icon("trash", true)} حذف</button>
@@ -806,78 +886,23 @@ function renderDraftCard(draft: DraftPost): string {
   `;
 }
 
-function renderCompare(): string {
-  const selected = state.compareProductIds.map(productById).filter((product): product is Product => Boolean(product));
-  const available = products.filter((product) => !state.compareProductIds.includes(product.id));
-  if (!selected.length) {
-    return `
-      ${renderEmpty("لم تضف منتجات للمقارنة", "افتح أي منتج واضغط إضافة للمقارنة.")}
-      <section class="section grid">${products.slice(0, 3).map((product) => renderProductCard(product, "compact")).join("")}</section>
-    `;
-  }
-
-  const rows = [
-    ["التقييم", ...selected.map((product) => `${product.rating} / 10`)],
-    ["السعر", ...selected.map((product) => product.priceRange)],
-    ["الملاءمة", ...selected.map((product) => product.suitableFor.slice(0, 2).join("، "))],
-    ["ملاحظات", ...selected.map((product) => product.cautions[0] ?? "لا توجد ملاحظة")]
-  ];
-
-  return `
-    <div class="table-wrap">
-      <table class="comparison">
-        <thead>
-          <tr>
-            <th>البند</th>
-            ${selected.map((product) => `<th>${html(product.name)}</th>`).join("")}
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map((row) => `<tr>${row.map((cell) => `<td>${html(cell)}</td>`).join("")}</tr>`).join("")}
-          <tr>
-            <td>إجراء</td>
-            ${selected
-              .map(
-                (product) => `
-                  <td>
-                    <button class="danger-button" data-action="remove-compare" data-product-id="${product.id}">
-                      ${icon("close", true)} إزالة
-                    </button>
-                  </td>
-                `
-              )
-              .join("")}
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <section class="section">
-      <div class="section-header">
-        <h2 class="section-title">أضف منتجاً آخر</h2>
-        <span class="caption">${selected.length} / 4</span>
-      </div>
-      <div class="grid">
-        ${available.length ? available.slice(0, 3).map((product) => renderProductCard(product, "compact")).join("") : renderEmpty("كل المنتجات المختارة", "أزل منتجا لإضافة خيار آخر.")}
-      </div>
-    </section>
-  `;
-}
-
 function renderSaved(): string {
   const productList = state.savedProductIds.map(productById).filter((product): product is Product => Boolean(product));
   const postList = state.savedPostIds.map(postById).filter((post): post is Post => Boolean(post));
+  const lists = personalSavedLists();
   return `
     <div class="tabs" role="tablist" aria-label="أقسام المحفوظات">
       <button class="tab${ui.savedView === "products" ? " active" : ""}" data-action="saved-view" data-view="products">منتجات</button>
       <button class="tab${ui.savedView === "posts" ? " active" : ""}" data-action="saved-view" data-view="posts">منشورات</button>
-      <button class="tab${ui.savedView === "lists" ? " active" : ""}" data-action="saved-view" data-view="lists">قوائم</button>
+      <button class="tab${ui.savedView === "lists" ? " active" : ""}" data-action="saved-view" data-view="lists">قوائم الحفظ</button>
     </div>
+    <p class="body-copy">هذه المحفوظات شخصية ولا تظهر في الملف العام.</p>
     <div class="grid">
       ${
         ui.savedView === "products"
           ? productList.length
             ? productList.map((product) => renderProductCard(product, "compact")).join("")
-            : renderEmpty("لا توجد منتجات محفوظة", "ابدأ بحفظ المنتجات التي تريد الرجوع إليها.")
+            : renderEmpty("لم تحفظ أي شيء بعد", "ابدأ بحفظ المنتجات التي تريد الرجوع إليها.")
           : ""
       }
       ${
@@ -889,7 +914,7 @@ function renderSaved(): string {
       }
       ${
         ui.savedView === "lists"
-          ? `${renderListForm()}${state.savedLists.map(renderListCard).join("")}`
+          ? `${renderListForm()}${lists.length ? lists.map(renderListCard).join("") : renderEmpty("لا توجد قوائم بعد", "أنشئ قائمة لتنظيم المنتجات والمنشورات.")}`
           : ""
       }
     </div>
@@ -897,40 +922,63 @@ function renderSaved(): string {
 }
 
 function renderLists(): string {
+  const lists = personalSavedLists();
   return `
     ${renderListForm()}
     <div class="grid section">
-      ${state.savedLists.length ? state.savedLists.map(renderListCard).join("") : renderEmpty("لا توجد قوائم بعد", "أنشئ قائمة لتنظيم المنتجات والمنشورات.")}
+      ${lists.length ? lists.map(renderListCard).join("") : renderEmpty("لا توجد قوائم بعد", "أنشئ قائمة لتنظيم المنتجات والمنشورات.")}
     </div>
   `;
 }
 
 function renderListRoute(path: string): RouteResult {
-  const listId = path.split("/")[3] ?? "";
-  const list = state.savedLists.find((item) => item.id === listId);
-  if (!list) return { title: "قائمة غير موجودة", body: renderMissing(), active: "saved", showBack: true };
+  const pathParts = path.split("/").filter(Boolean);
+  const listId = pathParts[pathParts.length - 1] ?? "";
+  const list = personalSavedLists().find((item) => item.id === listId);
+  if (!list) return { title: "لا يمكنك الوصول إلى هذه القائمة", body: renderEmpty("لا يمكنك الوصول إلى هذه القائمة", "قوائم الحفظ الشخصية تظهر لصاحب الحساب فقط."), active: "profile", showBack: true };
   const listProducts = list.productIds.map(productById).filter((product): product is Product => Boolean(product));
   const listPosts = list.postIds.map(postById).filter((post): post is Post => Boolean(post));
   return {
     title: list.name,
     subtitle: list.description,
-    active: "saved",
+    active: "profile",
     showBack: true,
     body: `
+      <div class="button-row single">
+        <button class="danger-button" data-action="delete-list" data-list-id="${list.id}">${icon("trash", true)} حذف القائمة</button>
+      </div>
       <section class="section">
         <h2 class="section-title">المنتجات</h2>
         <div class="grid section">
-          ${listProducts.length ? listProducts.map((product) => renderProductCard(product, "compact")).join("") : renderEmpty("لا توجد منتجات", "أضف منتجا من صفحة المنتج.")}
+          ${listProducts.length ? listProducts.map((product) => renderListProductItem(product, list.id)).join("") : renderEmpty("لا توجد منتجات", "أضف منتجا من صفحة المنتج.")}
         </div>
       </section>
       <section class="section">
         <h2 class="section-title">المنشورات</h2>
         <div class="grid section">
-          ${listPosts.length ? listPosts.map(renderPostCard).join("") : renderEmpty("لا توجد منشورات", "احفظ منشورا داخل هذه القائمة لاحقا.")}
+          ${listPosts.length ? listPosts.map((post) => renderListPostItem(post, list.id)).join("") : renderEmpty("لا توجد منشورات", "احفظ منشورا داخل هذه القائمة لاحقا.")}
         </div>
       </section>
     `
   };
+}
+
+function renderListProductItem(product: Product, listId: string): string {
+  return `
+    <div class="list-item">
+      ${renderProductCard(product, "compact")}
+      <button class="danger-button" data-action="remove-list-item" data-list-id="${listId}" data-target-type="product" data-target-id="${product.id}">إزالة من القائمة</button>
+    </div>
+  `;
+}
+
+function renderListPostItem(post: Post, listId: string): string {
+  return `
+    <div class="list-item">
+      ${renderPostCard(post)}
+      <button class="danger-button" data-action="remove-list-item" data-list-id="${listId}" data-target-type="post" data-target-id="${post.id}">إزالة من القائمة</button>
+    </div>
+  `;
 }
 
 function renderListForm(): string {
@@ -959,26 +1007,150 @@ function renderListCard(list: SavedList): string {
         </div>
         <span class="rating-badge">${list.productIds.length + list.postIds.length}</span>
       </div>
-      <button class="secondary-button" data-action="nav" data-path="/saved/lists/${list.id}">فتح القائمة</button>
+      <div class="button-row">
+        <button class="secondary-button" data-action="nav" data-path="/profile/saved/lists/${list.id}">فتح القائمة</button>
+        <button class="danger-button" data-action="delete-list" data-list-id="${list.id}">${icon("trash", true)} حذف</button>
+      </div>
     </article>
   `;
 }
 
 function renderFollowing(): string {
-  const followedPosts = allPosts().filter((post) => state.followingUsernames.includes(post.author));
+  const params = routeParams();
+  const selected = params.get("user") ?? "all";
+  const followedUsers = state.followingUsernames.map(userByUsername).filter((user): user is (typeof users)[number] => Boolean(user));
+  const followedPosts = allPosts().filter((post) => state.followingUsernames.includes(post.author) && (selected === "all" || post.author === selected));
+  if (!followedUsers.length) {
+    return `
+      ${renderEmpty("لم تتابع أي حساب بعد", "تابع الحسابات التي تثق بتجاربها لتظهر منشوراتها هنا.")}
+      <button class="primary-button section" data-action="nav" data-path="/search">استكشف الحسابات</button>
+    `;
+  }
   return `
-    <section class="grid">
-      ${users.map(renderUserCard).join("")}
+    <section class="section">
+      <div class="account-strip" aria-label="الحسابات المتابَعة">
+        <article class="account-chip${selected === "all" ? " active" : ""}">
+          <button class="avatar avatar-yellow" data-action="following-filter" data-username="all" aria-label="كل الحسابات">${icon("users")}</button>
+          <button class="text-button" data-action="following-filter" data-username="all">كل الحسابات</button>
+        </article>
+        ${followedUsers
+          .map(
+            (user) => `
+              <article class="account-chip${selected === user.username ? " active" : ""}">
+                <button class="avatar avatar-${user.avatarTone}" data-action="nav" data-path="/profile/${user.username}" aria-label="${html(user.name)}">${html(user.name.slice(0, 1))}</button>
+                <button class="account-name" data-action="following-filter" data-username="${user.username}">
+                  <strong>${html(user.name)}</strong>
+                  <span>@${html(user.username)}</span>
+                </button>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
     </section>
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">منشورات الحسابات المتابعة</h2>
+        <h2 class="section-title">منشورات المتابَعين</h2>
         <span class="caption">${followedPosts.length}</span>
       </div>
       <div class="grid">
-        ${followedPosts.length ? followedPosts.map(renderPostCard).join("") : renderEmpty("لا توجد منشورات جديدة", "تابع حسابات جديدة لتظهر تجاربها هنا.")}
+        ${followedPosts.length ? followedPosts.map(renderPostCard).join("") : renderEmpty("لا توجد منشورات جديدة حاليًا", "ارجع لاحقا أو اختر كل الحسابات.")}
       </div>
     </section>
+  `;
+}
+
+function renderPublicLists(username: string): string {
+  const lists = publicListsForUser(username);
+  return `
+    <div class="grid">
+      ${lists.length ? lists.map(renderPublicListCard).join("") : renderEmpty("لا توجد قوائم عامة حتى الآن", "عند نشر تجربة مرتبطة بقائمة عامة ستظهر هنا.")}
+    </div>
+  `;
+}
+
+function renderPublicListsRoute(path: string): RouteResult {
+  const username = path.split("/")[2] ?? "";
+  const user = userByUsername(username);
+  if (!user) return { title: "حساب غير موجود", body: renderMissing(), active: "profile", showBack: true };
+  return {
+    title: "القوائم",
+    subtitle: user.name,
+    active: "profile",
+    showBack: true,
+    body: renderPublicLists(username)
+  };
+}
+
+function renderPublicListRoute(path: string): RouteResult {
+  const parts = path.split("/").filter(Boolean);
+  const isOwnPublicList = parts[0] === "profile" && parts[1] === "public-lists";
+  const username = isOwnPublicList ? state.profile.username : parts[1] ?? "";
+  const listId = isOwnPublicList ? parts[2] ?? "" : parts[3] ?? "";
+  const user = username === state.profile.username ? undefined : userByUsername(username);
+  const ownerName = user?.name ?? state.profile.name;
+  const list = publicListById(listId);
+  if (!list || list.ownerUsername !== username || list.purpose !== "publisher_public") {
+    return { title: "قائمة غير متاحة", body: renderMissing(), active: "profile", showBack: true };
+  }
+  const listProducts = list.productIds.map(productById).filter((product): product is Product => Boolean(product));
+  const listPosts = list.postIds.map(postById).filter((post): post is Post => Boolean(post));
+  const otherLists = publicListsForUser(username).filter((item) => item.id !== list.id);
+  return {
+    title: list.name,
+    subtitle: ownerName,
+    active: "profile",
+    showBack: true,
+    body: `
+      <section class="public-list-hero visual-${list.coverTone ?? "cream"}">
+        <span class="caption">قائمة عامة للناشر</span>
+        <h2 class="section-title">${html(list.name)}</h2>
+        <p class="body-copy">${html(list.description)}</p>
+        <button class="text-button" data-action="nav" data-path="${username === state.profile.username ? "/profile" : `/profile/${username}`}">فتح ملف الناشر</button>
+      </section>
+      <section class="section">
+        <h2 class="section-title">المنتجات</h2>
+        <div class="grid section">
+          ${listProducts.length ? listProducts.map((product) => renderProductCard(product, "compact")).join("") : renderEmpty("لا توجد منتجات", "لم يربط الناشر منتجات بهذه القائمة بعد.")}
+        </div>
+      </section>
+      <section class="section">
+        <h2 class="section-title">المنشورات</h2>
+        <div class="grid section">
+          ${listPosts.length ? listPosts.map(renderPostCard).join("") : renderEmpty("لا توجد منشورات", "لم يربط الناشر منشورات بهذه القائمة بعد.")}
+        </div>
+      </section>
+      <section class="section">
+        <h2 class="section-title">قوائم أخرى</h2>
+        <div class="grid section">
+          ${otherLists.length ? otherLists.map(renderPublicListCard).join("") : renderEmpty("لا توجد قوائم أخرى", "هذه هي القائمة العامة الوحيدة حاليا.")}
+        </div>
+      </section>
+    `
+  };
+}
+
+function renderPublicListCard(list: SavedList): string {
+  const thumbnails = list.productIds
+    .slice(0, 3)
+    .map(productById)
+    .filter((product): product is Product => Boolean(product));
+  const owner = userByUsername(list.ownerUsername);
+  return `
+    <article class="list-card public-list-card">
+      <div class="list-cover visual-${list.coverTone ?? "cream"}">
+        ${thumbnails.length ? thumbnails.map((product) => `<span>${html(product.brand.slice(0, 2))}</span>`).join("") : icon("bookmark")}
+      </div>
+      <div class="split">
+        <div>
+          <h2 class="post-title">${html(list.name)}</h2>
+          <p class="product-summary">${html(list.description)}</p>
+          <span class="caption">${owner ? html(owner.name) : html(state.profile.name)}</span>
+        </div>
+        <span class="rating-badge">${list.productIds.length + list.postIds.length}</span>
+      </div>
+      <button class="secondary-button" data-action="nav" data-path="${publicListPath(list)}">فتح القائمة</button>
+    </article>
   `;
 }
 
@@ -1011,6 +1183,7 @@ function renderNotifications(): string {
 
 function renderProfile(): string {
   const ownPosts = allPosts().filter((post) => post.author === state.profile.username);
+  const ownPublicLists = publicListsForUser(state.profile.username);
   return `
     <section class="panel">
       <div class="user-row">
@@ -1023,7 +1196,7 @@ function renderProfile(): string {
       <p class="body-copy section">${html(state.profile.bio)}</p>
       <div class="stats section">
         <div class="stat"><strong>${ownPosts.length}</strong><span>منشورات</span></div>
-        <div class="stat"><strong>${state.savedProductIds.length}</strong><span>منتجات</span></div>
+        <div class="stat"><strong>${ownPublicLists.length}</strong><span>قوائم عامة</span></div>
         <div class="stat"><strong>${state.followingUsernames.length}</strong><span>متابعة</span></div>
       </div>
       <div class="button-row section">
@@ -1031,12 +1204,39 @@ function renderProfile(): string {
         <button class="secondary-button" data-action="nav" data-path="/settings">${icon("settings", true)} الإعدادات</button>
       </div>
     </section>
+    <div class="tabs" role="tablist" aria-label="أقسام حسابي">
+      <button class="tab${ui.profileView === "posts" ? " active" : ""}" data-action="profile-view" data-view="posts">منشوراتي</button>
+      <button class="tab${ui.profileView === "publicLists" ? " active" : ""}" data-action="profile-view" data-view="publicLists">قوائمي العامة</button>
+      <button class="tab${ui.profileView === "saved" ? " active" : ""}" data-action="profile-view" data-view="saved">المحفوظات</button>
+    </div>
     <section class="section">
       <div class="section-header">
-        <h2 class="section-title">منشوراتي</h2>
-        <button class="text-button" data-action="nav" data-path="/create">إضافة</button>
+        <h2 class="section-title">${ui.profileView === "posts" ? "منشوراتي" : ui.profileView === "publicLists" ? "قوائمي العامة" : "المحفوظات"}</h2>
+        ${
+          ui.profileView === "posts"
+            ? `<button class="text-button" data-action="nav" data-path="/create">إضافة</button>`
+            : ui.profileView === "publicLists"
+              ? `<button class="text-button" data-action="nav" data-path="/profile/public-lists">فتح الكل</button>`
+              : `<button class="text-button" data-action="nav" data-path="/profile/saved/lists">قوائم الحفظ</button>`
+        }
       </div>
-      <div class="grid">${ownPosts.length ? ownPosts.map(renderPostCard).join("") : renderEmpty("لم تنشر بعد", "اكتب تجربة تجريبية لتظهر في ملفك.")}</div>
+      <div class="grid">
+        ${
+          ui.profileView === "posts"
+            ? ownPosts.length
+              ? ownPosts.map(renderPostCard).join("")
+              : renderEmpty("لم تنشر بعد", "اكتب تجربة تجريبية لتظهر في ملفك.")
+            : ""
+        }
+        ${
+          ui.profileView === "publicLists"
+            ? ownPublicLists.length
+              ? ownPublicLists.map(renderPublicListCard).join("")
+              : renderEmpty("لا توجد قوائم عامة حتى الآن", "اربط منشورا بقائمة عامة عند النشر لتظهر هنا.")
+            : ""
+        }
+        ${ui.profileView === "saved" ? renderSaved() : ""}
+      </div>
     </section>
   `;
 }
@@ -1065,6 +1265,8 @@ function renderPublicProfileRoute(path: string): RouteResult {
   const username = path.split("/")[2] ?? "";
   const user = userByUsername(username);
   if (!user) return { title: "حساب غير موجود", body: renderMissing(), active: "profile", showBack: true };
+  const userPosts = allPosts().filter((post) => post.author === user.username);
+  const lists = publicListsForUser(user.username);
   return {
     title: user.name,
     subtitle: user.title,
@@ -1078,11 +1280,19 @@ function renderPublicProfileRoute(path: string): RouteResult {
           ${icon("users", true)} ${state.followingUsernames.includes(user.username) ? "إلغاء المتابعة" : "متابعة الحساب"}
         </button>
       </section>
-      <section class="section grid">
-        ${allPosts()
-          .filter((post) => post.author === user.username)
-          .map(renderPostCard)
-          .join("")}
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">منشوراته</h2>
+          <span class="caption">${userPosts.length}</span>
+        </div>
+        <div class="grid">${userPosts.length ? userPosts.map(renderPostCard).join("") : renderEmpty("لا توجد منشورات", "لم ينشر هذا الحساب تجارب بعد.")}</div>
+      </section>
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">القوائم</h2>
+          <button class="text-button" data-action="nav" data-path="/profile/${user.username}/lists">فتح الكل</button>
+        </div>
+        <div class="grid">${lists.length ? lists.map(renderPublicListCard).join("") : renderEmpty("لا توجد قوائم عامة حتى الآن", "القوائم العامة فقط تظهر للزوار.")}</div>
       </section>
     `
   };
@@ -1148,7 +1358,7 @@ function renderHelp(): string {
     <div class="grid">
       ${renderInfoPanel("كيف أجرّب الدخول؟", `استخدم رقم الجوال ${demoPhone} ثم رمز التحقق ${demoOtp}.`)}
       ${renderInfoPanel("هل توجد بيانات حقيقية؟", "لا، كل شيء في هذه المرحلة بيانات عرض محفوظة داخل المتصفح.")}
-      ${renderInfoPanel("ما أهم تدفق للعرض؟", "ابدأ من العناية بالبشرة، افتح منتج CeraVe، احفظه، أضفه للمقارنة، ثم افتح تجربة مستخدم وأضف تعليقاً.")}
+      ${renderInfoPanel("ما أهم تدفق للعرض؟", "ابدأ من العناية بالبشرة، افتح منتج CeraVe، احفظه داخل قائمة شخصية، ثم افتح تجربة مستخدم وأضف تعليقاً.")}
     </div>
   `;
 }
@@ -1164,7 +1374,7 @@ function renderTerms(): string {
 function renderPrivacy(): string {
   return `
     <div class="panel">
-      <p class="body-copy">في هذه المرحلة تحفظ رأينا البيانات داخل LocalStorage فقط: الجلسة التجريبية، المحفوظات، القوائم، المقارنة، التعليقات، المسودات، والإعدادات.</p>
+      <p class="body-copy">في هذه المرحلة تحفظ رأينا البيانات داخل LocalStorage فقط: الجلسة التجريبية، المحفوظات، القوائم، التعليقات، المسودات، والإعدادات.</p>
     </div>
   `;
 }
@@ -1217,7 +1427,7 @@ function renderProductCard(product: Product, variant: "full" | "compact"): strin
         <div class="tag-row">${product.tags.slice(0, 3).map((tag) => `<span class="tag">${html(tag)}</span>`).join("")}</div>
         <div class="button-row">
           <button class="primary-button" data-action="nav" data-path="/product/${product.slug}">فتح المنتج</button>
-          ${renderCompareButton(product.id)}
+          ${renderSaveProductButton(product.id)}
         </div>
       </div>
     </article>
@@ -1237,20 +1447,59 @@ function renderProductVisual(product: Product, compact = false): string {
 
 function renderPostCard(post: Post): string {
   const product = productById(post.productId);
+  const comments = commentsForPost(post);
   return `
     <article class="post-card">
-      ${renderUserLine(post.author)}
+      ${renderPostHeader(post)}
       <div class="split">
         <h3 class="post-title">${html(post.title)}</h3>
         ${renderRating(post.rating)}
       </div>
       <p class="post-body">${html(post.body)}</p>
       ${product ? `<span class="tag">${html(product.name)}</span>` : ""}
+      ${renderPublicListChip(post)}
       <div class="button-row">
-        <button class="primary-button" data-action="nav" data-path="/post/${post.id}">${icon("message", true)} قراءة التجربة</button>
+        <button class="primary-button" data-action="nav" data-path="/post/${post.id}">${icon("message", true)} التعليقات ${comments.length}</button>
         ${renderSavePostButton(post.id)}
       </div>
     </article>
+  `;
+}
+
+function renderPostHeader(post: Post): string {
+  const user = userByUsername(post.author);
+  const isOwnPost = post.author === state.profile.username;
+  const name = user?.name ?? state.profile.name;
+  const tone = user?.avatarTone ?? "yellow";
+  const profilePath = user ? `/profile/${user.username}` : "/profile";
+  const followed = state.followingUsernames.includes(post.author);
+  return `
+    <div class="post-header">
+      <button class="post-head" data-action="nav" data-path="${profilePath}">
+        <span class="avatar avatar-${tone}">${html(name.slice(0, 1))}</span>
+        <span class="row-text">
+          <strong>${html(name)}</strong>
+          <span>@${html(post.author)} · ${html(post.createdAt)}</span>
+        </span>
+      </button>
+      ${
+        isOwnPost
+          ? ""
+          : `<button class="chip follow-chip" data-action="follow-user" data-username="${post.author}">${followed ? "تتم المتابعة" : "متابعة"}</button>`
+      }
+      <button class="icon-button post-menu-button" data-action="open-post-menu" data-post-id="${post.id}" aria-label="خيارات المنشور">${icon("more")}</button>
+    </div>
+  `;
+}
+
+function renderPublicListChip(post: Post): string {
+  const lists = publicListsForPost(post);
+  const [primary, ...rest] = lists;
+  if (!primary) return "";
+  return `
+    <button class="chip public-list-chip" data-action="nav" data-path="${publicListPath(primary)}">
+      ضمن قائمة: ${html(primary.name)}${rest.length ? ` +${rest.length} قوائم` : ""}
+    </button>
   `;
 }
 
@@ -1304,15 +1553,6 @@ function renderSavePostButton(postId: string): string {
   return `
     <button class="${saved ? "secondary-button" : "primary-button"}" data-action="save-post" data-post-id="${postId}">
       ${icon("bookmark", true)} ${saved ? "محفوظ" : "حفظ"}
-    </button>
-  `;
-}
-
-function renderCompareButton(productId: string): string {
-  const selected = state.compareProductIds.includes(productId);
-  return `
-    <button class="${selected ? "secondary-button" : "primary-button"}" data-action="compare-product" data-product-id="${productId}">
-      ${icon("scale", true)} ${selected ? "في المقارنة" : "قارن"}
     </button>
   `;
 }
@@ -1373,18 +1613,51 @@ function renderSheet(sheet: SheetState): string {
   }
 
   if (sheet.kind === "addToList") {
+    const targetLabel = sheet.targetType === "post" ? "المنشور" : "المنتج";
+    const lists = personalSavedLists();
     return renderBottomSheet(`
-      <h2 class="section-title">إضافة إلى قائمة</h2>
-      <form class="grid" data-form="add-to-list" data-product-id="${sheet.productId}">
+      <h2 class="section-title">إضافة إلى قائمة حفظ</h2>
+      <p class="body-copy">اختر قائمة شخصية خاصة لإضافة ${targetLabel} إليها.</p>
+      <form class="grid" data-form="add-to-list" data-target-type="${sheet.targetType}" data-target-id="${sheet.targetId}">
         <div class="field">
           <label for="selected-list">اختر قائمة</label>
           <select id="selected-list" name="listId">
-            ${state.savedLists.map((list) => `<option value="${list.id}">${html(list.name)}</option>`).join("")}
+            ${lists.map((list) => `<option value="${list.id}">${html(list.name)}</option>`).join("")}
+            <option value="__new">إنشاء قائمة جديدة</option>
           </select>
+        </div>
+        <div class="field">
+          <label for="new-list-name">اسم قائمة جديدة</label>
+          <input id="new-list-name" name="newListName" placeholder="مثال: منتجات أعود لها" />
+        </div>
+        <div class="field">
+          <label for="new-list-description">وصف اختياري</label>
+          <input id="new-list-description" name="newListDescription" placeholder="لماذا تحفظ هذه العناصر؟" />
         </div>
         <button class="primary-button" type="submit">إضافة</button>
       </form>
-      <button class="text-button" data-action="nav" data-path="/saved/lists">إدارة القوائم</button>
+      <button class="text-button" data-action="nav" data-path="/profile/saved/lists">إدارة قوائم الحفظ</button>
+    `);
+  }
+
+  if (sheet.kind === "postActions") {
+    const post = postById(sheet.postId);
+    if (!post) return "";
+    const isOwnPost = post.author === state.profile.username;
+    return renderBottomSheet(`
+      <h2 class="section-title">خيارات المنشور</h2>
+      <div class="grid">
+        ${
+          isOwnPost
+            ? `
+              <button class="secondary-button" data-action="nav" data-path="/create">${icon("edit", true)} تعديل المنشور</button>
+              <button class="danger-button" data-action="delete-post" data-post-id="${post.id}">${icon("trash", true)} حذف المنشور</button>
+            `
+            : `<button class="danger-button" data-action="report" data-target="post:${post.id}" data-title="${html(post.title)}">${icon("flag", true)} الإبلاغ عن المنشور</button>`
+        }
+        <button class="secondary-button" data-action="share" data-path="/post/${post.id}">${icon("share", true)} مشاركة المنشور</button>
+        <button class="secondary-button" data-action="share" data-path="/post/${post.id}">${icon("share", true)} نسخ الرابط</button>
+      </div>
     `);
   }
 
@@ -1489,57 +1762,66 @@ document.addEventListener("click", async (event) => {
 
   if (action === "open-add-list") {
     if (!requireMember()) return;
-    ui.sheet = { kind: "addToList", productId: target.dataset.productId ?? "" };
+    ui.sheet = {
+      kind: "addToList",
+      targetType: target.dataset.targetType === "post" ? "post" : "product",
+      targetId: target.dataset.targetId ?? ""
+    };
     render();
+    return;
+  }
+
+  if (action === "open-post-menu") {
+    ui.sheet = { kind: "postActions", postId: target.dataset.postId ?? "" };
+    render();
+    return;
+  }
+
+  if (action === "resend-otp") {
+    ui.formError = "";
+    toast("تم إرسال رمز تحقق جديد");
     return;
   }
 
   if (action === "save-product") {
     if (!requireMember()) return;
-    toggleArray(state.savedProductIds, target.dataset.productId ?? "");
+    const productId = target.dataset.productId ?? "";
+    const alreadySaved = state.savedProductIds.includes(productId);
+    toggleArray(state.savedProductIds, productId);
+    if (alreadySaved) removeTargetFromPersonalLists("product", productId);
     persist();
-    toast("تم تحديث حفظ المنتج");
+    if (alreadySaved) {
+      toast("تمت إزالة المنتج من الحفظ");
+    } else {
+      ui.sheet = { kind: "addToList", targetType: "product", targetId: productId };
+      toast("تم الحفظ");
+    }
     return;
   }
 
   if (action === "save-post") {
     if (!requireMember()) return;
-    toggleArray(state.savedPostIds, target.dataset.postId ?? "");
+    const postId = target.dataset.postId ?? "";
+    const alreadySaved = state.savedPostIds.includes(postId);
+    toggleArray(state.savedPostIds, postId);
+    if (alreadySaved) removeTargetFromPersonalLists("post", postId);
     persist();
-    toast("تم تحديث حفظ المنشور");
-    return;
-  }
-
-  if (action === "compare-product") {
-    const productId = target.dataset.productId ?? "";
-    if (state.compareProductIds.includes(productId)) {
-      state.compareProductIds = state.compareProductIds.filter((id) => id !== productId);
-      persist();
-      toast("تمت إزالة المنتج من المقارنة");
-      return;
+    if (alreadySaved) {
+      toast("تمت إزالة المنشور من الحفظ");
+    } else {
+      ui.sheet = { kind: "addToList", targetType: "post", targetId: postId };
+      toast("تم الحفظ");
     }
-    if (state.compareProductIds.length >= 4) {
-      toast("يمكن مقارنة أربعة منتجات كحد أقصى");
-      return;
-    }
-    state.compareProductIds.push(productId);
-    persist();
-    toast("تمت إضافة المنتج للمقارنة");
-    return;
-  }
-
-  if (action === "remove-compare") {
-    state.compareProductIds = state.compareProductIds.filter((id) => id !== target.dataset.productId);
-    persist();
-    toast("تمت الإزالة من المقارنة");
     return;
   }
 
   if (action === "follow-user") {
     if (!requireMember()) return;
-    toggleArray(state.followingUsernames, target.dataset.username ?? "");
+    const username = target.dataset.username ?? "";
+    const wasFollowing = state.followingUsernames.includes(username);
+    toggleArray(state.followingUsernames, username);
     persist();
-    toast("تم تحديث المتابعة");
+    toast(wasFollowing ? "تم إلغاء المتابعة" : "تمت المتابعة");
     return;
   }
 
@@ -1547,6 +1829,48 @@ document.addEventListener("click", async (event) => {
     const view = target.dataset.view;
     if (view === "products" || view === "posts" || view === "lists") ui.savedView = view;
     render();
+    return;
+  }
+
+  if (action === "profile-view") {
+    const view = target.dataset.view;
+    if (view === "posts" || view === "publicLists" || view === "saved") ui.profileView = view;
+    render();
+    return;
+  }
+
+  if (action === "following-filter") {
+    const username = target.dataset.username ?? "all";
+    navigate(username === "all" ? "/following" : `/following?user=${encodeURIComponent(username)}`);
+    return;
+  }
+
+  if (action === "delete-list") {
+    const listId = target.dataset.listId ?? "";
+    state.savedLists = state.savedLists.filter(
+      (list) => !(list.id === listId && list.ownerUsername === state.profile.username && list.purpose === "personal_save")
+    );
+    persist();
+    toast("تم حذف القائمة");
+    navigate("/profile/saved/lists");
+    return;
+  }
+
+  if (action === "remove-list-item") {
+    const listId = target.dataset.listId ?? "";
+    const targetType = target.dataset.targetType === "post" ? "post" : "product";
+    const targetId = target.dataset.targetId ?? "";
+    state.savedLists = state.savedLists.map((list) =>
+      list.id === listId
+        ? {
+            ...list,
+            productIds: targetType === "product" ? list.productIds.filter((id) => id !== targetId) : list.productIds,
+            postIds: targetType === "post" ? list.postIds.filter((id) => id !== targetId) : list.postIds
+          }
+        : list
+    );
+    persist();
+    toast("تمت إزالة العنصر من القائمة");
     return;
   }
 
@@ -1599,6 +1923,17 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
+  if (action === "delete-post") {
+    const postId = target.dataset.postId ?? "";
+    state.publishedPosts = state.publishedPosts.filter((post) => post.id !== postId);
+    state.publicLists = state.publicLists.map((list) => ({ ...list, postIds: list.postIds.filter((id) => id !== postId) }));
+    persist();
+    ui.sheet = null;
+    toast("تم حذف المنشور");
+    navigate("/profile");
+    return;
+  }
+
   if (action === "mark-notifications") {
     state.notifications = state.notifications.map((item) => ({ ...item, read: true }));
     persist();
@@ -1625,7 +1960,7 @@ document.addEventListener("click", async (event) => {
 
   if (action === "reset-demo") {
     state = resetState();
-    ui = { toast: "", sheet: null, formError: "", savedView: "products" };
+    ui = { toast: "", sheet: null, formError: "", savedView: "products", profileView: "posts" };
     navigate("/splash");
   }
 });
@@ -1652,9 +1987,14 @@ document.addEventListener("submit", (event) => {
   }
 
   if (formName === "otp") {
-    const otp = submitText(form, "otp");
+    const otp = [0, 1, 2, 3].map((index) => submitText(form, `otp-${index}`).replace(/\D/g, "").slice(0, 1)).join("");
+    if (otp.length !== 4) {
+      ui.formError = "أكمل رمز التحقق المكون من 4 أرقام.";
+      render();
+      return;
+    }
     if (otp !== demoOtp) {
-      ui.formError = "رمز التحقق غير صحيح. استخدم 1234 في وضع العرض.";
+      ui.formError = "رمز التحقق غير صحيح";
       render();
       return;
     }
@@ -1712,12 +2052,14 @@ document.addEventListener("submit", (event) => {
       render();
       return;
     }
+    const publicListId = resolvePublicListFromForm(form, productId);
     const draft: DraftPost = {
       id: uid("draft"),
       productId,
       rating: Math.max(1, Math.min(10, rating)),
       title,
       body,
+      publicListId,
       updatedAt: "الآن"
     };
     if (intent === "publish") {
@@ -1737,21 +2079,51 @@ document.addEventListener("submit", (event) => {
     const name = submitText(form, "name");
     const description = submitText(form, "description") || "قائمة محفوظة للعرض";
     if (!name) return toast("اكتب اسم القائمة");
-    state.savedLists.unshift({ id: uid("list"), name, description, productIds: [], postIds: [] });
+    state.savedLists.unshift({
+      id: uid("list"),
+      ownerUsername: state.profile.username,
+      name,
+      description,
+      purpose: "personal_save",
+      visibility: "private",
+      coverTone: "cream",
+      productIds: [],
+      postIds: []
+    });
     persist();
     toast("تم إنشاء القائمة");
     return;
   }
 
   if (formName === "add-to-list") {
-    const listId = submitText(form, "listId");
-    const productId = form.dataset.productId ?? "";
-    const list = state.savedLists.find((item) => item.id === listId);
-    if (list && !list.productIds.includes(productId)) list.productIds.push(productId);
-    if (!state.savedProductIds.includes(productId)) state.savedProductIds.push(productId);
+    let listId = submitText(form, "listId");
+    const targetType = form.dataset.targetType === "post" ? "post" : "product";
+    const targetId = form.dataset.targetId ?? "";
+    if (listId === "__new" || !personalSavedLists().some((list) => list.id === listId)) {
+      const name = submitText(form, "newListName") || "قائمة حفظ جديدة";
+      const description = submitText(form, "newListDescription") || "قائمة شخصية خاصة";
+      const list: SavedList = {
+        id: uid("list"),
+        ownerUsername: state.profile.username,
+        name,
+        description,
+        purpose: "personal_save",
+        visibility: "private",
+        coverTone: "cream",
+        productIds: [],
+        postIds: []
+      };
+      state.savedLists.unshift(list);
+      listId = list.id;
+    }
+    const list = state.savedLists.find((item) => item.id === listId && item.purpose === "personal_save");
+    if (list && targetType === "product" && !list.productIds.includes(targetId)) list.productIds.push(targetId);
+    if (list && targetType === "post" && !list.postIds.includes(targetId)) list.postIds.push(targetId);
+    if (targetType === "product" && !state.savedProductIds.includes(targetId)) state.savedProductIds.push(targetId);
+    if (targetType === "post" && !state.savedPostIds.includes(targetId)) state.savedPostIds.push(targetId);
     persist();
     ui.sheet = null;
-    toast("تمت إضافة المنتج للقائمة");
+    toast("تمت الإضافة إلى قائمة الحفظ");
     return;
   }
 
@@ -1773,14 +2145,92 @@ document.addEventListener("submit", (event) => {
   }
 });
 
+document.addEventListener("input", (event) => {
+  const input = (event.target as HTMLElement).closest<HTMLInputElement>("[data-otp-input]");
+  if (!input) return;
+  const digits = input.value.replace(/\D/g, "").slice(0, 1);
+  input.value = digits;
+  ui.formError = "";
+  if (digits) {
+    const next = otpInputs()[Number(input.dataset.index ?? "0") + 1];
+    next?.focus();
+  }
+  updateOtpSubmit();
+});
+
+document.addEventListener("keydown", (event) => {
+  const input = (event.target as HTMLElement).closest<HTMLInputElement>("[data-otp-input]");
+  if (!input || event.key !== "Backspace" || input.value) return;
+  const previous = otpInputs()[Number(input.dataset.index ?? "0") - 1];
+  if (previous) {
+    previous.value = "";
+    previous.focus();
+    updateOtpSubmit();
+  }
+});
+
+document.addEventListener("paste", (event) => {
+  const input = (event.target as HTMLElement).closest<HTMLInputElement>("[data-otp-input]");
+  if (!input) return;
+  event.preventDefault();
+  const digits = event.clipboardData?.getData("text").replace(/\D/g, "").slice(0, 4) ?? "";
+  otpInputs().forEach((field, index) => {
+    field.value = digits[index] ?? "";
+  });
+  otpInputs()[Math.min(digits.length, 3)]?.focus();
+  updateOtpSubmit();
+});
+
 window.addEventListener("popstate", render);
 window.addEventListener("hashchange", render);
+
+function otpInputs(): HTMLInputElement[] {
+  return Array.from(app.querySelectorAll<HTMLInputElement>("[data-otp-input]"));
+}
+
+function updateOtpSubmit(): void {
+  const inputs = otpInputs();
+  const submit = app.querySelector<HTMLButtonElement>("[data-otp-submit]");
+  if (!submit || !inputs.length) return;
+  submit.disabled = inputs.some((input) => input.value.replace(/\D/g, "").length !== 1);
+}
 
 function toggleArray(list: string[], value: string): void {
   if (!value) return;
   const index = list.indexOf(value);
   if (index >= 0) list.splice(index, 1);
   else list.push(value);
+}
+
+function removeTargetFromPersonalLists(targetType: "product" | "post", targetId: string): void {
+  state.savedLists = state.savedLists.map((list) =>
+    targetType === "product"
+      ? { ...list, productIds: list.productIds.filter((id) => id !== targetId) }
+      : { ...list, postIds: list.postIds.filter((id) => id !== targetId) }
+  );
+}
+
+function resolvePublicListFromForm(form: HTMLFormElement, productId: string): string | undefined {
+  const newListName = submitText(form, "publicListName");
+  if (newListName) {
+    const list: SavedList = {
+      id: uid("public"),
+      ownerUsername: state.profile.username,
+      name: newListName,
+      description: submitText(form, "publicListDescription") || "قائمة عامة تظهر للزوار في الملف الشخصي.",
+      purpose: "publisher_public",
+      visibility: "public",
+      coverTone: "rose",
+      productIds: productId ? [productId] : [],
+      postIds: []
+    };
+    state.publicLists.unshift(list);
+    return list.id;
+  }
+  const selectedListId = submitText(form, "publicListId");
+  const selected = state.publicLists.find((list) => list.id === selectedListId && list.ownerUsername === state.profile.username);
+  if (selected && productId && !selected.productIds.includes(productId)) selected.productIds.push(productId);
+  return selected?.id;
 }
 
 function createComment(body: string): CommentItem {
@@ -1797,6 +2247,7 @@ function publishDraft(draft: DraftPost): void {
     id: uid("post"),
     productId: draft.productId,
     author: state.profile.username,
+    publicListId: draft.publicListId,
     rating: draft.rating,
     title: draft.title,
     body: draft.body,
@@ -1805,6 +2256,17 @@ function publishDraft(draft: DraftPost): void {
     comments: []
   };
   state.publishedPosts.unshift(post);
+  if (draft.publicListId) {
+    state.publicLists = state.publicLists.map((list) =>
+      list.id === draft.publicListId
+        ? {
+            ...list,
+            productIds: list.productIds.includes(post.productId) ? list.productIds : [...list.productIds, post.productId],
+            postIds: list.postIds.includes(post.id) ? list.postIds : [...list.postIds, post.id]
+          }
+        : list
+    );
+  }
   state.commentsByPostId[post.id] = [];
   state.drafts = state.drafts.filter((item) => item.id !== draft.id);
   state.notifications.unshift({

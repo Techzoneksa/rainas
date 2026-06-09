@@ -747,31 +747,125 @@ img {
   background: var(--yellow);
 }
 
-.comparison {
-  width: 100%;
-  border-collapse: collapse;
-  overflow: hidden;
-  border-radius: 14px;
-  background: var(--card);
+.post-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
 }
 
-.comparison th,
-.comparison td {
-  border: 1px solid var(--border);
-  padding: 10px;
-  text-align: start;
-  vertical-align: top;
-  min-width: 118px;
+.follow-chip {
+  min-width: 88px;
 }
 
-.comparison th {
+.post-menu-button {
   background: var(--soft);
-  font-size: 13px;
 }
 
-.table-wrap {
+.public-list-chip {
+  justify-self: start;
+}
+
+.account-strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(106px, 34%);
+  gap: 10px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-bottom: 6px;
+}
+
+.account-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.account-chip {
+  min-height: 126px;
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.account-chip.active {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px rgba(255, 206, 0, 0.22);
+}
+
+.account-name {
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  gap: 2px;
+  color: var(--text);
+}
+
+.account-name span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.otp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.otp-input {
+  min-height: 58px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.otp-error .otp-input {
+  border-color: var(--red);
+  background: rgba(217, 74, 74, 0.06);
+}
+
+.list-item {
+  display: grid;
+  gap: 8px;
+}
+
+.list-cover,
+.public-list-hero {
+  border: 1px solid rgba(23, 23, 23, 0.06);
   border-radius: 14px;
+}
+
+.list-cover {
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+}
+
+.list-cover span {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  font-weight: 900;
+}
+
+.public-list-hero {
+  padding: 16px;
+  display: grid;
+  gap: 10px;
 }
 
 .tabs {

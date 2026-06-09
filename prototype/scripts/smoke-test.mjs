@@ -24,9 +24,9 @@ const requiredRoutes = [
   "/categories",
   "/create",
   "/drafts",
-  "/compare",
-  "/saved",
-  "/saved/lists",
+  "/profile/saved",
+  "/profile/saved/lists",
+  "/profile/public-lists",
   "/following",
   "/notifications",
   "/profile",
@@ -46,7 +46,14 @@ const blocked = [
   [108, 105, 107, 101],
   [108, 105, 107, 101, 115],
   [72, 101, 97, 114, 116],
-  [104, 101, 97, 114, 116]
+  [104, 101, 97, 114, 116],
+  [99, 111, 109, 112, 97, 114, 101],
+  [67, 111, 109, 112, 97, 114, 101],
+  [99, 111, 109, 112, 97, 114, 105, 115, 111, 110],
+  [67, 111, 109, 112, 97, 114, 105, 115, 111, 110],
+  [1605, 1602, 1575, 1585, 1606, 1577],
+  [1575, 1604, 1605, 1602, 1575, 1585, 1606, 1577],
+  [1602, 1575, 1585, 1606]
 ].map((codes) => String.fromCharCode(...codes));
 
 const issues = [];
@@ -79,7 +86,7 @@ for (const route of requiredRoutes) {
   if (!app.includes(route)) issues.push(`Route signal missing: ${route}`);
 }
 
-for (const dynamicSignal of ["/category/", "/product/", "/post/", "/saved/lists/", "/profile/"]) {
+for (const dynamicSignal of ["/category/", "/product/", "/post/", "/profile/saved/lists/", "/profile/", "/lists/"]) {
   if (!app.includes(dynamicSignal)) issues.push(`Dynamic route signal missing: ${dynamicSignal}`);
 }
 

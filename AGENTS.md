@@ -12,7 +12,14 @@
 - Admin target: separate owner-only dashboard, not mixed with user screens.
 - Rating scale: 1 to 10.
 - Likes are not supported. Do not add Like buttons, counters, heart reactions, reactions, or Like-related tables.
+- Side-by-side product weighing is not supported. Raina must not include related routes, UI, state, APIs, or data models.
 - Saving with Bookmark is allowed and is not a Like.
+- Bottom navigation order is: الرئيسية, البحث, النشر, المتابَعون, حسابي.
+- Saves live inside حسابي, not in bottom navigation.
+- Personal save lists are private and visible only to their owner.
+- Publisher lists are public, always belong to the publisher profile, and can be linked from posts.
+- Post headers show follow/unfollow beside the account name. Share, copy link, report, edit, and delete actions live inside the three-dot menu.
+- OTP uses four separate numeric inputs, numeric keyboard hints, paste support, backspace navigation, and demo code `1234`.
 - MVP excludes purchase, payment, cart, shipping, delivery, inventory, private chat, live shopping, and influencer commissions.
 - Flutter must not be a WebView wrapper around the web app.
 - Do not connect Flutter directly to the database.
@@ -44,6 +51,7 @@ Not allowed without explicit approval:
 
 - Start Phase 3 Design System.
 - Move prototype screens or business logic into Next.js.
-- Add real product, auth, save, follow, comment, report, notification, comparison, media, admin, database, or Flutter features.
+- Add real product, auth, save, follow, comment, report, notification, media, admin, database, or Flutter features.
+- Add side-by-side product weighing in any form.
 - Add database schemas or migrations.
 - Add payment, cart, shipping, merchant, private chat, live shopping, influencer, Like, heart, or reaction scope.

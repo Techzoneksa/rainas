@@ -28,7 +28,7 @@ Known local stray file:
 
 ## [PROJECT_IDENTITY]
 
-Raina — رأينا is an Arabic-first social product discovery platform. The product helps users discover products, read real user experiences, compare products, save products/posts into lists, follow accounts, comment, reply, report content, and publish product experiences.
+Raina — رأينا is an Arabic-first social product discovery platform. The product helps users discover products, read real user experiences, save products/posts into lists, follow accounts, comment, reply, report content, and publish product experiences.
 
 The MVP is not an e-commerce product. Purchase, cart, payment, shipping, delivery, inventory, private chat, live shopping, and influencer commissions are out of scope.
 
@@ -39,7 +39,6 @@ In scope for the product direction:
 - Product discovery.
 - Product and post ratings from 1 to 10.
 - User experiences/posts.
-- Product comparison.
 - Saves and lists.
 - Following.
 - Comments and replies.
@@ -51,6 +50,7 @@ In scope for the product direction:
 Explicitly out of scope:
 
 - Likes, hearts, reactions, Like notifications, Like counters, Like tables.
+- Side-by-side product weighing flows.
 - E-commerce flows.
 - Merchant dashboard in MVP.
 - Flutter WebView wrapper.
@@ -141,10 +141,13 @@ Implemented route signals:
 - `/post/[id]`
 - `/create`
 - `/drafts`
-- `/compare`
-- `/saved`
-- `/saved/lists`
-- `/saved/lists/[id]`
+- `/profile/saved`
+- `/profile/saved/lists`
+- `/profile/saved/lists/[id]`
+- `/profile/public-lists`
+- `/profile/public-lists/[id]`
+- `/profile/[username]/lists`
+- `/profile/[username]/lists/[id]`
 - `/following`
 - `/notifications`
 - `/profile`
@@ -161,32 +164,32 @@ Implemented route signals:
 
 Feature status:
 
-| Feature              | Current status        |
-| -------------------- | --------------------- |
-| Splash               | Prototype implemented |
-| Onboarding           | Prototype implemented |
-| Login by phone       | Prototype implemented |
-| OTP                  | Demo fixed OTP `1234` |
-| Guest mode           | Prototype implemented |
-| Home feed            | Demo data             |
-| Search/filter/sort   | Local demo            |
-| Categories           | Demo data             |
-| Product details      | Demo data             |
-| Post details         | Demo data             |
-| Save product/post    | LocalStorage          |
-| Lists                | LocalStorage          |
-| Follow accounts      | LocalStorage          |
-| Comments/replies     | LocalStorage          |
-| Drafts               | LocalStorage          |
-| Publish demo post    | LocalStorage          |
-| Compare products     | LocalStorage          |
-| Notifications        | Local demo            |
-| Report content       | UI-only demo          |
-| Profile edit         | LocalStorage          |
-| Settings             | LocalStorage          |
-| Admin dashboard      | Not implemented       |
-| Backend/API/database | Not implemented       |
-| Media upload         | Not implemented       |
+| Feature              | Current status                            |
+| -------------------- | ----------------------------------------- |
+| Splash               | Prototype implemented                     |
+| Onboarding           | Prototype implemented                     |
+| Login by phone       | Prototype implemented                     |
+| OTP                  | Four numeric demo inputs with code `1234` |
+| Guest mode           | Prototype implemented                     |
+| Home feed            | Demo data                                 |
+| Search/filter/sort   | Local demo                                |
+| Categories           | Demo data                                 |
+| Product details      | Demo data                                 |
+| Post details         | Demo data                                 |
+| Save product/post    | LocalStorage inside profile               |
+| Personal save lists  | LocalStorage, private                     |
+| Publisher lists      | LocalStorage, public profile lists        |
+| Follow accounts      | LocalStorage and Following page           |
+| Comments/replies     | LocalStorage                              |
+| Drafts               | LocalStorage                              |
+| Publish demo post    | LocalStorage                              |
+| Notifications        | Local demo                                |
+| Report content       | UI-only demo                              |
+| Profile edit         | LocalStorage                              |
+| Settings             | LocalStorage                              |
+| Admin dashboard      | Not implemented                           |
+| Backend/API/database | Not implemented                           |
+| Media upload         | Not implemented                           |
 
 ## [CURRENT_DEMO_DATA]
 
@@ -215,9 +218,9 @@ Persisted state:
 - Intended path.
 - Profile.
 - Saved products/posts.
-- Saved lists.
+- Personal saved lists.
+- Public publisher lists.
 - Following usernames.
-- Compare products.
 - Comments by post/product.
 - Drafts.
 - Published demo posts.
@@ -334,7 +337,7 @@ Keep the current prototype under `prototype/` or `legacy-demo/` until feature pa
 - REST API.
 - PostgreSQL.
 - ORM: Prisma or Drizzle; Prisma is recommended for MVP speed and ecosystem unless migration/control needs favor Drizzle.
-- Modules: auth, users, profiles, categories, brands, products, posts, comments, saves, lists, follows, comparisons, reports, notifications, media, admin, audit.
+- Modules: auth, users, profiles, categories, brands, products, posts, comments, saves, lists, follows, reports, notifications, media, admin, audit.
 - OpenAPI documentation.
 - Central validation, authorization, rate limiting, logging, and error format.
 
@@ -365,8 +368,6 @@ Core entities:
 - SavedList
 - SavedListItem
 - Follow
-- Comparison
-- ComparisonItem
 - Report
 - Notification
 - AdminRole
@@ -455,7 +456,7 @@ Approved phases:
 6. Web Discovery.
 7. Web User Interaction.
 8. Web Content Creation.
-9. Comparison.
+9. Saves and Public Lists Hardening.
 10. Owner Dashboard.
 11. Quality and Security.
 12. Staging Web Launch.
@@ -483,6 +484,7 @@ Approved phases:
 - Owner-only admin dashboard.
 - Rating scale 1 to 10.
 - No Likes.
+- No side-by-side product weighing flow.
 - E-commerce out of MVP.
 
 ## [ORPHANS_AND_PENDING]

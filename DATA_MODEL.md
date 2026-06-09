@@ -92,6 +92,7 @@ No database, ORM, migrations, schema files, or seed scripts were created in Phas
 - `id`
 - `authorId`
 - `productId`
+- `publicListId` nullable
 - `rating`
 - `title`
 - `body`
@@ -135,9 +136,14 @@ No database, ORM, migrations, schema files, or seed scripts were created in Phas
 - `userId`
 - `name`
 - `description`
+- `purpose`: `personal_save` or `publisher_public`
 - `visibility`
 - `createdAt`
 - `updatedAt`
+
+Personal save lists use `purpose = personal_save` and `visibility = private`. They are visible only inside the owner account.
+
+Publisher lists use `purpose = publisher_public` and `visibility = public`. They appear on publisher profiles and can be linked from posts.
 
 ### SavedListItem
 
@@ -153,21 +159,6 @@ No database, ORM, migrations, schema files, or seed scripts were created in Phas
 - `followerId`
 - `followingId`
 - `createdAt`
-
-### Comparison
-
-- `id`
-- `userId`
-- `name`
-- `createdAt`
-- `updatedAt`
-
-### ComparisonItem
-
-- `id`
-- `comparisonId`
-- `productId`
-- `sortOrder`
 
 ### Report
 
@@ -239,6 +230,7 @@ No database, ORM, migrations, schema files, or seed scripts were created in Phas
 - `ReportStatus`: open, reviewing, resolved, rejected.
 - `TargetType`: product, post, comment, profile.
 - `SaveTargetType`: product, post.
+- `ListPurpose`: personal_save, publisher_public.
 - `ListVisibility`: private, public.
 - `MediaType`: image, video.
 - `ModerationStatus`: pending, approved, rejected.
@@ -278,12 +270,10 @@ erDiagram
   Brand ||--o{ Product : owns
   Product ||--o{ Post : reviewed_by
   Product ||--o{ ProductMedia : has
-  Product ||--o{ ComparisonItem : compared
   Post ||--o{ PostMedia : has
   Post ||--o{ Comment : has
   Comment ||--o{ Comment : replies
   SavedList ||--o{ SavedListItem : contains
-  Comparison ||--o{ ComparisonItem : contains
   Media ||--o{ ProductMedia : used_by
   Media ||--o{ PostMedia : used_by
   User ||--o{ AdminRole : may_have

@@ -158,19 +158,22 @@ Use explicit query parameters:
 - `POST /v1/me/lists/:id/items`
 - `DELETE /v1/me/lists/:id/items/:itemId`
 
+### Publisher Public Lists
+
+- `GET /v1/users/:username/lists`
+- `GET /v1/users/:username/lists/:id`
+- `GET /v1/me/public-lists`
+- `POST /v1/me/public-lists`
+- `PATCH /v1/me/public-lists/:id`
+- `DELETE /v1/me/public-lists/:id`
+- `POST /v1/me/public-lists/:id/items`
+- `DELETE /v1/me/public-lists/:id/items/:itemId`
+
 ### Follows
 
 - `GET /v1/me/following`
 - `POST /v1/users/:id/follow`
 - `DELETE /v1/users/:id/follow`
-
-### Comparisons
-
-- `GET /v1/me/comparisons`
-- `POST /v1/me/comparisons`
-- `GET /v1/me/comparisons/:id`
-- `PATCH /v1/me/comparisons/:id`
-- `DELETE /v1/me/comparisons/:id`
 
 ### Notifications
 
