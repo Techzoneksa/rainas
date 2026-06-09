@@ -141,7 +141,13 @@ Implemented route signals:
 - `/post/[id]`
 - `/create`
 - `/drafts`
+- `/profile?tab=posts`
+- `/profile?tab=public-lists`
+- `/profile?tab=saved`
 - `/profile/saved`
+- `/profile/saved?type=posts`
+- `/profile/saved?type=products`
+- `/profile/saved?type=lists`
 - `/profile/saved/lists`
 - `/profile/saved/lists/[id]`
 - `/profile/public-lists`
@@ -180,6 +186,7 @@ Feature status:
 | Personal save lists  | LocalStorage, private                     |
 | Publisher lists      | LocalStorage, public profile lists        |
 | Follow accounts      | LocalStorage and Following page           |
+| Profile tabs         | My posts, public publisher lists, saves   |
 | Comments/replies     | LocalStorage                              |
 | Drafts               | LocalStorage                              |
 | Publish demo post    | LocalStorage                              |
@@ -199,6 +206,11 @@ Current demo data includes:
 - 6 products.
 - 4 public users.
 - 4 seed posts.
+- 3 current-user published posts.
+- 2 current-user public publisher lists.
+- 3 saved posts.
+- 3 saved products.
+- 2 private personal save lists.
 - Seed comments and notifications.
 - Demo phone: `501234567`.
 - Demo OTP: `1234`.
@@ -234,6 +246,18 @@ Risks:
 - No encryption.
 - No backend truth.
 - LocalStorage can be cleared by user/browser.
+
+## [CURRENT_PROFILE_STRUCTURE]
+
+The current prototype profile for the signed-in user has three primary tabs:
+
+- `منشوراتي`: posts authored by the current user, including linked product, rating, date, linked public list, and owner actions through the three-dot menu.
+- `قوائم منشوراتي`: public publisher lists owned by the current user. They are visible to visitors and can include the user's posts and products linked to those posts.
+- `المحفوظات`: owner-only saved content with inner tabs for saved posts, saved products, and private save lists.
+
+Public profiles for other users show only public identity, posts, public publisher lists, follow state, and a three-dot action menu for sharing or reporting. They do not expose saved posts, saved products, private save lists, drafts, settings, or notifications.
+
+Direct private save-list routes resolve only against the current user's private lists. Missing or unauthorized list access returns a blocked/missing state without leaking list contents.
 
 ## [CURRENT_DESIGN_SYSTEM]
 

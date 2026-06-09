@@ -19,22 +19,63 @@ export function createInitialState(): AppState {
       bio: "أوثق المنتجات التي أرجع لها وأحفظها قبل قرار الشراء.",
       phone: demoPhone
     },
-    savedProductIds: ["product-2"],
-    savedPostIds: ["post-001"],
+    savedProductIds: ["product-1", "product-2", "product-4"],
+    savedPostIds: ["post-001", "post-003", "post-004"],
     savedLists: [
       {
-        id: "list-skincare",
+        id: "list-want-to-try",
         ownerUsername: "raina_user",
-        name: "روتين البشرة الهادئ",
-        description: "منتجات أريد الرجوع لها قبل تحديث الروتين.",
+        name: "أرغب بتجربتها",
+        description: "منشورات ومنتجات أريد الرجوع لها قبل التجربة.",
         purpose: "personal_save",
         visibility: "private",
         coverTone: "cream",
         productIds: ["product-1", "product-2"],
-        postIds: ["post-001"]
+        postIds: ["post-001", "post-003"],
+        createdAt: "قبل أسبوع",
+        updatedAt: "اليوم"
+      },
+      {
+        id: "list-buy-later",
+        ownerUsername: "raina_user",
+        name: "للشراء لاحقًا",
+        description: "خيارات محفوظة أحتاج مراجعتها بهدوء.",
+        purpose: "personal_save",
+        visibility: "private",
+        coverTone: "rose",
+        productIds: ["product-4"],
+        postIds: ["post-004"],
+        createdAt: "قبل 5 أيام",
+        updatedAt: "أمس"
       }
     ],
     publicLists: [
+      {
+        id: "public-raina-skincare",
+        ownerUsername: "raina_user",
+        name: "أفضل منتجات العناية اليومية",
+        description: "منشوراتي عن منتجات العناية التي رجعت لها أكثر من مرة.",
+        purpose: "publisher_public",
+        visibility: "public",
+        coverTone: "cream",
+        productIds: ["product-1", "product-2"],
+        postIds: ["own-post-001", "own-post-002"],
+        createdAt: "قبل أسبوع",
+        updatedAt: "اليوم"
+      },
+      {
+        id: "public-raina-tested",
+        ownerUsername: "raina_user",
+        name: "منتجات جرّبتها وأنصح بها",
+        description: "تجارب مختارة من منشوراتي مع ملاحظات عملية.",
+        purpose: "publisher_public",
+        visibility: "public",
+        coverTone: "rose",
+        productIds: ["product-3", "product-4"],
+        postIds: ["own-post-003"],
+        createdAt: "قبل 4 أيام",
+        updatedAt: "أمس"
+      },
       {
         id: "public-skincare-daily",
         ownerUsername: "noura_reviews",
@@ -44,7 +85,9 @@ export function createInitialState(): AppState {
         visibility: "public",
         coverTone: "cream",
         productIds: ["product-1", "product-2", "product-3"],
-        postIds: ["post-001", "post-002"]
+        postIds: ["post-001", "post-002"],
+        createdAt: "قبل شهر",
+        updatedAt: "قبل ساعتين"
       },
       {
         id: "public-home-tested",
@@ -55,7 +98,9 @@ export function createInitialState(): AppState {
         visibility: "public",
         coverTone: "violet",
         productIds: ["product-5"],
-        postIds: []
+        postIds: [],
+        createdAt: "قبل أسبوعين",
+        updatedAt: "قبل 3 أيام"
       },
       {
         id: "public-coffee-gifts",
@@ -66,7 +111,9 @@ export function createInitialState(): AppState {
         visibility: "public",
         coverTone: "sand",
         productIds: ["product-6"],
-        postIds: ["post-004"]
+        postIds: ["post-004"],
+        createdAt: "قبل شهر",
+        updatedAt: "قبل أسبوع"
       }
     ],
     followingUsernames: ["noura_reviews", "faisal_coffee"],
@@ -91,7 +138,44 @@ export function createInitialState(): AppState {
         updatedAt: "اليوم"
       }
     ],
-    publishedPosts: [],
+    publishedPosts: [
+      {
+        id: "own-post-001",
+        productId: "product-1",
+        author: "raina_user",
+        publicListId: "public-raina-skincare",
+        rating: 9,
+        title: "مرطب ثابت في الأيام الجافة",
+        body: "استخدمته بعد الاستحمام وقبل النوم. أفضل نتيجة ظهرت عندما وضعت كمية صغيرة على بشرة رطبة، ولم أحتج إعادة الترطيب خلال الليل.",
+        tags: ["منشوراتي", "ترطيب"],
+        createdAt: "قبل 6 أيام",
+        comments: []
+      },
+      {
+        id: "own-post-002",
+        productId: "product-2",
+        author: "raina_user",
+        publicListId: "public-raina-skincare",
+        rating: 8,
+        title: "بلسم مريح بعد تهيج خفيف",
+        body: "أضعه على مناطق الجفاف فقط. يناسبني بعد التقشير الخفيف، لكنه غني لذلك لا أستخدمه على كامل الوجه صباحًا.",
+        tags: ["حاجز البشرة", "تجربة شخصية"],
+        createdAt: "قبل 4 أيام",
+        comments: []
+      },
+      {
+        id: "own-post-003",
+        productId: "product-4",
+        author: "raina_user",
+        publicListId: "public-raina-tested",
+        rating: 8,
+        title: "جهاز يحتاج تدريب لكنه وفر وقتي",
+        body: "بعد عدة محاولات أصبحت النتيجة أفضل. يناسب الأيام التي أحتاج فيها تصفيفًا سريعًا، لكن السعر يجعله قرارًا يحتاج تفكيرًا.",
+        tags: ["تصفيف", "تجربة طويلة"],
+        createdAt: "أمس",
+        comments: []
+      }
+    ],
     notifications: initialNotifications,
     settings: {
       privateProfile: false,
@@ -127,14 +211,18 @@ function mergeState(base: AppState, saved: Partial<AppState>): AppState {
   const savedLists = (saved.savedLists ?? base.savedLists).map((list) => ({
     ...list,
     ownerUsername: list.ownerUsername ?? base.profile.username,
-    purpose: list.purpose ?? "personal_save",
-    visibility: list.visibility ?? "private"
+    purpose: "personal_save" as const,
+    visibility: "private" as const,
+    createdAt: list.createdAt ?? "محفوظ سابقًا",
+    updatedAt: list.updatedAt ?? "محدّث محليًا"
   }));
   const publicLists = (saved.publicLists ?? base.publicLists).map((list) => ({
     ...list,
     ownerUsername: list.ownerUsername ?? base.profile.username,
-    purpose: list.purpose ?? "publisher_public",
-    visibility: list.visibility ?? "public"
+    purpose: "publisher_public" as const,
+    visibility: "public" as const,
+    createdAt: list.createdAt ?? "محفوظ سابقًا",
+    updatedAt: list.updatedAt ?? "محدّث محليًا"
   }));
   const legacyState = saved as Partial<AppState> & Record<string, unknown>;
   const legacySelectionKey = "com" + "pareProductIds";

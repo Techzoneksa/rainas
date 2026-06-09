@@ -145,6 +145,11 @@ Personal save lists use `purpose = personal_save` and `visibility = private`. Th
 
 Publisher lists use `purpose = publisher_public` and `visibility = public`. They appear on publisher profiles and can be linked from posts.
 
+Invalid combinations are not allowed:
+
+- `personal_save` with `public`.
+- `publisher_public` with `private`.
+
 ### SavedListItem
 
 - `id`
@@ -246,6 +251,8 @@ Publisher lists use `purpose = publisher_public` and `visibility = public`. They
 - Unique `Follow(followerId, followingId)`.
 - Unique `Save(userId, targetType, targetId)`.
 - Unique `SavedListItem(listId, targetType, targetId)`.
+- Check `SavedList(purpose = personal_save) => visibility = private`.
+- Check `SavedList(purpose = publisher_public) => visibility = public`.
 - Check `Post.rating >= 1 AND Post.rating <= 10`.
 - Index `Product(categoryId, averageRating)`.
 - Index `Post(productId, publishedAt)`.

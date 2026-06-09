@@ -16,6 +16,10 @@
 - Saving with Bookmark is allowed and is not a Like.
 - Bottom navigation order is: الرئيسية, البحث, النشر, المتابَعون, حسابي.
 - Saves live inside حسابي, not in bottom navigation.
+- حسابي contains three primary tabs: منشوراتي, قوائم منشوراتي, and المحفوظات.
+- منشوراتي shows only posts authored by the current user.
+- قوائم منشوراتي shows public publisher lists for the current user's own posts and related products.
+- المحفوظات shows saved posts, saved products, and private save lists only to the account owner.
 - Personal save lists are private and visible only to their owner.
 - Publisher lists are public, always belong to the publisher profile, and can be linked from posts.
 - Post headers show follow/unfollow beside the account name. Share, copy link, report, edit, and delete actions live inside the three-dot menu.

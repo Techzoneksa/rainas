@@ -68,6 +68,8 @@ export interface SavedList {
   purpose: "personal_save" | "publisher_public";
   visibility: "private" | "public";
   coverTone?: "cream" | "mint" | "rose" | "sky" | "sand" | "violet";
+  createdAt?: string;
+  updatedAt?: string;
   productIds: string[];
   postIds: string[];
 }

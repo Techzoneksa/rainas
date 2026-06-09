@@ -43,6 +43,8 @@ Preserve these from the current prototype:
 - No Likes rule.
 - Rating from 1 to 10.
 - Current LocalStorage migration keeps saves, lists, following, comments, drafts, notifications, and settings while ignoring old side-by-side product weighing data.
+- Preserve the current profile split: My Posts, public publisher lists, and owner-only saved content.
+- Preserve the distinction between `personal_save/private` lists and `publisher_public/public` lists.
 
 ## Rewrite
 
@@ -56,6 +58,16 @@ Rewrite these in target architecture:
 - Custom hash routing.
 - Large CSS file into organized tokens/components/layout utilities.
 - UI-only report/auth/moderation behavior.
+
+## Profile Experience Migration Note
+
+When the prototype is rebuilt in later approved phases, the completed profile behavior must be carried into:
+
+- Next.js Web: route-backed profile tabs, owner-only saved content, and public publisher-list pages.
+- Node.js Backend: authorization rules that prevent private save-list access by other users and enforce list purpose/visibility pairs.
+- Flutter: the same Arabic RTL tabs, public profile behavior, private saved content, and publisher-list flows.
+
+This note is planning only. It does not start Phase 3, backend work, database work, or Flutter work.
 
 ## Migration Phases
 
@@ -84,7 +96,8 @@ Rewrite these in target architecture:
 - Post detail.
 - Public profiles.
 - Saves.
-- Lists.
+- Personal save lists.
+- Public publisher lists.
 - Following.
 - Comments/replies.
 - Reports.
