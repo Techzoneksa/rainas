@@ -24,7 +24,7 @@ Current ports:
 
 Known local stray file:
 
-- Root `route.ts` is untracked, unrelated to this foundation, and left untouched.
+- Root `route.ts` was inspected and removed as an orphaned file during Phase 2 cleanup. It was outside all apps/packages, was not referenced by build/test/runtime paths, and contained invalid, unrelated Next.js route code for storage/proof-file handling.
 
 ## [PROJECT_IDENTITY]
 
@@ -109,7 +109,7 @@ Generated files:
 
 Potentially unused or pending:
 
-- Root `route.ts` is untracked and unrelated to the Phase 2 foundation.
+- Root `route.ts` was removed after verification as an orphaned file unrelated to the Phase 2 foundation.
 - PRD PDF exists as reference material.
 
 Risky files:
@@ -487,7 +487,7 @@ Approved phases:
 
 ## [ORPHANS_AND_PENDING]
 
-- Root `route.ts`: untracked stray file outside the foundation scope.
+- Root `route.ts`: removed as orphaned cleanup after confirming it was outside workspace apps/packages and unused by build, tests, runtime, and smoke checks.
 - PRD PDF: reference only.
 - Remote setup: pending explicit decision.
 - Hosting provider: open decision.
