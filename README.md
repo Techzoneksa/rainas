@@ -1,56 +1,67 @@
 # Raina — رأينا
 
-رأينا منصة اجتماعية عربية لاكتشاف المنتجات وقراءة التجارب ومقارنة الخيارات قبل قرار الشراء.
+Raina is an Arabic-first, RTL, mobile-first social product discovery platform. The MVP is not an e-commerce product.
 
-هذه المرحلة هي **Phase 2 — Monorepo Foundation** فقط. لا تحتوي هذه المرحلة على نقل شاشات prototype أو تنفيذ ميزات المنتج.
+Current status: **Phase 3 — Design System is complete**.
 
-## المعمارية
+Phase 4 Backend Core has not started.
+
+## Architecture
 
 ```text
-apps/web      Next.js web foundation
-apps/admin    Owner-only dashboard foundation
-apps/api      Independent NestJS API foundation
-packages/*    Shared configs, tokens, types, validation, contracts
-prototype/    Preserved reference demo
+apps/web       Next.js web foundation
+apps/admin     Owner-only dashboard foundation
+apps/api       Independent NestJS API foundation
+packages/ui    Shared React UI primitives
+packages/*     Tokens, configs, types, validation, contracts
+prototype/     Preserved reference demo
 ```
 
-## القرارات الثابتة
+## Fixed Decisions
 
-- اللغة الأساسية: العربية.
-- الاتجاه: RTL.
-- التصميم: Mobile First.
-- الويب: Next.js + React + TypeScript.
-- لوحة الإدارة: للمالك فقط.
-- الـ API: Node.js مستقل باستخدام NestJS.
-- Flutter لاحقاً كتطبيق مستقل، وليس WebView.
-- التقييم من 1 إلى 10.
-- لا توجد Likes أو Hearts أو Reactions.
-- الشراء والدفع والسلة والشحن خارج MVP.
+- Primary language: Arabic.
+- Direction: RTL.
+- Design approach: Mobile First.
+- Web/Admin: Next.js + React + TypeScript.
+- API: independent Node.js/NestJS foundation.
+- Mobile: Flutter later as a native app, not a WebView wrapper.
+- Rating scale: 1 to 10.
+- No Likes, hearts, or reactions.
+- No product comparison flows.
+- No cart, checkout, payment, shipping, inventory, private chat, live shopping, or influencer commissions in MVP.
+- Bookmark is allowed for saving.
 
-## المتطلبات
+## Requirements
 
-- Node.js LTS/compatible runtime. البيئة الحالية تستخدم Node `v24.15.0`.
-- pnpm. البيئة الحالية تستخدم pnpm `11.0.9`.
+- Node.js compatible runtime.
+- pnpm `11.0.9`.
 
-## التثبيت
+On Windows PowerShell, prefer `pnpm.cmd` if script execution policy blocks `pnpm.ps1`.
+
+## Install
 
 ```bash
 pnpm install
 ```
 
-## التشغيل
+## Run
 
 ```bash
 pnpm dev
 ```
 
-المنافذ المعتمدة:
+Ports:
 
 - Web: `http://localhost:3000`
 - Admin: `http://localhost:3001`
-- API: `http://localhost:4000/api/v1/health`
+- API health: `http://localhost:4000/api/v1/health`
 
-## أوامر الفحص
+Design-system showcases:
+
+- Web Design System: `http://localhost:3000/design-system`
+- Admin Design System: `http://localhost:3001/design-system`
+
+## Checks
 
 ```bash
 pnpm format:check
@@ -61,33 +72,38 @@ pnpm build
 pnpm smoke
 ```
 
-## ملفات البيئة
+## Design System
 
-انسخ ملفات `.env.example` عند الحاجة. لا تضع أسراراً في المستودع.
+Phase 3 added:
 
-- `.env.example`
-- `apps/web/.env.example`
-- `apps/admin/.env.example`
-- `apps/api/.env.example`
+- Expanded semantic design tokens in `packages/design-tokens`.
+- Shared UI primitives in `packages/ui`.
+- Web and Admin `/design-system` showcase routes.
+- Component tests for core primitives.
+- Documentation in `docs/DESIGN_SYSTEM.md`.
+
+Storybook is not installed in this phase. The showcase routes are the current review and QA surface.
 
 ## Prototype
 
-النسخة التجريبية المرجعية محفوظة في:
+The reference prototype remains preserved in:
 
 ```text
 prototype/
 ```
 
-هذه النسخة مرجع للتصميم والتدفقات فقط، وليست Production Architecture. يمنع حذفها قبل Feature Parity واعتماد صريح.
+It is a visual and flow reference only. Do not delete it before feature parity and explicit approval.
 
 ## Security Notes
 
-- لا تستخدم `dangerouslySetInnerHTML` في Web/Admin.
-- لا تضع أسراراً في Client أو `.env.example`.
-- لا تستخدم LocalStorage للمصادقة الإنتاجية.
-- لا تضف Fake JWT.
-- API لا يسجل OTP أو Tokens أو Cookies أو Authorization headers أو أرقام جوال أو أسرار.
+- Do not use `dangerouslySetInnerHTML` in Web/Admin.
+- Do not put secrets in client code or `.env.example`.
+- Do not use LocalStorage for production authentication.
+- Do not add fake JWT behavior.
+- API must not log OTPs, tokens, cookies, authorization headers, phone numbers, or secrets.
 
 ## Phase Stop
 
-بعد Phase 2 لا تبدأ Phase 3 أو Design System الكامل أو Backend Core أو نقل الشاشات بدون موافقة صريحة.
+Stop after Phase 3 unless Phase 4 is explicitly approved.
+
+Do not start backend core, database schemas, migrations, auth, real product features, Flutter work, or real admin CRUD without explicit approval.

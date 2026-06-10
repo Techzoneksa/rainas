@@ -32,6 +32,11 @@
 - Do not use deprecated APIs.
 - Do not leave TODO comments in final implementation phases.
 - Do not delete the current prototype before feature parity and explicit approval.
+- New shared UI must use `@raina/ui` primitives when available.
+- New visual styles must use `@raina/design-tokens` and CSS variables.
+- Do not hardcode colors, spacing, radius, shadows, or typography in reusable UI.
+- Do not duplicate shared components inside apps when a primitive exists in `packages/ui`.
+- RTL, Mobile First, visible focus, semantic HTML, labels, and accessibility basics are mandatory for new UI.
 - Run lint, typecheck, tests when available, build, and smoke checks before handoff.
 - Update `PROJECT_MAP.md` after every phase.
 - Do not skip phases.
@@ -39,21 +44,24 @@
 
 ## Current Phase Guard
 
-Current phase: Phase 2 Monorepo Foundation is complete. Stop before Phase 3 unless the user explicitly approves the next phase.
+Current phase: Phase 3 Design System is complete. Stop before Phase 4 unless the user explicitly approves the next phase.
 
-Allowed in the completed foundation:
+Allowed in the completed design-system foundation:
 
 - Maintain the pnpm/Turborepo workspace.
-- Maintain the empty Next.js foundations in `apps/web` and `apps/admin`.
+- Maintain the Next.js foundations and design-system showcase routes in `apps/web` and `apps/admin`.
 - Maintain the NestJS API foundation in `apps/api`.
 - Maintain shared packages under `packages/`.
+- Maintain `packages/design-tokens`.
+- Maintain `packages/ui`.
+- Maintain Web/Admin `/design-system` showcase routes.
 - Keep the preserved prototype under `prototype/`.
 - Run install, format, lint, typecheck, test, build, and smoke checks.
-- Update documentation to match the foundation.
+- Update documentation to match the design system.
 
 Not allowed without explicit approval:
 
-- Start Phase 3 Design System.
+- Start Phase 4 Backend Core.
 - Move prototype screens or business logic into Next.js.
 - Add real product, auth, save, follow, comment, report, notification, media, admin, database, or Flutter features.
 - Add side-by-side product weighing in any form.

@@ -44,6 +44,9 @@ importers:
       '@raina/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@raina/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.7
         version: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -139,6 +142,9 @@ importers:
       '@raina/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@raina/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.7
         version: 16.2.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -223,6 +229,33 @@ importers:
         version: link:../typescript-config
 
   packages/typescript-config: {}
+
+  packages/ui:
+    devDependencies:
+      '@raina/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
+      '@raina/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@raina/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      react:
+        specifier: 19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: 19.2.7
+        version: 19.2.7(react@19.2.7)
+      vitest:
+        specifier: 4.1.8
+        version: 4.1.8(@types/node@25.9.2)(vite@8.0.16(@types/node@25.9.2)(esbuild@0.28.0)(jiti@2.7.0)(tsx@4.22.4))
 
   packages/validation:
     dependencies:

@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 import { webAppConfig } from "@/config/app";
@@ -14,6 +15,9 @@ export default function Page() {
         <nav className="foundation-links" aria-label="روابط فحص داخلية">
           <Link className="foundation-link" href="/health">
             Health
+          </Link>
+          <Link className="foundation-link" href={"/design-system" as Route}>
+            Design System
           </Link>
         </nav>
       </section>

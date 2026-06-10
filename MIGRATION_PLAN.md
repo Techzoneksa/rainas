@@ -1,5 +1,15 @@
 # MIGRATION_PLAN.md
 
+## Phase 3 Design System Status
+
+Phase 3 Design System is complete.
+
+- Shared semantic tokens were expanded in `packages/design-tokens`.
+- Shared UI primitives were added in `packages/ui`.
+- Web and Admin now include `/design-system` showcase routes.
+- No prototype screen, feature logic, LocalStorage behavior, backend feature, database schema, Flutter code, Like scope, product comparison scope, or e-commerce scope was added.
+- The next phase, Phase 4 Backend Core, must not start without explicit approval.
+
 ## Phase 2 Migration Status
 
 Phase 2 Monorepo Foundation is complete.
@@ -8,7 +18,7 @@ Phase 2 Monorepo Foundation is complete.
 - The new workspace has `apps/web`, `apps/admin`, `apps/api`, and shared `packages/*`.
 - No prototype screen or business logic was moved into the new apps.
 - No database, auth, migrations, or production feature implementation was added.
-- The next phase must not start without explicit approval.
+- Phase 3 has since been approved and completed. Phase 4 must not start without explicit approval.
 
 ## Current State
 

@@ -69,6 +69,8 @@ Out of phase: feature implementation.
 
 ## Phase 3 — Design System
 
+Status: complete.
+
 Goal: establish reusable RTL design primitives.
 
 Scope: tokens, typography, buttons, inputs, cards, sheets, dialogs, navigation, loading, empty/error states.
@@ -79,9 +81,9 @@ Risks: visual drift from approved Raina identity.
 
 Tests: component checks, RTL visual QA, accessibility checks.
 
-Acceptance criteria: primitives cover current prototype needs.
+Acceptance criteria: primitives cover current prototype needs. Met for shared foundation primitives and showcase routes.
 
-Definition of Done: documented tokens and examples.
+Definition of Done: documented tokens and examples. Met with `docs/DESIGN_SYSTEM.md`, `packages/ui`, and `/design-system` routes.
 
 Rollback: revert design package.
 

@@ -1,5 +1,43 @@
 # PROJECT_MAP.md
 
+## [PHASE_3_DESIGN_SYSTEM_STATUS]
+
+Phase 3 Design System is complete.
+
+Current design-system foundation:
+
+- `packages/design-tokens` now exposes semantic color, spacing, radius, shadow, typography, motion, z-index, and touch-target tokens.
+- `packages/ui` provides shared React UI primitives for Web and Admin.
+- `apps/web/src/app/design-system/page.tsx` exposes the Web design-system showcase route at `/design-system`.
+- `apps/admin/src/app/design-system/page.tsx` exposes the Admin design-system showcase route at `/design-system`.
+- Web and Admin import the same token CSS and shared UI CSS.
+- Storybook was intentionally not added in Phase 3; showcase routes are the current QA surface.
+- No prototype screen, route, LocalStorage behavior, feature state, backend feature, database schema, Flutter code, Like scope, product comparison scope, or e-commerce scope was added.
+
+Current shared UI primitives:
+
+- Button and IconButton.
+- Input, OTP Input, Textarea, Select, Checkbox, Radio, and Switch.
+- Badge, Chip, Avatar, Card, and Separator.
+- Tabs and Accordion.
+- Dialog, Bottom Sheet, Dropdown Menu, Toast, and Alert.
+- Skeleton, EmptyState, ErrorState, Spinner, and Progress.
+- Tooltip.
+- Container, Stack, Inline, Grid, and AppShell.
+- DataTable, Pagination, Breadcrumb, and StatCard.
+
+Current design-system routes:
+
+- Web: `http://localhost:3000/design-system`
+- Admin: `http://localhost:3001/design-system`
+
+Current Phase 3 verification:
+
+- Component tests exist in `packages/ui`.
+- Design-token tests were expanded in `packages/design-tokens`.
+- Foundation smoke checks include `packages/ui` and the two `/design-system` routes.
+- Runtime forbidden-term checks cover apps and packages for disallowed Like/product-comparison vocabulary.
+
 ## [PHASE_2_FOUNDATION_STATUS]
 
 Phase 2 Monorepo Foundation is complete.
@@ -8,10 +46,10 @@ Current foundation:
 
 - Git initialized with `main` and `develop`; active branch is `develop`.
 - pnpm workspaces and Turborepo are configured.
-- `apps/web` is a Next.js foundation with `/` and `/health` only.
-- `apps/admin` is a separate Next.js owner dashboard foundation with `/` and `/health` only.
+- `apps/web` is a Next.js foundation with `/`, `/health`, and the Phase 3 `/design-system` showcase route.
+- `apps/admin` is a separate Next.js owner dashboard foundation with `/`, `/health`, and the Phase 3 `/design-system` showcase route.
 - `apps/api` is an independent NestJS foundation with `/api/v1/health` only.
-- `packages/design-tokens`, `packages/shared-types`, `packages/validation`, `packages/api-contracts`, `packages/eslint-config`, and `packages/typescript-config` are in place.
+- `packages/design-tokens`, `packages/ui`, `packages/shared-types`, `packages/validation`, `packages/api-contracts`, `packages/eslint-config`, and `packages/typescript-config` are in place.
 - The original prototype is preserved under `prototype/`.
 - No prototype feature logic was moved into the new apps.
 - No database, migrations, auth, real product features, Flutter app, or e-commerce scope was added.
@@ -78,6 +116,7 @@ Current workspace is a monorepo foundation plus a preserved standalone prototype
 - Web/Admin foundation: Next.js + React + App Router.
 - API foundation: NestJS.
 - Shared validation: Zod.
+- Shared UI primitives: `@raina/ui`.
 - Tests: Vitest.
 - Linting: ESLint shared config.
 - Formatting: Prettier.
@@ -97,7 +136,11 @@ Important files:
 - `apps/web`: public Next.js foundation.
 - `apps/admin`: owner dashboard Next.js foundation.
 - `apps/api`: independent NestJS API foundation.
+- `apps/web/src/app/design-system`: Web design-system showcase route.
+- `apps/admin/src/app/design-system`: Admin design-system showcase route.
 - `packages/*`: shared foundation packages.
+- `packages/ui`: shared React UI primitives.
+- `docs/DESIGN_SYSTEM.md`: design-system rules and component documentation.
 - `prototype/`: preserved standalone prototype/demo.
 
 Generated files:

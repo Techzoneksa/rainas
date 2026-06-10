@@ -8,12 +8,16 @@ const requiredFiles = [
   "apps/web/src/app/layout.tsx",
   "apps/web/src/app/page.tsx",
   "apps/web/src/app/health/page.tsx",
+  "apps/web/src/app/design-system/page.tsx",
   "apps/admin/src/app/layout.tsx",
   "apps/admin/src/app/page.tsx",
   "apps/admin/src/app/health/page.tsx",
+  "apps/admin/src/app/design-system/page.tsx",
   "apps/api/src/main.ts",
   "apps/api/src/health/health.controller.ts",
   "packages/design-tokens/src/index.ts",
+  "packages/ui/src/index.tsx",
+  "packages/ui/src/styles.css",
   "packages/shared-types/src/index.ts",
   "packages/validation/src/index.ts",
   "packages/api-contracts/src/index.ts",
@@ -29,7 +33,10 @@ const blockedRuntimeTerms = [
   [108, 105, 107, 101, 100],
   [114, 101, 97, 99, 116, 105, 111, 110],
   [104, 101, 97, 114, 116],
-  [102, 97, 118, 111, 114, 105, 116, 101]
+  [102, 97, 118, 111, 114, 105, 116, 101],
+  [99, 111, 109, 112, 97, 114, 101],
+  [99, 111, 109, 112, 97, 114, 105, 115, 111, 110],
+  [1605, 1602, 1575, 1585, 1606, 1577]
 ].map((term) => String.fromCharCode(...term));
 
 const runtimeRoots = ["apps", "packages"];
