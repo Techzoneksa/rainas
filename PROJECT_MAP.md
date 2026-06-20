@@ -1,5 +1,39 @@
 # PROJECT_MAP.md
 
+## [PHASE_4_BACKEND_CORE_STATUS]
+
+Phase 4 Backend Core is complete locally.
+
+Current backend foundation:
+
+- `docker-compose.yml` provides a local PostgreSQL service with healthcheck and persistent volume.
+- `apps/api/prisma.config.ts` configures Prisma 7 with PostgreSQL.
+- `apps/api/prisma/schema.prisma` defines the backend core data model.
+- `apps/api/prisma/migrations/20260620000000_init_backend_core/migration.sql` is the initial database migration.
+- `apps/api/prisma/seed.ts` creates development seed data.
+- `apps/api/src/database` provides `DatabaseModule` and `PrismaService`.
+- `apps/api/src/common/auth` provides the development-only `X-Demo-User-Id` guard.
+- `apps/api/src/common/decorators` provides `@CurrentDemoUser()`.
+- `apps/api/src/common/pagination` provides page/limit pagination helpers.
+- `apps/api/src/users`, `profiles`, `categories`, `brands`, `products`, `posts`, `comments`, `follows`, `lists`, `saved-items`, `notifications`, `reports`, and `settings` provide Phase 4 REST modules.
+- `apps/api/src/health` now includes live and ready health routes.
+- Swagger is available at `/api/docs`.
+- Backend documentation lives in `docs/BACKEND.md` and `docs/DATABASE.md`.
+
+Current Phase 4 verification:
+
+- Prisma schema validation passed.
+- Prisma client generation passed.
+- API typecheck passed.
+- API tests passed.
+- Further full workspace verification is recorded in the handoff report.
+
+Current phase guard:
+
+- Stop before Phase 5 Web Authentication and Entry Flow unless the user explicitly approves the next phase.
+- Do not connect Web/Admin UI to the API yet.
+- Do not start Flutter work yet.
+
 ## [PHASE_3_DESIGN_SYSTEM_STATUS]
 
 Phase 3 Design System is complete.
@@ -48,7 +82,7 @@ Current foundation:
 - pnpm workspaces and Turborepo are configured.
 - `apps/web` is a Next.js foundation with `/`, `/health`, and the Phase 3 `/design-system` showcase route.
 - `apps/admin` is a separate Next.js owner dashboard foundation with `/`, `/health`, and the Phase 3 `/design-system` showcase route.
-- `apps/api` is an independent NestJS foundation with `/api/v1/health` only.
+- `apps/api` is an independent NestJS backend foundation. Phase 4 adds PostgreSQL, Prisma, Swagger, and core REST modules.
 - `packages/design-tokens`, `packages/ui`, `packages/shared-types`, `packages/validation`, `packages/api-contracts`, `packages/eslint-config`, and `packages/typescript-config` are in place.
 - The original prototype is preserved under `prototype/`.
 - No prototype feature logic was moved into the new apps.
@@ -135,7 +169,7 @@ Important files:
 - `scripts/clean.mjs`: generated-output cleanup.
 - `apps/web`: public Next.js foundation.
 - `apps/admin`: owner dashboard Next.js foundation.
-- `apps/api`: independent NestJS API foundation.
+- `apps/api`: independent NestJS API with Phase 4 backend core.
 - `apps/web/src/app/design-system`: Web design-system showcase route.
 - `apps/admin/src/app/design-system`: Admin design-system showcase route.
 - `packages/*`: shared foundation packages.
@@ -234,11 +268,11 @@ Feature status:
 | Drafts               | LocalStorage                              |
 | Publish demo post    | LocalStorage                              |
 | Notifications        | Local demo                                |
-| Report content       | UI-only demo                              |
+| Report content       | Prototype UI demo; Phase 4 API endpoint   |
 | Profile edit         | LocalStorage                              |
 | Settings             | LocalStorage                              |
 | Admin dashboard      | Not implemented                           |
-| Backend/API/database | Not implemented                           |
+| Backend/API/database | Phase 4 backend core implemented locally  |
 | Media upload         | Not implemented                           |
 
 ## [CURRENT_DEMO_DATA]

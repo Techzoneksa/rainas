@@ -12,6 +12,15 @@
     "format": "prettier --write \"*.{json,md,yml,yaml}\" \".prettierrc\" \".github/**/*.{yml,yaml}\" \"apps/**/*.{ts,tsx,js,mjs,css,json}\" \"docs/**/*.md\" \"packages/**/*.{ts,tsx,js,mjs,css,json,md}\" \"scripts/**/*.{js,mjs}\"",
     "format:check": "prettier --check \"*.{json,md,yml,yaml}\" \".prettierrc\" \".github/**/*.{yml,yaml}\" \"apps/**/*.{ts,tsx,js,mjs,css,json}\" \"docs/**/*.md\" \"packages/**/*.{ts,tsx,js,mjs,css,json,md}\" \"scripts/**/*.{js,mjs}\"",
     "smoke": "node scripts/smoke-foundation.mjs",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:generate": "pnpm --filter @raina/api db:generate",
+    "db:migrate": "pnpm --filter @raina/api db:migrate",
+    "db:migrate:deploy": "pnpm --filter @raina/api db:migrate:deploy",
+    "db:seed": "pnpm --filter @raina/api db:seed",
+    "db:reset": "pnpm --filter @raina/api db:reset",
+    "db:studio": "pnpm --filter @raina/api db:studio",
     "clean": "node scripts/clean.mjs"
   },
   "devDependencies": {
@@ -28,7 +37,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/engines",
       "esbuild",
+      "prisma",
       "sharp"
     ]
   }

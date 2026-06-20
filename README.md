@@ -2,16 +2,14 @@
 
 Raina is an Arabic-first, RTL, mobile-first social product discovery platform. The MVP is not an e-commerce product.
 
-Current status: **Phase 3 — Design System is complete**.
-
-Phase 4 Backend Core has not started.
+Current status: **Phase 4 - Backend Core is complete locally**.
 
 ## Architecture
 
 ```text
 apps/web       Next.js web foundation
 apps/admin     Owner-only dashboard foundation
-apps/api       Independent NestJS API foundation
+apps/api       Independent NestJS API with PostgreSQL/Prisma backend core
 packages/ui    Shared React UI primitives
 packages/*     Tokens, configs, types, validation, contracts
 prototype/     Preserved reference demo
@@ -23,7 +21,7 @@ prototype/     Preserved reference demo
 - Direction: RTL.
 - Design approach: Mobile First.
 - Web/Admin: Next.js + React + TypeScript.
-- API: independent Node.js/NestJS foundation.
+- API: independent Node.js/NestJS.
 - Mobile: Flutter later as a native app, not a WebView wrapper.
 - Rating scale: 1 to 10.
 - No Likes, hearts, or reactions.
@@ -35,6 +33,7 @@ prototype/     Preserved reference demo
 
 - Node.js compatible runtime.
 - pnpm `11.0.9`.
+- Docker for local PostgreSQL.
 
 On Windows PowerShell, prefer `pnpm.cmd` if script execution policy blocks `pnpm.ps1`.
 
@@ -47,6 +46,9 @@ pnpm install
 ## Run
 
 ```bash
+pnpm db:up
+pnpm db:migrate
+pnpm db:seed
 pnpm dev
 ```
 
@@ -55,6 +57,9 @@ Ports:
 - Web: `http://localhost:3000`
 - Admin: `http://localhost:3001`
 - API health: `http://localhost:4000/api/v1/health`
+- API docs: `http://localhost:4000/api/docs`
+- API live: `http://localhost:4000/health/live`
+- API ready: `http://localhost:4000/health/ready`
 
 Design-system showcases:
 
@@ -71,6 +76,35 @@ pnpm test
 pnpm build
 pnpm smoke
 ```
+
+## Backend and Database
+
+Phase 4 added:
+
+- Docker Compose PostgreSQL service.
+- Prisma schema, migration, and seed script.
+- NestJS modules for users, profiles, categories, brands, products, posts, comments, follows, lists, saved items, notifications, reports, settings, health, and database access.
+- Swagger documentation at `/api/docs`.
+- Demo development identity through `X-Demo-User-Id`.
+
+Database commands:
+
+```bash
+pnpm db:up
+pnpm db:down
+pnpm db:logs
+pnpm db:generate
+pnpm db:migrate
+pnpm db:migrate:deploy
+pnpm db:seed
+pnpm db:reset
+pnpm db:studio
+```
+
+Backend docs:
+
+- `docs/BACKEND.md`
+- `docs/DATABASE.md`
 
 ## Design System
 
@@ -104,6 +138,6 @@ It is a visual and flow reference only. Do not delete it before feature parity a
 
 ## Phase Stop
 
-Stop after Phase 3 unless Phase 4 is explicitly approved.
+Stop after Phase 4 unless Phase 5 is explicitly approved.
 
-Do not start backend core, database schemas, migrations, auth, real product features, Flutter work, or real admin CRUD without explicit approval.
+Do not start web authentication, web feature migration, Flutter work, or real admin UI work without explicit approval.

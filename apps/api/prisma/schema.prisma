@@ -1,0 +1,463 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MODERATOR
+  SUPPORT
+  USER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  DELETED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum RecordStatus {
+  ACTIVE
+  HIDDEN
+  REMOVED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  REMOVED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ListPurpose {
+  PERSONAL_SAVE
+  PUBLISHER_PUBLIC
+}
+
+enum ListVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum ListItemTargetType {
+  POST
+  PRODUCT
+}
+
+enum SavedTargetType {
+  POST
+  PRODUCT
+}
+
+enum CommentTargetType {
+  POST
+  PRODUCT
+}
+
+enum ReportTargetType {
+  USER
+  PROFILE
+  PRODUCT
+  POST
+  COMMENT
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  REJECTED
+}
+
+enum NotificationType {
+  FOLLOW_CREATED
+  COMMENT_CREATED
+  REPLY_CREATED
+  POST_PUBLISHED
+  REPORT_UPDATED
+  SYSTEM
+}
+
+enum SettingValueType {
+  STRING
+  BOOLEAN
+  NUMBER
+  JSON
+}
+
+model User {
+  id           String     @id @default(cuid())
+  phone        String     @unique
+  role         UserRole   @default(USER)
+  status       UserStatus @default(ACTIVE)
+  lastSeenAt   DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  profile      Profile?
+  posts        Post[]         @relation("PostAuthor")
+  comments     Comment[]      @relation("CommentAuthor")
+  reports      Report[]       @relation("ReportSubmitter")
+  assigned     Report[]       @relation("ReportAssignee")
+  lists        UserList[]
+  savedItems   SavedItem[]
+  notifications Notification[]
+  auditLogs    AdminAuditLog[] @relation("AuditActor")
+  settings     AppSetting[]    @relation("SettingUpdater")
+  following    Follow[]        @relation("Following")
+  followers    Follow[]        @relation("Followers")
+
+  @@index([status, createdAt])
+  @@index([role, status])
+}
+
+model Profile {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  username     String     @unique
+  displayName  String
+  bio          String?
+  city         String?
+  avatarUrl    String?
+  visibility   Visibility @default(PUBLIC)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([visibility, createdAt])
+}
+
+model Category {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  nameAr        String
+  descriptionAr String?
+  status        RecordStatus @default(ACTIVE)
+  sortOrder     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  products      Product[]
+
+  @@index([status, sortOrder])
+}
+
+model Brand {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  name          String
+  description   String?
+  status        RecordStatus @default(ACTIVE)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  products      Product[]
+
+  @@index([status, name])
+}
+
+model Product {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  brandId         String
+  categoryId      String
+  nameAr          String
+  summaryAr       String?
+  descriptionAr   String?
+  priceMin        Decimal?      @db.Decimal(10, 2)
+  priceMax        Decimal?      @db.Decimal(10, 2)
+  currency        String        @default("SAR")
+  status          RecordStatus  @default(ACTIVE)
+  ratingAverage   Decimal       @default(0) @db.Decimal(4, 2)
+  ratingCount     Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  brand           Brand         @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  category        Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  media           ProductMedia[]
+  specifications  ProductSpecification[]
+  posts           Post[]
+  comments        Comment[]
+
+  @@index([categoryId, ratingAverage])
+  @@index([brandId, status])
+  @@index([status, createdAt])
+}
+
+model ProductMedia {
+  id               String           @id @default(cuid())
+  productId        String
+  type             MediaType        @default(IMAGE)
+  url              String
+  altAr            String?
+  sortOrder        Int              @default(0)
+  moderationStatus ModerationStatus @default(APPROVED)
+  createdAt        DateTime         @default(now())
+  deletedAt        DateTime?
+
+  product          Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+model ProductSpecification {
+  id        String   @id @default(cuid())
+  productId String
+  nameAr    String
+  valueAr   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, nameAr])
+  @@index([productId, sortOrder])
+}
+
+model Post {
+  id            String        @id @default(cuid())
+  authorId      String
+  productId     String
+  publicListId  String?
+  rating        Int
+  title         String
+  body          String
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+
+  author        User          @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+  publicList    UserList?     @relation("PostPublicList", fields: [publicListId], references: [id], onDelete: SetNull)
+  media         PostMedia[]
+  pros          PostPro[]
+  cons          PostCon[]
+  comments      Comment[]
+
+  @@index([authorId, status, createdAt])
+  @@index([productId, publishedAt])
+  @@index([publicListId])
+  @@index([status, publishedAt])
+}
+
+model PostMedia {
+  id               String           @id @default(cuid())
+  postId           String
+  type             MediaType        @default(IMAGE)
+  url              String
+  altAr            String?
+  sortOrder        Int              @default(0)
+  moderationStatus ModerationStatus @default(APPROVED)
+  createdAt        DateTime         @default(now())
+  deletedAt        DateTime?
+
+  post             Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, sortOrder])
+}
+
+model PostPro {
+  id        String   @id @default(cuid())
+  postId    String
+  body      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, sortOrder])
+}
+
+model PostCon {
+  id        String   @id @default(cuid())
+  postId    String
+  body      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, sortOrder])
+}
+
+model Comment {
+  id          String            @id @default(cuid())
+  authorId    String
+  targetType  CommentTargetType
+  postId      String?
+  productId   String?
+  parentId    String?
+  body        String
+  status      ContentStatus     @default(PUBLISHED)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deletedAt   DateTime?
+
+  author      User              @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  post        Post?             @relation(fields: [postId], references: [id], onDelete: Cascade)
+  product     Product?          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  parent      Comment?          @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[]         @relation("CommentReplies")
+
+  @@index([postId, createdAt])
+  @@index([productId, createdAt])
+  @@index([parentId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followingId, createdAt])
+  @@index([followerId, createdAt])
+}
+
+model UserList {
+  id          String         @id @default(cuid())
+  ownerId     String
+  slug        String
+  title       String
+  description String?
+  purpose     ListPurpose
+  visibility  ListVisibility
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  owner       User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items       UserListItem[]
+  linkedPosts Post[]         @relation("PostPublicList")
+
+  @@unique([ownerId, slug])
+  @@index([ownerId, purpose, visibility])
+  @@index([purpose, visibility, createdAt])
+}
+
+model UserListItem {
+  id         String             @id @default(cuid())
+  listId     String
+  targetType ListItemTargetType
+  targetId   String
+  sortOrder  Int                @default(0)
+  createdAt  DateTime           @default(now())
+
+  list       UserList           @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([listId, sortOrder])
+}
+
+model SavedItem {
+  id         String          @id @default(cuid())
+  userId     String
+  targetType SavedTargetType
+  targetId   String
+  createdAt  DateTime        @default(now())
+
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+  @@index([type, createdAt])
+}
+
+model Report {
+  id              String           @id @default(cuid())
+  reporterId      String
+  targetType      ReportTargetType
+  targetId        String
+  reason          String
+  details         String?
+  status          ReportStatus     @default(OPEN)
+  assignedAdminId String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  resolvedAt      DateTime?
+
+  reporter        User             @relation("ReportSubmitter", fields: [reporterId], references: [id], onDelete: Cascade)
+  assignedAdmin   User?            @relation("ReportAssignee", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@index([reporterId, createdAt])
+}
+
+model AppSetting {
+  key         String           @id
+  value       Json
+  valueType   SettingValueType @default(JSON)
+  description String?
+  updatedById String?
+  updatedAt   DateTime         @updatedAt
+
+  updatedBy   User?            @relation("SettingUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([updatedAt])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
+}

@@ -91,19 +91,21 @@ Out of phase: business features.
 
 ## Phase 4 — Backend Core
 
+Status: complete.
+
 Goal: create backend foundation and data model.
 
-Scope: NestJS app, PostgreSQL, ORM, migrations, auth foundation, users, profiles, categories, brands, products, posts, API docs, demo seed.
+Scope: NestJS app, PostgreSQL, Prisma ORM, migrations, demo identity foundation, users, profiles, categories, brands, products, posts, comments, follows, lists, saved items, notifications, reports, settings, API docs, demo seed.
 
 Dependencies: provider decisions.
 
 Risks: data model underfits moderation/media.
 
-Tests: unit/integration tests and migration tests.
+Tests: unit/service/DTO tests, typecheck, build, smoke, and local migration/seed checks.
 
-Acceptance criteria: API starts, OpenAPI generated, seed data exists.
+Acceptance criteria: API starts, OpenAPI generated, seed data exists. Met locally.
 
-Definition of Done: backend core deployable to development.
+Definition of Done: backend core deployable to development. Met locally.
 
 Rollback: revert migrations and seed.
 

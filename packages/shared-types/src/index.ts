@@ -12,10 +12,12 @@ export interface ApiError {
 }
 
 export interface PaginationMeta {
+  page?: number;
   limit: number;
   cursor?: string;
   nextCursor?: string;
   total?: number;
+  totalPages?: number;
 }
 
 export interface HealthResponse {

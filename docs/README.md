@@ -1,6 +1,6 @@
 # Raina Docs
 
-The root documentation files remain the source of truth for the foundation phase:
+The root documentation files remain the source of truth for project phase gates and product scope:
 
 - `AGENTS.md`
 - `PROJECT_MAP.md`
@@ -9,4 +9,8 @@ The root documentation files remain the source of truth for the foundation phase
 - `DATA_MODEL.md`
 - `PHASES.md`
 
-Future phase-specific documents can live in this folder once the implementation moves beyond the monorepo foundation.
+Phase-specific documents:
+
+- `docs/DESIGN_SYSTEM.md`
+- `docs/BACKEND.md`
+- `docs/DATABASE.md`

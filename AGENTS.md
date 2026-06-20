@@ -44,26 +44,28 @@
 
 ## Current Phase Guard
 
-Current phase: Phase 3 Design System is complete. Stop before Phase 4 unless the user explicitly approves the next phase.
+Current phase: Phase 4 Backend Core is complete locally. Stop before Phase 5 unless the user explicitly approves the next phase.
 
-Allowed in the completed design-system foundation:
+Allowed in the completed backend foundation:
 
 - Maintain the pnpm/Turborepo workspace.
 - Maintain the Next.js foundations and design-system showcase routes in `apps/web` and `apps/admin`.
-- Maintain the NestJS API foundation in `apps/api`.
+- Maintain the NestJS API foundation and Phase 4 backend modules in `apps/api`.
+- Maintain Docker Compose PostgreSQL setup.
+- Maintain Prisma schema, migration, seed, and database scripts.
 - Maintain shared packages under `packages/`.
 - Maintain `packages/design-tokens`.
 - Maintain `packages/ui`.
 - Maintain Web/Admin `/design-system` showcase routes.
 - Keep the preserved prototype under `prototype/`.
-- Run install, format, lint, typecheck, test, build, and smoke checks.
-- Update documentation to match the design system.
+- Run install, format, lint, typecheck, test, build, smoke checks, and database checks.
+- Update documentation to match the backend foundation.
 
 Not allowed without explicit approval:
 
-- Start Phase 4 Backend Core.
+- Start Phase 5 Web Authentication and Entry Flow.
 - Move prototype screens or business logic into Next.js.
-- Add real product, auth, save, follow, comment, report, notification, media, admin, database, or Flutter features.
+- Connect Web/Admin screens to the new API.
+- Add production auth, OTP provider integration, media uploads, admin dashboard UI, database provider deployment, or Flutter features.
 - Add side-by-side product weighing in any form.
-- Add database schemas or migrations.
 - Add payment, cart, shipping, merchant, private chat, live shopping, influencer, Like, heart, or reaction scope.

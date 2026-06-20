@@ -1,246 +1,151 @@
 # API_PLAN.md
 
-## Phase 2 API Foundation Status
+## Phase 4 API Status
 
-The current API app is a NestJS foundation only.
+The API is now a NestJS backend core with PostgreSQL, Prisma, Swagger, validation, rate limiting, request IDs, and a demo development identity.
 
-Implemented now:
+Implemented:
 
 - `GET /api/v1/health`.
-- Helmet.
-- CORS configured from environment examples.
-- Global validation pipe.
-- Request ID middleware.
-- Standard exception filter.
-- Minimal bootstrap logging.
+- `GET /health/live`.
+- `GET /health/ready`.
+- Swagger at `/api/docs`.
+- Standard error format: `{ code, message, details, requestId }`.
+- Page/limit pagination metadata.
+- Demo protected routes using `X-Demo-User-Id` in development/test only.
+- Modules for users, profiles, categories, brands, products, posts, comments, follows, lists, saved items, notifications, reports, settings, health, and database.
 
-Not implemented yet:
+Not implemented in Phase 4:
 
-- Auth.
-- Database.
-- ORM.
-- OpenAPI generation.
-- Feature modules.
-- Migrations.
-- Production business logic.
+- Production OTP auth.
+- Access/refresh token sessions.
+- Media upload signing.
+- Web/Admin API integration.
+- Flutter API client.
+- Owner dashboard UI.
 
 ## API Style
 
 - REST API.
 - JSON request/response.
-- Version prefix: `/v1`.
-- OpenAPI is the source of truth.
-- Generated TypeScript client for web/admin.
-- Generated Dart client for Flutter.
+- Version prefix: `/api/v1`.
+- OpenAPI/Swagger is exposed at `/api/docs`.
 - Backend is independent from Next.js UI.
 
-## Versioning
-
-Initial version:
-
-```text
-/v1
-```
-
-Breaking changes require a new major route prefix such as `/v2`. Minor additive changes stay under `/v1`.
-
-## Standard Error Format
+## Error Format
 
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Human-readable Arabic or localized message",
-    "details": {},
-    "requestId": "req_..."
-  }
+  "code": "VALIDATION_ERROR",
+  "message": "Human-readable Arabic or localized message",
+  "details": {},
+  "requestId": "req_..."
 }
 ```
 
 ## Pagination
 
-Feed endpoints should prefer cursor pagination:
+Collection endpoints use:
 
 ```text
-?cursor=...&limit=20
+?page=1&limit=20
 ```
 
-Admin table endpoints may support page pagination:
+Response metadata:
+
+```json
+{
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "totalPages": 5
+  }
+}
+```
+
+## Public Endpoints
+
+- `GET /api/v1/categories`
+- `GET /api/v1/categories/:slug`
+- `GET /api/v1/brands`
+- `GET /api/v1/brands/:slug`
+- `GET /api/v1/products`
+- `GET /api/v1/products/:slug`
+- `GET /api/v1/products/:id/posts`
+- `GET /api/v1/products/:id/comments`
+- `GET /api/v1/posts`
+- `GET /api/v1/posts/:id`
+- `GET /api/v1/comments/:id`
+- `GET /api/v1/profiles/:username`
+- `GET /api/v1/users/:username/lists`
+- `GET /api/v1/users/:username/lists/:id`
+- `GET /api/v1/settings`
+
+## Demo Protected Endpoints
+
+Header:
 
 ```text
-?page=1&pageSize=50
+X-Demo-User-Id: usr_01
 ```
 
-## Filtering and Sorting
+Routes:
 
-Use explicit query parameters:
+- `GET /api/v1/me`
+- `GET /api/v1/me/profile`
+- `PATCH /api/v1/me/profile`
+- `POST /api/v1/posts`
+- `PATCH /api/v1/posts/:id`
+- `PATCH /api/v1/posts/:id/publish`
+- `DELETE /api/v1/posts/:id`
+- `POST /api/v1/posts/:postId/comments`
+- `POST /api/v1/products/:productId/comments`
+- `POST /api/v1/comments/:id/replies`
+- `PATCH /api/v1/comments/:id`
+- `DELETE /api/v1/comments/:id`
+- `GET /api/v1/me/following`
+- `POST /api/v1/users/:id/follow`
+- `DELETE /api/v1/users/:id/follow`
+- `GET /api/v1/me/lists`
+- `POST /api/v1/me/lists`
+- `GET /api/v1/me/lists/:id`
+- `PATCH /api/v1/me/lists/:id`
+- `DELETE /api/v1/me/lists/:id`
+- `POST /api/v1/me/lists/:id/items`
+- `DELETE /api/v1/me/lists/:id/items/:itemId`
+- `GET /api/v1/me/saved`
+- `POST /api/v1/me/saved`
+- `DELETE /api/v1/me/saved/:id`
+- `GET /api/v1/me/notifications`
+- `PATCH /api/v1/me/notifications/:id/read`
+- `PATCH /api/v1/me/notifications/read-all`
+- `POST /api/v1/reports`
+- `GET /api/v1/reports`
+- `PATCH /api/v1/reports/:id`
+- `PATCH /api/v1/settings/:key`
 
-```text
-?categoryId=...
-?q=...
-?sort=rating_desc
-?status=published
-```
+## Authorization Rules in Phase 4
 
-## Modules and Endpoints
-
-### Auth
-
-- `POST /v1/auth/otp/start`
-- `POST /v1/auth/otp/verify`
-- `POST /v1/auth/refresh`
-- `POST /v1/auth/logout`
-- `GET /v1/auth/me`
-
-### Users and Profiles
-
-- `GET /v1/users/:username`
-- `GET /v1/me/profile`
-- `PATCH /v1/me/profile`
-- `PATCH /v1/me/settings`
-- `DELETE /v1/me`
-
-### Categories
-
-- `GET /v1/categories`
-- `GET /v1/categories/:slug`
-
-### Brands
-
-- `GET /v1/brands`
-- `GET /v1/brands/:slug`
-
-### Products
-
-- `GET /v1/products`
-- `GET /v1/products/:slug`
-- `GET /v1/products/:id/posts`
-- `GET /v1/products/:id/comments`
-- `POST /v1/products/:id/comments`
-- `POST /v1/products/:id/report`
-
-### Posts
-
-- `GET /v1/posts`
-- `GET /v1/posts/:id`
-- `POST /v1/posts`
-- `PATCH /v1/posts/:id`
-- `DELETE /v1/posts/:id`
-- `POST /v1/posts/:id/comments`
-- `POST /v1/posts/:id/report`
-
-### Drafts
-
-- `GET /v1/me/drafts`
-- `POST /v1/me/drafts`
-- `PATCH /v1/me/drafts/:id`
-- `POST /v1/me/drafts/:id/publish`
-- `DELETE /v1/me/drafts/:id`
-
-### Comments
-
-- `GET /v1/comments/:id`
-- `POST /v1/comments/:id/replies`
-- `PATCH /v1/comments/:id`
-- `DELETE /v1/comments/:id`
-- `POST /v1/comments/:id/report`
-
-### Saves and Lists
-
-- `GET /v1/me/saves`
-- `POST /v1/me/saves`
-- `DELETE /v1/me/saves/:id`
-- `GET /v1/me/lists`
-- `POST /v1/me/lists`
-- `GET /v1/me/lists/:id`
-- `PATCH /v1/me/lists/:id`
-- `DELETE /v1/me/lists/:id`
-- `POST /v1/me/lists/:id/items`
-- `DELETE /v1/me/lists/:id/items/:itemId`
-
-### Publisher Public Lists
-
-- `GET /v1/users/:username/lists`
-- `GET /v1/users/:username/lists/:id`
-- `GET /v1/me/public-lists`
-- `POST /v1/me/public-lists`
-- `PATCH /v1/me/public-lists/:id`
-- `DELETE /v1/me/public-lists/:id`
-- `POST /v1/me/public-lists/:id/items`
-- `DELETE /v1/me/public-lists/:id/items/:itemId`
-
-### Follows
-
-- `GET /v1/me/following`
-- `POST /v1/users/:id/follow`
-- `DELETE /v1/users/:id/follow`
-
-### Notifications
-
-- `GET /v1/me/notifications`
-- `PATCH /v1/me/notifications/:id/read`
-- `PATCH /v1/me/notifications/read-all`
-- `PATCH /v1/me/notification-settings`
-
-### Media
-
-- `POST /v1/media/upload-intent`
-- `POST /v1/media/:id/complete`
-- `DELETE /v1/media/:id`
-
-### Reports and Moderation
-
-- `POST /v1/reports`
-- `GET /v1/admin/reports`
-- `PATCH /v1/admin/reports/:id`
-- `POST /v1/admin/moderation/actions`
-
-### Owner Admin
-
-- `GET /v1/admin/overview`
-- `GET /v1/admin/users`
-- `PATCH /v1/admin/users/:id`
-- `GET /v1/admin/products`
-- `POST /v1/admin/products`
-- `PATCH /v1/admin/products/:id`
-- `GET /v1/admin/posts`
-- `PATCH /v1/admin/posts/:id`
-- `GET /v1/admin/comments`
-- `PATCH /v1/admin/comments/:id`
-- `GET /v1/admin/audit-logs`
-- `GET /v1/admin/settings`
-- `PATCH /v1/admin/settings`
-
-## Authentication
-
-- Phone OTP for users.
-- Admin authentication with owner/admin roles.
-- Access token + refresh token.
-- Flutter uses secure storage.
-- Web strategy depends on final domain/CORS decision.
+- Demo identity is rejected in production.
+- Private save lists are owner-only.
+- Saved items are owner-only.
+- Public publisher lists are visible by username.
+- Public publisher list items must belong to the publisher's own published posts or related products.
+- Draft posts are only mutable by their author.
+- Reports/settings administrative routes require seeded owner/admin/moderation roles.
 
 ## Security
 
-- Rate limiting on OTP, auth, comments, reports, media.
-- Validation DTOs.
-- Authorization guards per route.
-- Request ID logging.
-- Audit logs for admin actions.
-- Upload size/type limits.
-- No Like-related endpoints.
+- Helmet.
+- Configurable CORS.
+- Global ValidationPipe.
+- Global exception filter.
+- Request ID middleware.
+- `@nestjs/throttler` rate limiting.
+- Configurable request body size.
+- Safe logging without secrets.
 
-## OpenAPI
+## Future API Work
 
-OpenAPI must describe:
-
-- Request bodies.
-- Response schemas.
-- Error schemas.
-- Auth requirements.
-- Pagination metadata.
-- Enum values.
-
-Clients:
-
-- `packages/api-client-ts`
-- Flutter generated client under `apps/mobile` or `packages/api-client-dart`.
+Phase 5 can build web authentication only after explicit approval. Production auth must replace the demo header before real users connect to the API.

@@ -1,295 +1,167 @@
 # DATA_MODEL.md
 
-## Phase 2 Data Status
+## Phase 4 Data Status
 
-No database, ORM, migrations, schema files, or seed scripts were created in Phase 2. This document remains the planning reference for Phase 4 Backend Core.
+PostgreSQL and Prisma are implemented for the backend core.
+
+Primary files:
+
+- `docker-compose.yml`
+- `apps/api/prisma.config.ts`
+- `apps/api/prisma/schema.prisma`
+- `apps/api/prisma/migrations/20260620000000_init_backend_core/migration.sql`
+- `apps/api/prisma/seed.ts`
 
 ## Principles
 
-- PostgreSQL is the target database.
+- PostgreSQL is the development database.
+- Prisma is the ORM.
 - Rating scale is 1 to 10.
-- No Likes, Hearts, Reactions, PostLike, CommentLike, or Reaction tables.
-- Use soft deletion for user-generated content.
-- Use audit fields on important entities.
-- Backend owns validation, authorization, and moderation state.
+- Soft deletion is used for user-generated or recoverable records.
+- Backend owns validation, authorization, moderation, and notification rules.
+- Personal save lists are private.
+- Publisher lists are public and tied to publisher profiles.
 
-## Core Entities
+## Models
 
 ### User
 
-- `id`
-- `phone`
-- `status`
-- `createdAt`
-- `updatedAt`
-- `deletedAt`
+Fields: `id`, `phone`, `role`, `status`, `lastSeenAt`, `createdAt`, `updatedAt`, `deletedAt`.
+
+Relations: profile, posts, comments, reports, lists, saved items, notifications, follows, audit logs, settings.
 
 ### Profile
 
-- `id`
-- `userId`
-- `username`
-- `displayName`
-- `bio`
-- `city`
-- `avatarMediaId`
-- `isPrivate`
-- `createdAt`
-- `updatedAt`
-
-### OtpChallenge
-
-- `id`
-- `phone`
-- `codeHash`
-- `purpose`
-- `expiresAt`
-- `attemptCount`
-- `consumedAt`
-- `createdAt`
+Fields: `id`, `userId`, `username`, `displayName`, `bio`, `city`, `avatarUrl`, `visibility`, `createdAt`, `updatedAt`, `deletedAt`.
 
 ### Category
 
-- `id`
-- `slug`
-- `nameAr`
-- `descriptionAr`
-- `status`
-- `sortOrder`
+Fields: `id`, `slug`, `nameAr`, `descriptionAr`, `status`, `sortOrder`, `createdAt`, `updatedAt`.
 
 ### Brand
 
-- `id`
-- `slug`
-- `name`
-- `description`
-- `status`
+Fields: `id`, `slug`, `name`, `description`, `status`, `createdAt`, `updatedAt`.
 
 ### Product
 
-- `id`
-- `slug`
-- `brandId`
-- `categoryId`
-- `nameAr`
-- `summaryAr`
-- `priceRange`
-- `status`
-- `averageRating`
-- `ratingCount`
-- `createdAt`
-- `updatedAt`
+Fields: `id`, `slug`, `brandId`, `categoryId`, `nameAr`, `summaryAr`, `descriptionAr`, `priceMin`, `priceMax`, `currency`, `status`, `ratingAverage`, `ratingCount`, `createdAt`, `updatedAt`, `deletedAt`.
+
+Relations: brand, category, media, specifications, posts, comments.
 
 ### ProductMedia
 
-- `id`
-- `productId`
-- `mediaId`
-- `sortOrder`
+Fields: `id`, `productId`, `type`, `url`, `altAr`, `sortOrder`, `moderationStatus`, `createdAt`, `deletedAt`.
+
+### ProductSpecification
+
+Fields: `id`, `productId`, `nameAr`, `valueAr`, `sortOrder`, `createdAt`, `updatedAt`.
 
 ### Post
 
-- `id`
-- `authorId`
-- `productId`
-- `publicListId` nullable
-- `rating`
-- `title`
-- `body`
-- `status`
-- `publishedAt`
-- `createdAt`
-- `updatedAt`
-- `deletedAt`
+Fields: `id`, `authorId`, `productId`, `publicListId`, `rating`, `title`, `body`, `status`, `publishedAt`, `createdAt`, `updatedAt`, `deletedAt`.
+
+Relations: author, product, optional public publisher list, media, pros, cons, comments.
 
 ### PostMedia
 
-- `id`
-- `postId`
-- `mediaId`
-- `sortOrder`
+Fields: `id`, `postId`, `type`, `url`, `altAr`, `sortOrder`, `moderationStatus`, `createdAt`, `deletedAt`.
+
+### PostPro and PostCon
+
+Fields: `id`, `postId`, `body`, `sortOrder`, `createdAt`.
 
 ### Comment
 
-- `id`
-- `authorId`
-- `postId`
-- `productId`
-- `parentId`
-- `body`
-- `status`
-- `createdAt`
-- `updatedAt`
-- `deletedAt`
+Fields: `id`, `authorId`, `targetType`, `postId`, `productId`, `parentId`, `body`, `status`, `createdAt`, `updatedAt`, `deletedAt`.
 
-### Save
+Rules:
 
-- `id`
-- `userId`
-- `targetType`
-- `targetId`
-- `createdAt`
-
-### SavedList
-
-- `id`
-- `userId`
-- `name`
-- `description`
-- `purpose`: `personal_save` or `publisher_public`
-- `visibility`
-- `createdAt`
-- `updatedAt`
-
-Personal save lists use `purpose = personal_save` and `visibility = private`. They are visible only inside the owner account.
-
-Publisher lists use `purpose = publisher_public` and `visibility = public`. They appear on publisher profiles and can be linked from posts.
-
-Invalid combinations are not allowed:
-
-- `personal_save` with `public`.
-- `publisher_public` with `private`.
-
-### SavedListItem
-
-- `id`
-- `listId`
-- `targetType`
-- `targetId`
-- `createdAt`
+- A comment targets either a post or a product.
+- Replies are limited in service logic to one level.
 
 ### Follow
 
-- `id`
-- `followerId`
-- `followingId`
-- `createdAt`
+Fields: `followerId`, `followingId`, `createdAt`.
 
-### Report
+Rules:
 
-- `id`
-- `reporterId`
-- `targetType`
-- `targetId`
-- `reason`
-- `details`
-- `status`
-- `assignedAdminId`
-- `createdAt`
-- `resolvedAt`
+- Composite primary key: `followerId`, `followingId`.
+- Database check prevents self-follow.
+
+### UserList
+
+Fields: `id`, `ownerId`, `slug`, `title`, `description`, `purpose`, `visibility`, `createdAt`, `updatedAt`, `deletedAt`.
+
+Rules:
+
+- `PERSONAL_SAVE` must be `PRIVATE`.
+- `PUBLISHER_PUBLIC` must be `PUBLIC`.
+- Slug is unique per owner.
+
+### UserListItem
+
+Fields: `id`, `listId`, `targetType`, `targetId`, `sortOrder`, `createdAt`.
+
+Rules:
+
+- Unique target per list.
+- Publisher public lists can contain the publisher's own published posts and related products.
+
+### SavedItem
+
+Fields: `id`, `userId`, `targetType`, `targetId`, `createdAt`.
+
+Rules:
+
+- Unique saved target per user.
+- Visible through owner-only routes.
 
 ### Notification
 
-- `id`
-- `userId`
-- `type`
-- `title`
-- `body`
-- `data`
-- `readAt`
-- `createdAt`
+Fields: `id`, `userId`, `type`, `title`, `body`, `payload`, `readAt`, `createdAt`.
 
-### Media
+### Report
 
-- `id`
-- `ownerId`
-- `type`
-- `storageKey`
-- `url`
-- `mimeType`
-- `sizeBytes`
-- `width`
-- `height`
-- `durationSeconds`
-- `moderationStatus`
-- `createdAt`
+Fields: `id`, `reporterId`, `targetType`, `targetId`, `reason`, `details`, `status`, `assignedAdminId`, `createdAt`, `updatedAt`, `resolvedAt`.
 
-### AdminRole
+### AppSetting
 
-- `id`
-- `userId`
-- `role`
-- `createdAt`
+Fields: `key`, `value`, `valueType`, `description`, `updatedById`, `updatedAt`.
 
-### AuditLog
+### AdminAuditLog
 
-- `id`
-- `actorId`
-- `action`
-- `targetType`
-- `targetId`
-- `metadata`
-- `createdAt`
-
-### PlatformSetting
-
-- `key`
-- `value`
-- `updatedBy`
-- `updatedAt`
+Fields: `id`, `actorId`, `action`, `targetType`, `targetId`, `metadata`, `createdAt`.
 
 ## Enums
 
-- `UserStatus`: active, disabled, deleted.
-- `ContentStatus`: draft, published, hidden, removed.
-- `ReportStatus`: open, reviewing, resolved, rejected.
-- `TargetType`: product, post, comment, profile.
-- `SaveTargetType`: product, post.
-- `ListPurpose`: personal_save, publisher_public.
-- `ListVisibility`: private, public.
-- `MediaType`: image, video.
-- `ModerationStatus`: pending, approved, rejected.
-- `AdminRole`: owner, admin, moderator, support.
+- `UserRole`: `OWNER`, `ADMIN`, `MODERATOR`, `SUPPORT`, `USER`.
+- `UserStatus`: `ACTIVE`, `DISABLED`, `DELETED`.
+- `Visibility`: `PUBLIC`, `PRIVATE`.
+- `RecordStatus`: `ACTIVE`, `HIDDEN`, `REMOVED`.
+- `ContentStatus`: `DRAFT`, `PUBLISHED`, `HIDDEN`, `REMOVED`.
+- `MediaType`: `IMAGE`, `VIDEO`.
+- `ModerationStatus`: `PENDING`, `APPROVED`, `REJECTED`.
+- `ListPurpose`: `PERSONAL_SAVE`, `PUBLISHER_PUBLIC`.
+- `ListVisibility`: `PRIVATE`, `PUBLIC`.
+- `ListItemTargetType`: `POST`, `PRODUCT`.
+- `SavedTargetType`: `POST`, `PRODUCT`.
+- `CommentTargetType`: `POST`, `PRODUCT`.
+- `ReportTargetType`: `USER`, `PROFILE`, `PRODUCT`, `POST`, `COMMENT`.
+- `ReportStatus`: `OPEN`, `REVIEWING`, `RESOLVED`, `REJECTED`.
+- `NotificationType`: `FOLLOW_CREATED`, `COMMENT_CREATED`, `REPLY_CREATED`, `POST_PUBLISHED`, `REPORT_UPDATED`, `SYSTEM`.
+- `SettingValueType`: `STRING`, `BOOLEAN`, `NUMBER`, `JSON`.
 
-## Constraints and Indexes
+## Database Checks
 
-- Unique `User.phone`.
-- Unique `Profile.username`.
-- Unique `Category.slug`.
-- Unique `Brand.slug`.
-- Unique `Product.slug`.
-- Unique `Follow(followerId, followingId)`.
-- Unique `Save(userId, targetType, targetId)`.
-- Unique `SavedListItem(listId, targetType, targetId)`.
-- Check `SavedList(purpose = personal_save) => visibility = private`.
-- Check `SavedList(purpose = publisher_public) => visibility = public`.
-- Check `Post.rating >= 1 AND Post.rating <= 10`.
-- Index `Product(categoryId, averageRating)`.
-- Index `Post(productId, publishedAt)`.
-- Index `Comment(postId, createdAt)`.
-- Index `Notification(userId, readAt, createdAt)`.
-- Index `Report(status, createdAt)`.
+The initial migration adds checks for:
 
-## ERD
+- `Post.rating` between 1 and 10.
+- Product rating summary from 0 to 10 with non-negative count.
+- `Product.priceMin <= Product.priceMax` when both values exist.
+- Comment single target.
+- User list purpose and visibility pairing.
+- Follow cannot point to the same user on both sides.
 
-```mermaid
-erDiagram
-  User ||--|| Profile : has
-  User ||--o{ Post : writes
-  User ||--o{ Comment : writes
-  User ||--o{ Save : creates
-  User ||--o{ SavedList : owns
-  User ||--o{ Follow : follows
-  User ||--o{ Notification : receives
-  User ||--o{ Report : submits
-  User ||--o{ AuditLog : performs
-  Category ||--o{ Product : groups
-  Brand ||--o{ Product : owns
-  Product ||--o{ Post : reviewed_by
-  Product ||--o{ ProductMedia : has
-  Post ||--o{ PostMedia : has
-  Post ||--o{ Comment : has
-  Comment ||--o{ Comment : replies
-  SavedList ||--o{ SavedListItem : contains
-  Media ||--o{ ProductMedia : used_by
-  Media ||--o{ PostMedia : used_by
-  User ||--o{ AdminRole : may_have
-```
+## Seed
 
-## Soft Deletion
-
-Use `deletedAt` for users, posts, comments, and media references where recovery or audit is needed. Hidden/removed moderation status should be separate from deletion.
-
-## Audit Fields
-
-Admin changes to users, products, posts, comments, reports, settings, and moderation actions should create `AuditLog` records.
+Seed data creates owner/user accounts, profiles, categories, brands, products, posts, comments/replies, follows, public publisher lists, private personal lists, saved items, notifications, reports, settings, and one audit record.
