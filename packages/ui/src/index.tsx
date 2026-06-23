@@ -634,8 +634,8 @@ export type AvatarSize = "sm" | "md" | "lg";
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLSpanElement> {
   name: string;
-  imageUrl?: string;
-  imageAlt?: string;
+  imageUrl?: string | undefined;
+  imageAlt?: string | undefined;
   size?: AvatarSize;
   status?: "online" | "offline";
 }

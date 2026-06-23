@@ -13,7 +13,9 @@
     "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\""
   },
   "dependencies": {
+    "@raina/api-contracts": "workspace:*",
     "@raina/design-tokens": "workspace:*",
+    "@raina/shared-types": "workspace:*",
     "@raina/ui": "workspace:*",
     "next": "16.2.7",
     "react": "19.2.7",

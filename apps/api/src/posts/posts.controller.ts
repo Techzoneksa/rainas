@@ -14,6 +14,7 @@ import { ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { DemoUserGuard } from "../common/auth/demo-user.guard";
 import { CurrentDemoUser } from "../common/decorators/current-demo-user.decorator";
 import { SearchQueryDto } from "../common/dto/search-query.dto";
+import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./posts.service";
@@ -31,6 +32,11 @@ export class PostsController {
   @Get(":id")
   getById(@Param("id") id: string) {
     return this.posts.getById(id);
+  }
+
+  @Get(":id/comments")
+  listComments(@Param("id") id: string, @Query() query: PaginationQueryDto) {
+    return this.posts.listComments(id, query);
   }
 
   @ApiSecurity("demo-user")

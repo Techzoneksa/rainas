@@ -2,12 +2,12 @@
 
 Raina is an Arabic-first, RTL, mobile-first social product discovery platform. The MVP is not an e-commerce product.
 
-Current status: **Phase 4 - Backend Core is complete locally**.
+Current status: **Phase 5 - Web Read-Only API Integration is complete locally**.
 
 ## Architecture
 
 ```text
-apps/web       Next.js web foundation
+apps/web       Next.js public web app consuming read-only backend APIs
 apps/admin     Owner-only dashboard foundation
 apps/api       Independent NestJS API with PostgreSQL/Prisma backend core
 packages/ui    Shared React UI primitives
@@ -47,6 +47,7 @@ pnpm install
 
 ```bash
 pnpm db:up
+pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
 pnpm dev
@@ -56,8 +57,9 @@ Ports:
 
 - Web: `http://localhost:3000`
 - Admin: `http://localhost:3001`
+- API: `http://localhost:4000`
+- Swagger: `http://localhost:4000/api/docs`
 - API health: `http://localhost:4000/api/v1/health`
-- API docs: `http://localhost:4000/api/docs`
 - API live: `http://localhost:4000/api/v1/health/live`
 - API ready: `http://localhost:4000/api/v1/health/ready`
 - API live: `http://localhost:4000/health/live`
@@ -67,6 +69,26 @@ Design-system showcases:
 
 - Web Design System: `http://localhost:3000/design-system`
 - Admin Design System: `http://localhost:3001/design-system`
+
+Phase 5 web API environment:
+
+```text
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
+```
+
+`apps/web` uses a unified API client under `apps/web/src/lib/api`. Public web routes read from the backend and show loading, empty, error, and not-found states. If the API is offline, the web app renders an error state instead of falling back to prototype data or LocalStorage.
+
+Public web routes added in Phase 5:
+
+- `/`
+- `/categories`
+- `/categories/[slug]`
+- `/products`
+- `/products/[slug]`
+- `/posts`
+- `/posts/[id]`
+- `/users/[username]`
+- `/users/[username]/lists/[slug]`
 
 ## Checks
 
@@ -108,6 +130,8 @@ Backend docs:
 - `docs/BACKEND.md`
 - `docs/DATABASE.md`
 
+Phase 5 added a read-only web integration over the existing backend public endpoints. It does not implement production auth, write actions, admin UI, or Flutter.
+
 ## Design System
 
 Phase 3 added:
@@ -140,6 +164,6 @@ It is a visual and flow reference only. Do not delete it before feature parity a
 
 ## Phase Stop
 
-Stop after Phase 4 unless Phase 5 is explicitly approved.
+Stop after Phase 5 unless the next phase is explicitly approved.
 
-Do not start web authentication, web feature migration, Flutter work, or real admin UI work without explicit approval.
+Do not start production authentication, write actions, Flutter work, or real admin UI work without explicit approval.

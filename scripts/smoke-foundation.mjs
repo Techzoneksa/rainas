@@ -9,6 +9,15 @@ const requiredFiles = [
   "apps/web/src/app/page.tsx",
   "apps/web/src/app/health/page.tsx",
   "apps/web/src/app/design-system/page.tsx",
+  "apps/web/src/app/categories/page.tsx",
+  "apps/web/src/app/categories/[slug]/page.tsx",
+  "apps/web/src/app/products/page.tsx",
+  "apps/web/src/app/products/[slug]/page.tsx",
+  "apps/web/src/app/posts/page.tsx",
+  "apps/web/src/app/posts/[id]/page.tsx",
+  "apps/web/src/app/users/[username]/page.tsx",
+  "apps/web/src/app/users/[username]/lists/[slug]/page.tsx",
+  "apps/web/src/lib/api/client.ts",
   "apps/admin/src/app/layout.tsx",
   "apps/admin/src/app/page.tsx",
   "apps/admin/src/app/health/page.tsx",
@@ -87,6 +96,16 @@ for (const root of runtimeRoots) {
       }
     }
   }
+}
+
+const webRoutes = ["/", "/categories", "/products", "/posts", "/design-system"];
+
+for (const route of webRoutes) {
+  await fetch(`http://localhost:3000${route}`, { signal: AbortSignal.timeout(1000) })
+    .then((response) => {
+      if (!response.ok) issues.push(`Web smoke route failed: ${route} ${response.status}`);
+    })
+    .catch(() => undefined);
 }
 
 if (issues.length > 0) {

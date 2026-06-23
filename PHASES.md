@@ -113,23 +113,27 @@ Out of phase: full web UI rewrite.
 
 ## Phase 5 — Web Authentication and Entry Flow
 
-Goal: rebuild entry flow in Next.js.
+Phase label: Web Read-Only API Integration.
 
-Scope: splash, onboarding, login, OTP demo/integration, guest mode, protected actions.
+Status: complete locally.
 
-Dependencies: backend auth foundation or demo adapter.
+Goal: connect the public Next.js web app to backend read APIs through a unified API client.
 
-Risks: token/cookie domain decisions.
+Scope: API client, public home, categories, products, product details, posts, post details, public profiles, public publisher lists, loading/empty/error/not-found states, SEO basics, RTL mobile-first UI.
 
-Tests: E2E auth flow, guest protected route flow.
+Dependencies: Phase 4 backend public endpoints and seed data.
 
-Acceptance criteria: user can enter as guest or authenticated user.
+Risks: public read endpoints may need further shaping before production privacy hardening.
 
-Definition of Done: parity with prototype entry flow.
+Tests: API client tests, read-only component tests, route/build/smoke checks.
 
-Rollback: feature flag route back to prototype reference.
+Acceptance criteria: public web routes read from API, no direct random fetch in pages, no protected routes, no write actions, no admin integration, no Flutter.
 
-Out of phase: discovery features.
+Definition of Done: Phase 5 public read integration verified locally.
+
+Rollback: hide API-backed routes while keeping the API client isolated.
+
+Out of phase: production auth, OTP, create/edit/delete, comments write, follows write, saves write, lists write, admin UI, Flutter.
 
 ## Phase 6 — Web Discovery
 

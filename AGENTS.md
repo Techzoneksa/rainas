@@ -2,6 +2,14 @@
 
 ## Project Rules
 
+Phase 5 web rules:
+
+- Web API-backed pages must use the unified client under `apps/web/src/lib/api`.
+- Do not add direct random `fetch` calls inside web pages.
+- Do not use LocalStorage, prototype data, or hidden seed fixtures as fallback for API-backed web pages.
+- Phase 5 web integration is read-only: no production auth, OTP, create, edit, delete, comments write, follow write, save write, or lists write behavior.
+- Do not add Likes, reactions, hearts, product comparison, cart, checkout, payment, shipping, or commerce actions.
+
 - Product name: Raina — رأينا.
 - Primary language: Arabic.
 - Direction: RTL by default.
@@ -44,7 +52,7 @@
 
 ## Current Phase Guard
 
-Current phase: Phase 4 Backend Core is complete locally. Stop before Phase 5 unless the user explicitly approves the next phase.
+Current phase: Phase 5 Web Read-Only API Integration is complete locally. Stop before Phase 6 unless the user explicitly approves the next phase.
 
 Allowed in the completed backend foundation:
 
@@ -57,15 +65,17 @@ Allowed in the completed backend foundation:
 - Maintain `packages/design-tokens`.
 - Maintain `packages/ui`.
 - Maintain Web/Admin `/design-system` showcase routes.
+- Maintain the Phase 5 web API client and public read-only routes in `apps/web`.
 - Keep the preserved prototype under `prototype/`.
 - Run install, format, lint, typecheck, test, build, smoke checks, and database checks.
 - Update documentation to match the backend foundation.
 
 Not allowed without explicit approval:
 
-- Start Phase 5 Web Authentication and Entry Flow.
+- Start Phase 6 or any production authentication flow.
 - Move prototype screens or business logic into Next.js.
-- Connect Web/Admin screens to the new API.
+- Connect Admin screens to the new API.
+- Add web write actions.
 - Add production auth, OTP provider integration, media uploads, admin dashboard UI, database provider deployment, or Flutter features.
 - Add side-by-side product weighing in any form.
 - Add payment, cart, shipping, merchant, private chat, live shopping, influencer, Like, heart, or reaction scope.

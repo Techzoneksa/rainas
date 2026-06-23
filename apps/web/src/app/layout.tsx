@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
 
+import { SiteShell } from "@/components/site-shell";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Raina — رأينا",
-  description: "Raina web foundation for an Arabic-first product discovery platform."
+  title: "Raina — رأينا | تجارب منتجات حقيقية",
+  description: "رأينا مجتمع عربي لاكتشاف المنتجات وقراءة تجارب المستخدمين وتقييماتهم من 10.",
+  openGraph: {
+    title: "Raina — رأينا",
+    description: "تجارب منتجات حقيقية تساعدك تختار بثقة.",
+    type: "website"
+  }
 };
 
 export const viewport: Viewport = {
@@ -16,7 +23,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteShell>{children}</SiteShell>
+      </body>
     </html>
   );
 }

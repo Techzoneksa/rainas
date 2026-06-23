@@ -163,9 +163,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@raina/api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/api-contracts
       '@raina/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@raina/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@raina/ui':
         specifier: workspace:*
         version: link:../../packages/ui

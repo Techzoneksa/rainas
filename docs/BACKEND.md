@@ -70,6 +70,7 @@ Public:
 - `GET /api/v1/products/:id/comments`
 - `GET /api/v1/posts`
 - `GET /api/v1/posts/:id`
+- `GET /api/v1/posts/:id/comments`
 - `GET /api/v1/comments/:id`
 - `GET /api/v1/profiles/:username`
 - `GET /api/v1/users/:username/lists`

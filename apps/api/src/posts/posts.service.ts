@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
+import { PaginationQueryDto } from "../common/dto/pagination-query.dto";
 import { SearchQueryDto } from "../common/dto/search-query.dto";
 import { createPageResult, getPagination } from "../common/pagination/pagination";
 import { PrismaService } from "../database/prisma.service";
@@ -71,6 +72,38 @@ export class PostsService {
     }
 
     return { data: post };
+  }
+
+  async listComments(postId: string, query: PaginationQueryDto) {
+    await this.assertPublishedPost(postId);
+    const where: Prisma.CommentWhereInput = {
+      postId,
+      parentId: null,
+      status: "PUBLISHED",
+      deletedAt: null
+    };
+    const page = query.page;
+    const limit = query.limit;
+    const { skip, take } = getPagination(page, limit);
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.comment.findMany({
+        where,
+        include: {
+          author: { include: { profile: true } },
+          replies: {
+            where: { deletedAt: null, status: "PUBLISHED" },
+            include: { author: { include: { profile: true } } },
+            orderBy: { createdAt: "asc" }
+          }
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take
+      }),
+      this.prisma.comment.count({ where })
+    ]);
+
+    return createPageResult(data, total, page, limit);
   }
 
   async create(authorId: string, dto: CreatePostDto) {
@@ -212,6 +245,20 @@ export class PostsService {
       throw new NotFoundException({
         code: "PRODUCT_NOT_FOUND",
         message: "المنتج غير موجود."
+      });
+    }
+  }
+
+  private async assertPublishedPost(postId: string): Promise<void> {
+    const post = await this.prisma.post.findFirst({
+      where: { id: postId, status: "PUBLISHED", deletedAt: null },
+      select: { id: true }
+    });
+
+    if (post === null) {
+      throw new NotFoundException({
+        code: "POST_NOT_FOUND",
+        message: "المنشور غير موجود."
       });
     }
   }

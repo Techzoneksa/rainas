@@ -1,5 +1,26 @@
 # API_PLAN.md
 
+## Phase 5 Web Read Integration Status
+
+Phase 5 connects `apps/web` to read-only backend APIs through a unified client.
+
+Consumed by Web:
+
+- `GET /api/v1/categories`
+- `GET /api/v1/categories/:slug`
+- `GET /api/v1/brands`
+- `GET /api/v1/products`
+- `GET /api/v1/products/:slug`
+- `GET /api/v1/products/:id/posts`
+- `GET /api/v1/posts`
+- `GET /api/v1/posts/:id`
+- `GET /api/v1/posts/:id/comments`
+- `GET /api/v1/profiles/:username`
+- `GET /api/v1/users/:username/lists`
+- `GET /api/v1/users/:username/lists/:id`
+
+The web app does not call protected `me` routes in Phase 5 and does not perform write actions.
+
 ## Phase 4 API Status
 
 The API is now a NestJS backend core with PostgreSQL, Prisma, Swagger, validation, rate limiting, request IDs, and a demo development identity.
@@ -76,6 +97,7 @@ Response metadata:
 - `GET /api/v1/products/:id/comments`
 - `GET /api/v1/posts`
 - `GET /api/v1/posts/:id`
+- `GET /api/v1/posts/:id/comments`
 - `GET /api/v1/comments/:id`
 - `GET /api/v1/profiles/:username`
 - `GET /api/v1/users/:username/lists`
@@ -148,4 +170,4 @@ Routes:
 
 ## Future API Work
 
-Phase 5 can build web authentication only after explicit approval. Production auth must replace the demo header before real users connect to the API.
+Future phases can build production authentication only after explicit approval. Production auth must replace the demo header before real users connect to protected API behavior.

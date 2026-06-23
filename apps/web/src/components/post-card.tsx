@@ -1,0 +1,56 @@
+import type { Route } from "next";
+import Link from "next/link";
+import type { Post } from "@raina/api-contracts";
+import { Avatar, Badge, Card, Inline, Stack } from "@raina/ui";
+
+import { excerpt, formatDate, formatRating } from "@/lib/format";
+
+import { MediaPlaceholder } from "./media-placeholder";
+
+export function PostCard({ post }: Readonly<{ post: Post }>) {
+  const profile = post.author.profile;
+  const media = post.media?.[0];
+
+  return (
+    <Card
+      title={post.title}
+      description={excerpt(post.body)}
+      variant="interactive"
+      footer={
+        <Link className="web-link" href={`/posts/${post.id}` as Route}>
+          قراءة التجربة
+        </Link>
+      }
+    >
+      <Stack gap="12">
+        <Inline gap="8" align="center">
+          <Avatar
+            name={profile?.displayName ?? "ناشر رأينا"}
+            imageUrl={profile?.avatarUrl ?? undefined}
+          />
+          <div className="web-post-author">
+            <strong>{profile?.displayName ?? "ناشر رأينا"}</strong>
+            <span>{formatDate(post.publishedAt ?? post.createdAt)}</span>
+          </div>
+        </Inline>
+        {media ? <MediaPlaceholder label={media.altAr ?? post.title} type={media.type} /> : null}
+        <Inline gap="8">
+          <Badge variant="primary">{formatRating(post.rating)}</Badge>
+          <Badge>{post.product.nameAr}</Badge>
+          <Badge variant="info">{post.product.category.nameAr}</Badge>
+        </Inline>
+        {post.pros && post.pros.length > 0 ? (
+          <ul className="web-point-list">
+            {post.pros.slice(0, 2).map((point) => (
+              <li key={point.id}>{point.body}</li>
+            ))}
+          </ul>
+        ) : null}
+        {post.cons && post.cons.length > 0 ? (
+          <p className="web-muted">ملاحظة: {post.cons[0]?.body}</p>
+        ) : null}
+        <span className="web-muted">{post._count?.comments ?? 0} تعليق</span>
+      </Stack>
+    </Card>
+  );
+}

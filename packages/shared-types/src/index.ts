@@ -7,8 +7,8 @@ export type UserRole = "owner" | "admin" | "moderator" | "support" | "user";
 export interface ApiError {
   code: string;
   message: string;
-  requestId?: string;
-  details?: Record<string, unknown>;
+  requestId?: string | undefined;
+  details?: unknown;
 }
 
 export interface PaginationMeta {
