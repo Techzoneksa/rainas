@@ -30,6 +30,40 @@ export class FollowsService {
     return createPageResult(data, total, page, limit);
   }
 
+  async listFollowingPosts(userId: string, query: PaginationQueryDto) {
+    const following = await this.prisma.follow.findMany({
+      where: { followerId: userId },
+      select: { followingId: true }
+    });
+    const followingIds = following.map((follow) => follow.followingId);
+    const where: Prisma.PostWhereInput = {
+      authorId: { in: followingIds },
+      status: "PUBLISHED",
+      deletedAt: null
+    };
+    const page = query.page;
+    const limit = query.limit;
+    const { skip, take } = getPagination(page, limit);
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.post.findMany({
+        where,
+        include: {
+          author: { include: { profile: true } },
+          product: { include: { brand: true, category: true } },
+          publicList: true,
+          pros: { orderBy: { sortOrder: "asc" } },
+          cons: { orderBy: { sortOrder: "asc" } }
+        },
+        orderBy: { publishedAt: "desc" },
+        skip,
+        take
+      }),
+      this.prisma.post.count({ where })
+    ]);
+
+    return createPageResult(data, total, page, limit);
+  }
+
   async follow(followerId: string, followingId: string) {
     if (followerId === followingId) {
       throw new BadRequestException({

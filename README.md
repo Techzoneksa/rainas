@@ -58,6 +58,8 @@ Ports:
 - Admin: `http://localhost:3001`
 - API health: `http://localhost:4000/api/v1/health`
 - API docs: `http://localhost:4000/api/docs`
+- API live: `http://localhost:4000/api/v1/health/live`
+- API ready: `http://localhost:4000/api/v1/health/ready`
 - API live: `http://localhost:4000/health/live`
 - API ready: `http://localhost:4000/health/ready`
 

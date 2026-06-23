@@ -1,6 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+const localDatabaseUrl =
+  "postgresql://raina:raina_local_password@localhost:5432/raina_dev?schema=public";
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(process.env.DATABASE_URL ?? localDatabaseUrl)
+});
 
 const now = new Date();
 const daysAgo = (days: number): Date => new Date(now.getTime() - days * 24 * 60 * 60 * 1000);

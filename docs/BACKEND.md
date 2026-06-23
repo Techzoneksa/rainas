@@ -43,8 +43,8 @@ Phase 4 establishes the independent NestJS REST API under `apps/api`.
 ## Health
 
 - `GET /api/v1/health`: API health metadata.
-- `GET /health/live`: process liveness.
-- `GET /health/ready`: readiness with database check.
+- `GET /api/v1/health/live` and `GET /health/live`: process liveness.
+- `GET /api/v1/health/ready` and `GET /health/ready`: readiness with database check.
 
 ## Demo Identity
 

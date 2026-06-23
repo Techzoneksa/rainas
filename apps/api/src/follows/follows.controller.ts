@@ -18,6 +18,11 @@ export class FollowsController {
     return this.follows.listFollowing(userId, query);
   }
 
+  @Get("me/following/posts")
+  listFollowingPosts(@CurrentDemoUser() userId: string, @Query() query: PaginationQueryDto) {
+    return this.follows.listFollowingPosts(userId, query);
+  }
+
   @Post("users/:id/follow")
   follow(@CurrentDemoUser() userId: string, @Param("id") id: string) {
     return this.follows.follow(userId, id);

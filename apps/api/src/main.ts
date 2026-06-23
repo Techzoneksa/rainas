@@ -10,6 +10,23 @@ import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/errors/http-exception.filter";
 import { requestIdMiddleware } from "./common/middleware/request-id.middleware";
 import { getApiRuntimeConfig } from "./config/app.config";
+import { PrismaService } from "./database/prisma.service";
+
+interface JsonResponder {
+  json(body: {
+    status: "ok" | "degraded";
+    service: string;
+    version: string;
+    environment: string;
+  }): void;
+}
+
+interface ExpressLike {
+  get(
+    path: string,
+    handler: (_request: unknown, response: JsonResponder) => void | Promise<void>
+  ): void;
+}
 
 async function bootstrap(): Promise<void> {
   const config = getApiRuntimeConfig();
@@ -17,9 +34,7 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true
   });
 
-  app.setGlobalPrefix(config.apiPrefix, {
-    exclude: ["health/live", "health/ready"]
-  });
+  app.setGlobalPrefix(config.apiPrefix);
   app.use(helmet());
   app.useBodyParser("json", { limit: config.requestBodyLimit });
   app.useBodyParser("urlencoded", { extended: true, limit: config.requestBodyLimit });
@@ -53,9 +68,37 @@ async function bootstrap(): Promise<void> {
     .build();
   const openApiDocument = SwaggerModule.createDocument(app, openApiConfig);
   SwaggerModule.setup("api/docs", app, openApiDocument);
+  registerRootHealthRoutes(app, config.environment);
 
   await app.listen(config.port);
   console.log(`Raina API listening on port ${config.port}`);
+}
+
+function registerRootHealthRoutes(
+  app: NestExpressApplication,
+  environment: ReturnType<typeof getApiRuntimeConfig>["environment"]
+): void {
+  const express = app.getHttpAdapter().getInstance() as ExpressLike;
+  const prisma = app.get(PrismaService);
+  const base = {
+    service: "raina-api",
+    version: "1.0.0",
+    environment
+  };
+
+  express.get("/health/live", (_request, response) => {
+    response.json({
+      ...base,
+      status: "ok"
+    });
+  });
+
+  express.get("/health/ready", async (_request, response) => {
+    response.json({
+      ...base,
+      status: (await prisma.isReady()) ? "ok" : "degraded"
+    });
+  });
 }
 
 void bootstrap();
