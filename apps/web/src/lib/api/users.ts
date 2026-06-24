@@ -22,3 +22,7 @@ export function listPublicUserLists(username: string) {
     }
   });
 }
+
+export const getPublicUser = getPublicProfile;
+export const getPublicUserPosts = listPublicProfilePosts;
+export const getPublicUserLists = listPublicUserLists;

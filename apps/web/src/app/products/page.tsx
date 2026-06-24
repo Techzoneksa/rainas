@@ -3,13 +3,14 @@ import { EmptyState, Grid, Stack } from "@raina/ui";
 
 import { FilterBar } from "@/components/filter-bar";
 import { PageHeader } from "@/components/page-header";
+import { PaginationControls } from "@/components/pagination-controls";
 import { ProductCard } from "@/components/product-card";
 import { ApiErrorState } from "@/components/state-views";
 import { listBrands } from "@/lib/api/brands";
 import { listCategories } from "@/lib/api/categories";
 import { listProducts } from "@/lib/api/products";
 import type { PageSearchParams } from "@/lib/search-params";
-import { readParam, readSort } from "@/lib/search-params";
+import { readPage, readParam, readSort } from "@/lib/search-params";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function ProductsPage({
   const categorySlug = readParam(params, "category");
   const brandSlug = readParam(params, "brand");
   const sort = readSort(params);
+  const page = readPage(params);
 
   try {
     const [categories, brands] = await Promise.all([
@@ -35,6 +37,7 @@ export default async function ProductsPage({
     const category = categories.data.find((item) => item.slug === categorySlug);
     const brand = brands.data.find((item) => item.slug === brandSlug);
     const products = await listProducts({
+      page,
       limit: 24,
       q: search,
       categoryId: category?.id,
@@ -66,6 +69,11 @@ export default async function ProductsPage({
         ) : (
           <EmptyState title="لا توجد منتجات حاليا" description="جرب تغيير الفلاتر أو البحث." />
         )}
+        <PaginationControls
+          meta={products.meta}
+          path="/products"
+          params={{ search, category: categorySlug, brand: brandSlug, sort }}
+        />
       </Stack>
     );
   } catch (error) {

@@ -111,7 +111,7 @@ Rollback: revert migrations and seed.
 
 Out of phase: full web UI rewrite.
 
-## Phase 5 — Web Authentication and Entry Flow
+## Phase 5 — Web Read-Only API Integration
 
 Phase label: Web Read-Only API Integration.
 
@@ -119,15 +119,15 @@ Status: complete locally.
 
 Goal: connect the public Next.js web app to backend read APIs through a unified API client.
 
-Scope: API client, public home, categories, products, product details, posts, post details, public profiles, public publisher lists, loading/empty/error/not-found states, SEO basics, RTL mobile-first UI.
+Scope: API client aliases, public home, categories, category detail, product lists, product details, post lists, post details, public profiles, public publisher lists, loading/empty/error/not-found states, pagination, media galleries, SEO basics, RTL mobile-first UI.
 
 Dependencies: Phase 4 backend public endpoints and seed data.
 
 Risks: public read endpoints may need further shaping before production privacy hardening.
 
-Tests: API client tests, read-only component tests, route/build/smoke checks.
+Tests: API client tests, read-only component tests, route/build/smoke checks, and local runtime route verification.
 
-Acceptance criteria: public web routes read from API, no direct random fetch in pages, no protected routes, no write actions, no admin integration, no Flutter.
+Acceptance criteria: public web routes read from API, no direct random fetch in pages or read-only feature components, no protected routes, no write actions, no admin integration, no Flutter.
 
 Definition of Done: Phase 5 public read integration verified locally.
 

@@ -14,3 +14,6 @@ export function listCategories(query: ListQuery = {}) {
 export function getCategoryBySlug(slug: string) {
   return apiGetData<Category>(`/categories/${encodeURIComponent(slug)}`);
 }
+
+export const getCategories = listCategories;
+export const getCategory = getCategoryBySlug;

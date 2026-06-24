@@ -3,8 +3,9 @@ import Link from "next/link";
 import type { Product } from "@raina/api-contracts";
 import { Badge, Card, Inline, Stack } from "@raina/ui";
 
-import { formatCount, formatPrice, formatRating } from "@/lib/format";
+import { formatCount, formatPrice } from "@/lib/format";
 
+import { RatingBadge } from "./rating-badge";
 import { RemoteImage } from "./remote-image";
 
 export function ProductCard({ product }: Readonly<{ product: Product }>) {
@@ -39,7 +40,9 @@ export function ProductCard({ product }: Readonly<{ product: Product }>) {
           </div>
           <div>
             <dt>التقييم</dt>
-            <dd>{formatRating(product.ratingAverage)}</dd>
+            <dd>
+              <RatingBadge value={product.ratingAverage} />
+            </dd>
           </div>
           <div>
             <dt>التجارب</dt>

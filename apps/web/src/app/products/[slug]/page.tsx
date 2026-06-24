@@ -2,14 +2,15 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { Badge, Card, EmptyState, Grid, Inline, Stack } from "@raina/ui";
 
+import { MediaGallery } from "@/components/media-gallery";
 import { PageHeader } from "@/components/page-header";
 import { PostCard } from "@/components/post-card";
 import { ProductCard } from "@/components/product-card";
+import { RatingBadge } from "@/components/rating-badge";
 import { RatingSummary } from "@/components/rating-summary";
-import { RemoteImage } from "@/components/remote-image";
 import { ApiErrorState, NotFoundState } from "@/components/state-views";
 import { isRainaApiError } from "@/lib/api/errors";
-import { getProductBySlug, listProductPosts, listProducts } from "@/lib/api/products";
+import { getProductBySlug, getSimilarProducts, listProductPosts } from "@/lib/api/products";
 import { formatPrice, formatRating } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -40,9 +41,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     const product = await getProductBySlug(slug);
     const [posts, related] = await Promise.all([
       listProductPosts(product.id, { limit: 100 }),
-      listProducts({ categoryId: product.categoryId, limit: 6 })
+      getSimilarProducts(product.id)
     ]);
-    const relatedProducts = related.data.filter((item) => item.id !== product.id).slice(0, 3);
     const media = product.media ?? [];
 
     return (
@@ -56,27 +56,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           badge={formatRating(product.ratingAverage)}
         />
         <section className="web-section" aria-label="صور المنتج">
-          <div className="web-gallery">
-            {media.length > 0 ? (
-              media.map((item) => (
-                <RemoteImage
-                  key={item.id}
-                  src={item.url}
-                  alt={item.altAr ?? `صورة ${product.nameAr}`}
-                  fallbackLabel={product.nameAr}
-                  className="web-gallery__item"
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                />
-              ))
-            ) : (
-              <RemoteImage
-                alt={`صورة ${product.nameAr}`}
-                fallbackLabel={product.nameAr}
-                className="web-gallery__item"
-                sizes="(min-width: 1024px) 50vw, 100vw"
-              />
-            )}
-          </div>
+          <MediaGallery items={media} fallbackLabel={product.nameAr} />
         </section>
         <Grid columns="2" gap="16">
           <Card title="بيانات المنتج">
@@ -95,7 +75,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             </dl>
             <Inline gap="8">
-              <Badge variant="primary">{formatRating(product.ratingAverage)}</Badge>
+              <RatingBadge value={product.ratingAverage} />
               <Badge>{product.ratingCount} تجربة</Badge>
             </Inline>
           </Card>
@@ -136,9 +116,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <section className="web-section" aria-labelledby="related-products">
           <PageHeader title="منتجات مشابهة" />
-          {relatedProducts.length > 0 ? (
+          {related.length > 0 ? (
             <Grid columns="3" gap="16">
-              {relatedProducts.map((item) => (
+              {related.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
             </Grid>

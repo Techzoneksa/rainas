@@ -27,3 +27,7 @@ export function listPostComments(postId: string, query: SearchQuery = {}) {
     }
   });
 }
+
+export const getPosts = listPosts;
+export const getPost = getPostById;
+export const getPostComments = listPostComments;

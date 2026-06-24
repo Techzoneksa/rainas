@@ -17,6 +17,10 @@ const requiredFiles = [
   "apps/web/src/app/posts/[id]/page.tsx",
   "apps/web/src/app/users/[username]/page.tsx",
   "apps/web/src/app/users/[username]/lists/[slug]/page.tsx",
+  "apps/web/src/components/media-gallery.tsx",
+  "apps/web/src/components/pagination-controls.tsx",
+  "apps/web/src/components/profile-summary.tsx",
+  "apps/web/src/components/rating-badge.tsx",
   "apps/web/src/lib/api/client.ts",
   "apps/admin/src/app/layout.tsx",
   "apps/admin/src/app/page.tsx",
@@ -98,7 +102,15 @@ for (const root of runtimeRoots) {
   }
 }
 
-const webRoutes = ["/", "/categories", "/products", "/posts", "/design-system"];
+const webRoutes = [
+  "/",
+  "/categories",
+  "/products",
+  "/posts",
+  "/users/rana",
+  "/users/rana/lists/public-list-1",
+  "/design-system"
+];
 
 for (const route of webRoutes) {
   await fetch(`http://localhost:3000${route}`, { signal: AbortSignal.timeout(1000) })

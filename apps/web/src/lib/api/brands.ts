@@ -14,3 +14,6 @@ export function listBrands(query: ListQuery = {}) {
 export function getBrandBySlug(slug: string) {
   return apiGetData<Brand>(`/brands/${encodeURIComponent(slug)}`);
 }
+
+export const getBrands = listBrands;
+export const getBrand = getBrandBySlug;

@@ -3,6 +3,7 @@ import { EmptyState, Grid, Stack } from "@raina/ui";
 
 import { PageHeader } from "@/components/page-header";
 import { ProductCard } from "@/components/product-card";
+import { RemoteImage } from "@/components/remote-image";
 import { ApiErrorState, NotFoundState } from "@/components/state-views";
 import { getCategoryBySlug } from "@/lib/api/categories";
 import { isRainaApiError } from "@/lib/api/errors";
@@ -42,6 +43,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           eyebrow="تصنيف"
           title={category.nameAr}
           description={category.descriptionAr ?? "منتجات وتجارب ضمن هذا التصنيف."}
+        />
+        <RemoteImage
+          src={category.imageUrl}
+          alt={`صورة تصنيف ${category.nameAr}`}
+          fallbackLabel={category.nameAr}
+          className="web-category-detail__media"
+          sizes="(min-width: 1024px) 66vw, 100vw"
         />
         {products.data.length > 0 ? (
           <Grid columns="3" gap="16">

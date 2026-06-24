@@ -26,3 +26,10 @@ export function readSort(
   }
   return fallback;
 }
+
+export function readPage(params: Record<string, string | string[] | undefined>): number {
+  const value = readParam(params, "page");
+  if (value === undefined) return 1;
+  const page = Number(value);
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}

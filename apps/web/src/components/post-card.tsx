@@ -3,8 +3,9 @@ import Link from "next/link";
 import type { Post } from "@raina/api-contracts";
 import { Avatar, Badge, Card, Inline, Stack } from "@raina/ui";
 
-import { excerpt, formatDate, formatRating } from "@/lib/format";
+import { excerpt, formatDate } from "@/lib/format";
 
+import { RatingBadge } from "./rating-badge";
 import { RemoteImage } from "./remote-image";
 
 export function PostCard({ post }: Readonly<{ post: Post }>) {
@@ -40,7 +41,7 @@ export function PostCard({ post }: Readonly<{ post: Post }>) {
           className="web-post-card__media"
         />
         <Inline gap="8">
-          <Badge variant="primary">{formatRating(post.rating)}</Badge>
+          <RatingBadge value={post.rating} />
           <Badge>{post.product.nameAr}</Badge>
           <Badge variant="info">{post.product.category.nameAr}</Badge>
         </Inline>

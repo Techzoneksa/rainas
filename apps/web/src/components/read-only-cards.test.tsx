@@ -5,8 +5,12 @@ import { describe, expect, it } from "vitest";
 import type { Product, Post } from "@raina/api-contracts";
 
 import { ApiErrorState } from "./state-views";
+import { CategoryCard } from "./category-card";
+import { PaginationControls } from "./pagination-controls";
 import { ProductCard } from "./product-card";
 import { PostCard } from "./post-card";
+import { RatingSummary } from "./rating-summary";
+import { RemoteImage } from "./remote-image";
 import { RainaApiError } from "@/lib/api/errors";
 
 const category = {
@@ -101,6 +105,13 @@ const post: Post = {
 };
 
 describe("read-only web cards", () => {
+  it("renders category card with read-only link", () => {
+    const html = renderToStaticMarkup(createElement(CategoryCard, { category }));
+
+    expect(html).toContain("العناية بالبشرة");
+    expect(html).toContain("/categories/skincare");
+  });
+
   it("renders product card details", () => {
     const html = renderToStaticMarkup(createElement(ProductCard, { product }));
 
@@ -108,6 +119,43 @@ describe("read-only web cards", () => {
     expect(html).toContain("لوما");
     expect(html).toContain("٨٫٥");
     expect(html).toContain("/products/product-01");
+  });
+
+  it("renders rating summary distribution", () => {
+    const html = renderToStaticMarkup(
+      createElement(RatingSummary, {
+        average: "8.5",
+        count: 1,
+        posts: [post]
+      })
+    );
+
+    expect(html).toContain("ملخص التقييم");
+    expect(html).toContain("8 من 10");
+  });
+
+  it("renders remote image fallback without a source", () => {
+    const html = renderToStaticMarkup(
+      createElement(RemoteImage, {
+        alt: "صورة منتج",
+        fallbackLabel: "منتج تجريبي"
+      })
+    );
+
+    expect(html).toContain("منتج تجريبي");
+  });
+
+  it("renders pagination links", () => {
+    const html = renderToStaticMarkup(
+      createElement(PaginationControls, {
+        path: "/products",
+        params: { search: "سيروم" },
+        meta: { page: 2, limit: 24, total: 60, totalPages: 3 }
+      })
+    );
+
+    expect(html).toContain("page=1");
+    expect(html).toContain("page=3");
   });
 
   it("renders post card without write controls", () => {

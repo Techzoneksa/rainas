@@ -78,6 +78,8 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
 
 `apps/web` uses a unified API client under `apps/web/src/lib/api`. Public web routes read from the backend and show loading, empty, error, and not-found states. If the API is offline, the web app renders an error state instead of falling back to prototype data or LocalStorage.
 
+Phase 5 public pages share read-only cards, filters, rating displays, media galleries, pagination controls, and `RemoteImage` fallbacks. API-backed requests must stay inside the unified client layer.
+
 Demo media:
 
 - Seed data includes remote image URLs for category, product, and post demo media.

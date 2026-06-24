@@ -46,3 +46,5 @@ export async function getPublicListBySlug(
     products
   };
 }
+
+export const getPublicUserList = getPublicListBySlug;

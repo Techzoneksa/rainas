@@ -20,6 +20,7 @@ Consumed by Web:
 - `GET /api/v1/users/:username/lists/:id`
 
 The web app does not call protected `me` routes in Phase 5 and does not perform write actions.
+Product rating summaries and similar-product sections are derived in the web API client from public read endpoints only. Phase 5 does not add protected, write, admin, or moderation endpoints.
 
 ## Phase 4 API Status
 

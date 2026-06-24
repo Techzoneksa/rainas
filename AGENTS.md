@@ -5,8 +5,9 @@
 Phase 5 web rules:
 
 - Web API-backed pages must use the unified client under `apps/web/src/lib/api`.
-- Do not add direct random `fetch` calls inside web pages.
+- Do not add direct random `fetch` calls inside web pages or read-only feature components.
 - Do not use LocalStorage, prototype data, or hidden seed fixtures as fallback for API-backed web pages.
+- Remote media in the web app must use the shared `RemoteImage` fallback component.
 - Phase 5 web integration is read-only: no production auth, OTP, create, edit, delete, comments write, follow write, save write, or lists write behavior.
 - Do not add Likes, reactions, hearts, product comparison, cart, checkout, payment, shipping, or commerce actions.
 

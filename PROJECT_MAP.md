@@ -7,7 +7,7 @@ Phase 5 Web Read-Only API Integration is complete locally.
 Current web integration:
 
 - `apps/web/src/lib/api` provides a unified API client with base URL handling, query param serialization, JSON parsing, timeout handling, standard API error normalization, and typed page/item responses.
-- `apps/web/src/components` provides read-only feature components for categories, products, posts, public profiles, public lists, rating summaries, filters, media placeholders, page headers, and safe data states.
+- `apps/web/src/components` provides read-only feature components for categories, products, posts, public profiles, public lists, rating badges, rating summaries, pagination, filters, media galleries, page headers, and safe data states.
 - `apps/web/src/app/page.tsx` reads categories, posts, and products from the backend.
 - `apps/web/src/app/categories` reads category lists and category product pages.
 - `apps/web/src/app/products` reads product lists and product detail pages.
@@ -15,7 +15,7 @@ Current web integration:
 - `apps/web/src/app/users/[username]` reads public profile data, public posts, and public publisher lists.
 - `apps/web/src/app/users/[username]/lists/[slug]` resolves public publisher lists by slug and renders public list posts/products only.
 - `apps/api/prisma/seed.ts` now seeds direct Unsplash demo images for categories, product media, and post media.
-- `apps/web/src/components/remote-image.tsx` renders remote demo images with a design-system fallback if loading fails.
+- `apps/web/src/components/remote-image.tsx` renders remote demo images with a design-system fallback if loading fails, and API-backed media galleries consume it instead of raw image tags.
 - `apps/web/.env.example` declares `NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1`.
 - `scripts/smoke-foundation.mjs` includes Phase 5 web routes and keeps runtime route checks optional when the web server is not running.
 
@@ -23,7 +23,7 @@ Current Phase 5 guard:
 
 - Web must use `apps/web/src/lib/api` for backend requests.
 - Public pages are read-only.
-- No direct random fetch calls inside pages.
+- No direct random fetch calls inside pages or read-only feature components.
 - No LocalStorage or prototype data fallback for API-backed pages.
 - No production auth, OTP, write actions, admin API integration, Flutter, Likes, product comparison, cart, checkout, payment, or shipping work started.
 

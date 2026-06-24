@@ -2,8 +2,9 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { Avatar, Badge, Card, EmptyState, Grid, Inline, Stack } from "@raina/ui";
 
+import { MediaGallery } from "@/components/media-gallery";
 import { PageHeader } from "@/components/page-header";
-import { RemoteImage } from "@/components/remote-image";
+import { RatingBadge } from "@/components/rating-badge";
 import { ApiErrorState, NotFoundState } from "@/components/state-views";
 import { isRainaApiError } from "@/lib/api/errors";
 import { getPostById, listPostComments } from "@/lib/api/posts";
@@ -60,27 +61,13 @@ export default async function PostPage({ params }: PostPageProps) {
                 <span className="web-muted">{formatDate(post.publishedAt ?? post.createdAt)}</span>
               </Stack>
             </Inline>
-            {media && media.length > 0 ? (
-              media.map((item) => (
-                <RemoteImage
-                  key={item.id}
-                  src={item.url}
-                  alt={item.altAr ?? `صورة ${post.title}`}
-                  fallbackLabel={post.product.nameAr}
-                  className="web-post-detail__media"
-                  sizes="(min-width: 1024px) 65vw, 100vw"
-                />
-              ))
-            ) : (
-              <RemoteImage
-                alt={`صورة ${post.title}`}
-                fallbackLabel={post.product.nameAr}
-                className="web-post-detail__media"
-                sizes="(min-width: 1024px) 65vw, 100vw"
-              />
-            )}
+            <MediaGallery
+              items={media ?? []}
+              fallbackLabel={post.product.nameAr}
+              className="web-post-detail__media"
+            />
             <Inline gap="8">
-              <Badge variant="primary">{formatRating(post.rating)}</Badge>
+              <RatingBadge value={post.rating} />
               <Badge>{post.product.nameAr}</Badge>
               <Badge variant="info">{post.product.brand.name}</Badge>
             </Inline>
