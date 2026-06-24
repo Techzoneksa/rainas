@@ -1339,7 +1339,12 @@ export function AppShell({ header, sidebar, footer, children, className }: AppSh
   return (
     <div className={cx("raina-app-shell", className)}>
       {header ? <header className="raina-app-shell__header">{header}</header> : null}
-      <div className="raina-app-shell__content">
+      <div
+        className={cx(
+          "raina-app-shell__content",
+          Boolean(sidebar) && "raina-app-shell__content--with-sidebar"
+        )}
+      >
         {sidebar ? <aside className="raina-app-shell__sidebar">{sidebar}</aside> : null}
         <main className="raina-app-shell__main">{children}</main>
       </div>

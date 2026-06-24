@@ -8,6 +8,7 @@ import { RemoteImage } from "./remote-image";
 export function CategoryCard({ category }: Readonly<{ category: Category }>) {
   return (
     <Card
+      className="web-content-card web-content-card--category"
       title={category.nameAr}
       description={category.descriptionAr ?? "تصنيف من منتجات رأينا"}
       variant="interactive"

@@ -46,7 +46,7 @@ export default async function UserPage({ params }: UserPageProps) {
         <section className="web-section" aria-labelledby="user-posts">
           <PageHeader title="منشوراته العامة" />
           {posts.data.length > 0 ? (
-            <Grid columns="3" gap="16">
+            <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
               {posts.data.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
@@ -58,7 +58,7 @@ export default async function UserPage({ params }: UserPageProps) {
         <section className="web-section" aria-labelledby="user-lists">
           <PageHeader title="قوائمه العامة" description="لا تظهر قوائم الحفظ الخاصة هنا." />
           {lists.data.length > 0 ? (
-            <Grid columns="3" gap="16">
+            <Grid className="web-card-grid web-card-grid--lists" columns="3" gap="16">
               {lists.data.map((list) => (
                 <PublicListCard key={list.id} list={list} username={profile.username} />
               ))}

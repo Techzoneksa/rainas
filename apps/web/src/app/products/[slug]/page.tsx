@@ -89,7 +89,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="web-section" aria-labelledby="product-specs">
           <PageHeader title="المواصفات" />
           {product.specifications && product.specifications.length > 0 ? (
-            <Grid columns="3" gap="12">
+            <Grid className="web-card-grid web-card-grid--details" columns="3" gap="12">
               {product.specifications.map((specification) => (
                 <Card key={specification.id} title={specification.nameAr}>
                   {specification.valueAr}
@@ -104,7 +104,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="web-section" aria-labelledby="product-posts">
           <PageHeader title="تجارب المستخدمين" description="تجارب منشورة عن هذا المنتج." />
           {posts.data.length > 0 ? (
-            <Grid columns="3" gap="16">
+            <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
               {posts.data.slice(0, 6).map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
@@ -117,7 +117,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <section className="web-section" aria-labelledby="related-products">
           <PageHeader title="منتجات مشابهة" />
           {related.length > 0 ? (
-            <Grid columns="3" gap="16">
+            <Grid className="web-card-grid web-card-grid--products" columns="3" gap="16">
               {related.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}

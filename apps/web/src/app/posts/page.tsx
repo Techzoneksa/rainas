@@ -61,7 +61,7 @@ export default async function PostsPage({
           brands={brands.data}
         />
         {posts.data.length > 0 ? (
-          <Grid columns="3" gap="16">
+          <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
             {posts.data.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}

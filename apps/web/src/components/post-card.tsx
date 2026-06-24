@@ -14,6 +14,7 @@ export function PostCard({ post }: Readonly<{ post: Post }>) {
 
   return (
     <Card
+      className="web-content-card web-content-card--post"
       title={post.title}
       description={excerpt(post.body)}
       variant="interactive"

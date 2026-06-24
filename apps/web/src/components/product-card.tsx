@@ -13,6 +13,7 @@ export function ProductCard({ product }: Readonly<{ product: Product }>) {
 
   return (
     <Card
+      className="web-content-card web-content-card--product"
       title={product.nameAr}
       description={product.summaryAr ?? product.descriptionAr ?? "منتج ضمن قاعدة رأينا"}
       variant="interactive"

@@ -9,6 +9,7 @@ export function PublicListCard({
 }: Readonly<{ list: PublicList; username: string }>) {
   return (
     <Card
+      className="web-content-card web-content-card--list"
       title={list.title}
       description={list.description ?? "قائمة عامة من الناشر"}
       variant="interactive"

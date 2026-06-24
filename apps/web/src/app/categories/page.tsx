@@ -25,7 +25,7 @@ export default async function CategoriesPage() {
           description="تصفح المنتجات والتجارب حسب المجال."
         />
         {categories.data.length > 0 ? (
-          <Grid columns="4" gap="16">
+          <Grid className="web-card-grid web-card-grid--categories" columns="4" gap="16">
             {categories.data.map((category) => (
               <CategoryCard key={category.id} category={category} />
             ))}

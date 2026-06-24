@@ -46,7 +46,7 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
         <section className="web-section" aria-labelledby="list-posts">
           <PageHeader title="منشورات القائمة" />
           {details.posts.length > 0 ? (
-            <Grid columns="3" gap="16">
+            <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
               {details.posts.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
@@ -58,7 +58,7 @@ export default async function PublicListPage({ params }: PublicListPageProps) {
         <section className="web-section" aria-labelledby="list-products">
           <PageHeader title="منتجات القائمة" />
           {details.products.length > 0 ? (
-            <Grid columns="3" gap="16">
+            <Grid className="web-card-grid web-card-grid--products" columns="3" gap="16">
               {details.products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

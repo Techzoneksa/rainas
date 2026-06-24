@@ -61,7 +61,7 @@ export default async function ProductsPage({
           brands={brands.data}
         />
         {products.data.length > 0 ? (
-          <Grid columns="3" gap="16">
+          <Grid className="web-card-grid web-card-grid--products" columns="3" gap="16">
             {products.data.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
