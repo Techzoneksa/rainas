@@ -78,6 +78,13 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
 
 `apps/web` uses a unified API client under `apps/web/src/lib/api`. Public web routes read from the backend and show loading, empty, error, and not-found states. If the API is offline, the web app renders an error state instead of falling back to prototype data or LocalStorage.
 
+Demo media:
+
+- Seed data includes remote image URLs for category, product, and post demo media.
+- Demo images are loaded from `https://images.unsplash.com`.
+- An internet connection is required to display the remote demo images.
+- If an image fails, the web UI renders a safe fallback surface.
+
 Public web routes added in Phase 5:
 
 - `/`

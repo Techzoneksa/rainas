@@ -2,8 +2,8 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { Avatar, Badge, Card, EmptyState, Grid, Inline, Stack } from "@raina/ui";
 
-import { MediaPlaceholder } from "@/components/media-placeholder";
 import { PageHeader } from "@/components/page-header";
+import { RemoteImage } from "@/components/remote-image";
 import { ApiErrorState, NotFoundState } from "@/components/state-views";
 import { isRainaApiError } from "@/lib/api/errors";
 import { getPostById, listPostComments } from "@/lib/api/posts";
@@ -37,6 +37,8 @@ export default async function PostPage({ params }: PostPageProps) {
     const post = await getPostById(id);
     const comments = await listPostComments(post.id, { limit: 50 });
     const profile = post.author.profile;
+    const media =
+      post.media && post.media.length > 0 ? post.media : post.product.media?.slice(0, 1);
 
     return (
       <Stack gap="24">
@@ -58,13 +60,25 @@ export default async function PostPage({ params }: PostPageProps) {
                 <span className="web-muted">{formatDate(post.publishedAt ?? post.createdAt)}</span>
               </Stack>
             </Inline>
-            {post.media?.map((media) => (
-              <MediaPlaceholder
-                key={media.id}
-                label={media.altAr ?? post.title}
-                type={media.type}
+            {media && media.length > 0 ? (
+              media.map((item) => (
+                <RemoteImage
+                  key={item.id}
+                  src={item.url}
+                  alt={item.altAr ?? `صورة ${post.title}`}
+                  fallbackLabel={post.product.nameAr}
+                  className="web-post-detail__media"
+                  sizes="(min-width: 1024px) 65vw, 100vw"
+                />
+              ))
+            ) : (
+              <RemoteImage
+                alt={`صورة ${post.title}`}
+                fallbackLabel={post.product.nameAr}
+                className="web-post-detail__media"
+                sizes="(min-width: 1024px) 65vw, 100vw"
               />
-            ))}
+            )}
             <Inline gap="8">
               <Badge variant="primary">{formatRating(post.rating)}</Badge>
               <Badge>{post.product.nameAr}</Badge>

@@ -10,6 +10,8 @@ const prisma = new PrismaClient({
 
 const now = new Date();
 const daysAgo = (days: number): Date => new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+const demoImageUrl = (photoId: string, width = 800, height = 800): string =>
+  `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=${width}&h=${height}&q=80`;
 
 const users = [
   { id: "usr_owner", phone: "+966500000001", role: "OWNER" as const },
@@ -99,15 +101,114 @@ const profiles = [
 ];
 
 const categories = [
-  ["cat_skincare", "skincare", "العناية بالبشرة", "منتجات البشرة اليومية", 10],
-  ["cat_haircare", "haircare", "العناية بالشعر", "شامبو وزيوت وأدوات الشعر", 20],
-  ["cat_home", "home", "المنزل", "أدوات منزلية عملية", 30],
-  ["cat_coffee", "coffee", "القهوة", "قهوة وأدوات تحضير", 40],
-  ["cat_makeup", "makeup", "المكياج", "منتجات تجميل خفيفة", 50],
-  ["cat_devices", "devices", "الأجهزة", "أجهزة صغيرة للاستخدام اليومي", 60],
-  ["cat_kids", "kids", "الأطفال", "منتجات عائلية وأطفال", 70],
-  ["cat_wellness", "wellness", "العناية الشخصية", "منتجات راحة وروتين", 80]
+  [
+    "cat_skincare",
+    "skincare",
+    "العناية بالبشرة",
+    "كريمات وسيروم ومنتجات عناية يومية",
+    10,
+    demoImageUrl("1598440947619-2c35fc9aa908")
+  ],
+  [
+    "cat_haircare",
+    "perfumes",
+    "العطور",
+    "زجاجات عطر ومجموعات رائحة أنيقة",
+    20,
+    demoImageUrl("1594035910387-fea47794261f")
+  ],
+  [
+    "cat_makeup",
+    "makeup",
+    "المكياج",
+    "مستحضرات تجميل وأدوات تطبيق",
+    30,
+    demoImageUrl("1512496015851-a90fb38ba796")
+  ],
+  [
+    "cat_devices",
+    "mobiles",
+    "الجوالات",
+    "هواتف ذكية وإكسسوارات يومية",
+    40,
+    demoImageUrl("1510557880182-3d4d3cba35a5")
+  ],
+  [
+    "cat_home",
+    "home-appliances",
+    "الأجهزة المنزلية",
+    "أجهزة وأدوات منزلية عملية",
+    50,
+    demoImageUrl("1556911220-bff31c812dba")
+  ],
+  [
+    "cat_coffee",
+    "coffee",
+    "القهوة",
+    "قهوة وأدوات تحضير ومكائن",
+    60,
+    demoImageUrl("1495474472287-4d71bcdd2085")
+  ],
+  [
+    "cat_kids",
+    "kids",
+    "الأطفال",
+    "منتجات أطفال عامة وألعاب تعليمية",
+    70,
+    demoImageUrl("1566576912321-d58ddd7a6088")
+  ],
+  [
+    "cat_wellness",
+    "sports",
+    "الرياضة",
+    "أدوات وتمارين وتجهيزات رياضية",
+    80,
+    demoImageUrl("1517836357463-d25dfeac3438")
+  ]
 ] as const;
+
+const productPhotoIdsByCategoryId: Record<string, readonly string[]> = {
+  cat_skincare: [
+    "1598440947619-2c35fc9aa908",
+    "1571781926291-c477ebfd024b",
+    "1608248597279-f99d160bfcbc",
+    "1608571423902-eed4a5ad8108"
+  ],
+  cat_haircare: [
+    "1594035910387-fea47794261f",
+    "1523293182086-7651a899d37f",
+    "1542291026-7eec264c27ff"
+  ],
+  cat_makeup: [
+    "1512496015851-a90fb38ba796",
+    "1522335789203-aabd1fc54bc9",
+    "1503236823255-94609f598e71"
+  ],
+  cat_devices: [
+    "1510557880182-3d4d3cba35a5",
+    "1580910051074-3eb694886505",
+    "1516321318423-f06f85e504b3"
+  ],
+  cat_home: ["1556911220-bff31c812dba", "1586201375761-83865001e31c", "1585515320310-259814833e62"],
+  cat_coffee: [
+    "1495474472287-4d71bcdd2085",
+    "1514432324607-a09d9b4aefdd",
+    "1442512595331-e89e73853f31"
+  ],
+  cat_kids: ["1566576912321-d58ddd7a6088", "1546519638-68e109498ffc"],
+  cat_wellness: [
+    "1517836357463-d25dfeac3438",
+    "1518611012118-696072aa579a",
+    "1546483875-ad9014c88eba"
+  ]
+};
+
+const getProductMediaUrl = (categoryId: string, offset: number): string => {
+  const photoIds =
+    productPhotoIdsByCategoryId[categoryId] ?? productPhotoIdsByCategoryId.cat_skincare;
+  const photoId = photoIds[offset % photoIds.length] ?? "1598440947619-2c35fc9aa908";
+  return demoImageUrl(photoId);
+};
 
 const brands = [
   ["brd_01", "luma", "لوما"],
@@ -304,34 +405,79 @@ const reports = Array.from({ length: 6 }, (_, index) => ({
   status: index % 3 === 0 ? ("REVIEWING" as const) : ("OPEN" as const)
 }));
 
+const categoryRecords = categories.map(
+  ([id, slug, nameAr, descriptionAr, sortOrder, imageUrl]) => ({
+    id,
+    slug,
+    nameAr,
+    descriptionAr,
+    sortOrder,
+    imageUrl
+  })
+);
+
+const productMedia = products.map((product, index) => ({
+  id: `${product.id}_media_1`,
+  productId: product.id,
+  type: "IMAGE" as const,
+  url: getProductMediaUrl(product.categoryId, index),
+  altAr: `صورة ${product.nameAr}`,
+  sortOrder: 1,
+  moderationStatus: "APPROVED" as const
+}));
+
+const postMedia = posts.map((post, index) => {
+  const product =
+    products.find((item) => item.id === post.productId) ?? products[index % products.length];
+  return {
+    id: `${post.id}_media_1`,
+    postId: post.id,
+    type: "IMAGE" as const,
+    url:
+      product === undefined
+        ? demoImageUrl("1495474472287-4d71bcdd2085")
+        : getProductMediaUrl(product.categoryId, index + 1),
+    altAr: `صورة تجربة ${index + 1}`,
+    sortOrder: 1,
+    moderationStatus: "APPROVED" as const
+  };
+});
+
 async function main(): Promise<void> {
   await prisma.user.createMany({ data: users, skipDuplicates: true });
   await prisma.profile.createMany({ data: profiles, skipDuplicates: true });
-  await prisma.category.createMany({
-    data: categories.map(([id, slug, nameAr, descriptionAr, sortOrder]) => ({
-      id,
-      slug,
-      nameAr,
-      descriptionAr,
-      sortOrder
-    })),
-    skipDuplicates: true
-  });
+  for (const category of categoryRecords) {
+    await prisma.category.upsert({
+      where: { id: category.id },
+      update: {
+        slug: category.slug,
+        nameAr: category.nameAr,
+        descriptionAr: category.descriptionAr,
+        imageUrl: category.imageUrl,
+        sortOrder: category.sortOrder
+      },
+      create: category
+    });
+  }
   await prisma.brand.createMany({
     data: brands.map(([id, slug, name]) => ({ id, slug, name })),
     skipDuplicates: true
   });
   await prisma.product.createMany({ data: products, skipDuplicates: true });
-  await prisma.productMedia.createMany({
-    data: products.map((product, index) => ({
-      id: `${product.id}_media_1`,
-      productId: product.id,
-      url: `https://assets.raina.local/products/${product.slug}.jpg`,
-      altAr: `صورة ${product.nameAr}`,
-      sortOrder: index
-    })),
-    skipDuplicates: true
-  });
+  for (const media of productMedia) {
+    await prisma.productMedia.upsert({
+      where: { id: media.id },
+      update: {
+        type: media.type,
+        url: media.url,
+        altAr: media.altAr,
+        sortOrder: media.sortOrder,
+        moderationStatus: media.moderationStatus,
+        deletedAt: null
+      },
+      create: media
+    });
+  }
   await prisma.productSpecification.createMany({
     data: products.flatMap((product) => [
       {
@@ -354,16 +500,20 @@ async function main(): Promise<void> {
   await prisma.post.createMany({ data: posts, skipDuplicates: true });
   await prisma.postPro.createMany({ data: postPros, skipDuplicates: true });
   await prisma.postCon.createMany({ data: postCons, skipDuplicates: true });
-  await prisma.postMedia.createMany({
-    data: posts.map((post, index) => ({
-      id: `${post.id}_media_1`,
-      postId: post.id,
-      url: `https://assets.raina.local/posts/${post.id}.jpg`,
-      altAr: `صورة تجربة ${index + 1}`,
-      sortOrder: 1
-    })),
-    skipDuplicates: true
-  });
+  for (const media of postMedia) {
+    await prisma.postMedia.upsert({
+      where: { id: media.id },
+      update: {
+        type: media.type,
+        url: media.url,
+        altAr: media.altAr,
+        sortOrder: media.sortOrder,
+        moderationStatus: media.moderationStatus,
+        deletedAt: null
+      },
+      create: media
+    });
+  }
   await prisma.comment.createMany({ data: [...topComments, ...replies], skipDuplicates: true });
   await prisma.follow.createMany({ data: follows, skipDuplicates: true });
   await prisma.userList.createMany({

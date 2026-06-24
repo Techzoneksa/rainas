@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { Category } from "@raina/api-contracts";
 import { Card } from "@raina/ui";
 
+import { RemoteImage } from "./remote-image";
+
 export function CategoryCard({ category }: Readonly<{ category: Category }>) {
   return (
     <Card
@@ -14,6 +16,13 @@ export function CategoryCard({ category }: Readonly<{ category: Category }>) {
           عرض التصنيف
         </Link>
       }
-    />
+    >
+      <RemoteImage
+        src={category.imageUrl}
+        alt={`صورة تصنيف ${category.nameAr}`}
+        fallbackLabel={category.nameAr}
+        className="web-category-card__media"
+      />
+    </Card>
   );
 }

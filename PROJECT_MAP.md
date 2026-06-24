@@ -14,6 +14,8 @@ Current web integration:
 - `apps/web/src/app/posts` reads post lists, post details, and post comments.
 - `apps/web/src/app/users/[username]` reads public profile data, public posts, and public publisher lists.
 - `apps/web/src/app/users/[username]/lists/[slug]` resolves public publisher lists by slug and renders public list posts/products only.
+- `apps/api/prisma/seed.ts` now seeds direct Unsplash demo images for categories, product media, and post media.
+- `apps/web/src/components/remote-image.tsx` renders remote demo images with a design-system fallback if loading fails.
 - `apps/web/.env.example` declares `NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1`.
 - `scripts/smoke-foundation.mjs` includes Phase 5 web routes and keeps runtime route checks optional when the web server is not running.
 

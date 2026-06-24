@@ -39,6 +39,7 @@ export interface Category {
   slug: string;
   nameAr: string;
   descriptionAr: string | null;
+  imageUrl: string | null;
   status: string;
   sortOrder: number;
   createdAt: string;

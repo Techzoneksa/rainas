@@ -84,7 +84,14 @@ export class ProductsService {
         where,
         include: {
           author: { include: { profile: true } },
-          product: { include: { brand: true, category: true } },
+          product: {
+            include: {
+              brand: true,
+              category: true,
+              media: { where: { deletedAt: null }, orderBy: { sortOrder: "asc" } }
+            }
+          },
+          media: { where: { deletedAt: null }, orderBy: { sortOrder: "asc" } },
           pros: { orderBy: { sortOrder: "asc" } },
           cons: { orderBy: { sortOrder: "asc" } }
         },

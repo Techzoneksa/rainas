@@ -5,11 +5,11 @@ import { Avatar, Badge, Card, Inline, Stack } from "@raina/ui";
 
 import { excerpt, formatDate, formatRating } from "@/lib/format";
 
-import { MediaPlaceholder } from "./media-placeholder";
+import { RemoteImage } from "./remote-image";
 
 export function PostCard({ post }: Readonly<{ post: Post }>) {
   const profile = post.author.profile;
-  const media = post.media?.[0];
+  const media = post.media?.[0] ?? post.product.media?.[0];
 
   return (
     <Card
@@ -33,7 +33,12 @@ export function PostCard({ post }: Readonly<{ post: Post }>) {
             <span>{formatDate(post.publishedAt ?? post.createdAt)}</span>
           </div>
         </Inline>
-        {media ? <MediaPlaceholder label={media.altAr ?? post.title} type={media.type} /> : null}
+        <RemoteImage
+          src={media?.url}
+          alt={media?.altAr ?? `صورة ${post.title}`}
+          fallbackLabel={post.product.nameAr}
+          className="web-post-card__media"
+        />
         <Inline gap="8">
           <Badge variant="primary">{formatRating(post.rating)}</Badge>
           <Badge>{post.product.nameAr}</Badge>

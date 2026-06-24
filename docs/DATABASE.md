@@ -102,6 +102,19 @@ Useful demo user IDs:
 - Owner: `usr_owner`
 - Regular users: `usr_01` through `usr_08`
 
+## Demo Media Sources
+
+The seed data uses remote demo image URLs for categories, products, and posts.
+
+- Source: Unsplash public image CDN (`https://images.unsplash.com`).
+- License reference: `https://unsplash.com/license`.
+- The images are used for demo and development presentation only.
+- The image URLs are direct remote image URLs with crop/format parameters for card-friendly sizes.
+- No protected images from commercial product sites are used.
+- Demo image rendering requires an internet connection.
+- If a remote image fails, the web UI shows a design-system fallback surface.
+- These URLs can be replaced later with officially uploaded product media from the production media pipeline.
+
 ## Environment
 
 `apps/api/.env.example` contains:

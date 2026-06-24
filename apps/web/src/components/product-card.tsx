@@ -5,7 +5,7 @@ import { Badge, Card, Inline, Stack } from "@raina/ui";
 
 import { formatCount, formatPrice, formatRating } from "@/lib/format";
 
-import { MediaPlaceholder } from "./media-placeholder";
+import { RemoteImage } from "./remote-image";
 
 export function ProductCard({ product }: Readonly<{ product: Product }>) {
   const media = product.media?.[0];
@@ -22,9 +22,10 @@ export function ProductCard({ product }: Readonly<{ product: Product }>) {
       }
     >
       <Stack gap="12">
-        <MediaPlaceholder
-          label={media?.altAr ?? product.nameAr}
-          type={media?.type}
+        <RemoteImage
+          src={media?.url}
+          alt={media?.altAr ?? `صورة ${product.nameAr}`}
+          fallbackLabel={product.nameAr}
           className="web-product-card__media"
         />
         <Inline gap="8">

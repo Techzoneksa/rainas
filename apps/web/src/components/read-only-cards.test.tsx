@@ -14,6 +14,7 @@ const category = {
   slug: "skincare",
   nameAr: "العناية بالبشرة",
   descriptionAr: "منتجات يومية",
+  imageUrl: null,
   status: "ACTIVE",
   sortOrder: 1,
   createdAt: "2026-06-23T00:00:00.000Z",

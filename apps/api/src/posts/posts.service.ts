@@ -10,7 +10,13 @@ import { UpdatePostDto } from "./dto/update-post.dto";
 
 const postInclude = {
   author: { include: { profile: true } },
-  product: { include: { brand: true, category: true } },
+  product: {
+    include: {
+      brand: true,
+      category: true,
+      media: { where: { deletedAt: null }, orderBy: { sortOrder: "asc" } }
+    }
+  },
   publicList: true,
   media: { where: { deletedAt: null }, orderBy: { sortOrder: "asc" } },
   pros: { orderBy: { sortOrder: "asc" } },

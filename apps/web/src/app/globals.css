@@ -386,8 +386,40 @@ body {
   padding-inline: var(--raina-space-8);
 }
 
+.web-image-frame {
+  position: relative;
+  min-block-size: 148px;
+  overflow: hidden;
+  border: 1px solid var(--raina-color-border-subtle);
+  border-radius: var(--raina-radius-lg);
+  background: var(--raina-color-surface-muted);
+}
+
+.web-image-frame__image {
+  object-fit: cover;
+}
+
+.web-category-card__media {
+  min-block-size: 156px;
+}
+
 .web-product-card__media {
   min-block-size: 132px;
+}
+
+.web-post-card__media {
+  min-block-size: 148px;
+}
+
+.web-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--raina-space-12);
+}
+
+.web-gallery__item,
+.web-post-detail__media {
+  min-block-size: 260px;
 }
 
 .web-meta-list,

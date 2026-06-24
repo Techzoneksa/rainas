@@ -155,6 +155,7 @@ model Category {
   slug          String       @unique
   nameAr        String
   descriptionAr String?
+  imageUrl      String?
   status        RecordStatus @default(ACTIVE)
   sortOrder     Int          @default(0)
   createdAt     DateTime     @default(now())
