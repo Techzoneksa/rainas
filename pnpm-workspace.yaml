@@ -3,6 +3,14 @@ packages:
   - "packages/*"
 allowBuilds:
   "@prisma/engines": true
+  "@scarf/scarf": true
   esbuild: true
   prisma: true
   sharp: true
+onlyBuiltDependencies:
+  - esbuild
+  - prisma
+  - "@prisma/client"
+  - "@prisma/engines"
+  - sharp
+  - "@scarf/scarf"

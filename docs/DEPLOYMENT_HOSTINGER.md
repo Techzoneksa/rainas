@@ -20,7 +20,7 @@ sudo apt install -y nodejs
 
 # Install pnpm
 corepack enable
-corepack prepare pnpm@11.0.9 --activate
+corepack prepare pnpm@11.9.0 --activate
 
 # Install PostgreSQL
 sudo apt install -y postgresql postgresql-contrib
@@ -180,21 +180,42 @@ pg_dump -U raina raina_prod > backup_$(date +%F).sql
 
 ## Branch Strategy
 
-| Branch  | Purpose     |
-|---------|-------------|
-| `main`  | Production  |
+| Branch    | Purpose                        |
+| --------- | ------------------------------ |
+| `main`    | Production                     |
 | `develop` | Development (feature branches) |
 
 ## Required Environment Variables
 
 ### Root `.env`
+
 - `RAINA_ENV=production`
 
 ### API `apps/api/.env`
+
 - `NODE_ENV`, `PORT`, `DATABASE_URL`, `CORS_ORIGINS`, `RATE_LIMIT_*`
 
 ### Web `apps/web/.env`
+
 - `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_APP_ENV`
+
+## pnpm Build Approvals
+
+Hostinger uses pnpm v11.9.0 which requires explicit approval for dependency build scripts.
+
+Build approvals are configured in `pnpm-workspace.yaml` via `onlyBuiltDependencies` + `allowBuilds`:
+
+| Package | Purpose |
+|---------|---------|
+| `esbuild` | Bundler (used by Turborepo) |
+| `prisma` | ORM CLI |
+| `@prisma/client` | Prisma client runtime |
+| `@prisma/engines` | Prisma engine binaries |
+| `sharp` | Image processing |
+| `@scarf/scarf` | Telemetry (approved for build) |
+
+Do **not** place `pnpm.onlyBuiltDependencies` inside `package.json` —  
+Hostinger's pnpm ignores it and prints a warning.
 
 ## Notes
 
@@ -202,3 +223,4 @@ pg_dump -U raina raina_prod > backup_$(date +%F).sql
 - Never commit `.env` files to git.
 - Use a managed PostgreSQL provider (e.g., Aiven, Supabase) for higher reliability.
 - For admin panel, deploy with the same `pnpm build` and proxy to port 3001.
+- Hostinger should pull from the `main` branch for production deployment.
