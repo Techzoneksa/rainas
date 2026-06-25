@@ -8,7 +8,10 @@ Current web integration:
 
 - `apps/web/src/lib/api` provides a unified API client with base URL handling, query param serialization, JSON parsing, timeout handling, standard API error normalization, and typed page/item responses.
 - `apps/web/src/components` provides read-only feature components for categories, the rounded home category carousel, products, posts, public profiles, public lists, rating badges, rating summaries, pagination, filters, media galleries, page headers, and safe data states.
-- `apps/web/src/app/page.tsx` reads categories, posts, and products from the backend and renders home categories as a rounded horizontal carousel below the hero.
+- `apps/web/src/app/page.tsx` reads categories, posts, and products from the backend and renders a modern hero with integrated stats from API data, rounded category carousel, and horizontal scroll section carousels for posts and products.
+- `apps/web/src/components/section-carousel.tsx` is a reusable horizontal scroll carousel for home sections with RTL-safe scroll-snap behavior.
+- Bottom navigation includes SVG icons, safe-area padding for iOS, and is hidden on desktop.
+- Home hero features dynamic stats cards (products, posts, categories count) from API data.
 - `apps/web/src/app/categories` reads category lists and category product pages.
 - `apps/web/src/app/products` reads product lists and product detail pages.
 - `apps/web/src/app/posts` reads post lists, post details, and post comments.

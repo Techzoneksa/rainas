@@ -30,26 +30,20 @@ export function ProductCard({ product }: Readonly<{ product: Product }>) {
           fallbackLabel={product.nameAr}
           className="web-product-card__media"
         />
-        <Inline gap="8">
-          <Badge>{product.brand.name}</Badge>
+        <Inline gap="8" justify="start">
           <Badge variant="info">{product.category.nameAr}</Badge>
         </Inline>
-        <dl className="web-meta-list">
-          <div>
-            <dt>السعر التقريبي</dt>
-            <dd>{formatPrice(product.priceMin, product.priceMax, product.currency)}</dd>
+        <div className="web-product-card__details">
+          <div className="web-product-card__price">
+            <span className="web-muted">
+              {formatPrice(product.priceMin, product.priceMax, product.currency)}
+            </span>
           </div>
-          <div>
-            <dt>التقييم</dt>
-            <dd>
-              <RatingBadge value={product.ratingAverage} />
-            </dd>
+          <div className="web-product-card__rating">
+            <RatingBadge value={product.ratingAverage} />
+            <span className="web-muted">({formatCount(product.ratingCount, "")})</span>
           </div>
-          <div>
-            <dt>التجارب</dt>
-            <dd>{formatCount(product.ratingCount, "تجربة")}</dd>
-          </div>
-        </dl>
+        </div>
       </Stack>
     </Card>
   );

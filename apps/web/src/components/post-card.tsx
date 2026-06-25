@@ -41,20 +41,17 @@ export function PostCard({ post }: Readonly<{ post: Post }>) {
           fallbackLabel={post.product.nameAr}
           className="web-post-card__media"
         />
-        <Inline gap="8">
+        <Inline gap="8" justify="start">
           <RatingBadge value={post.rating} />
           <Badge>{post.product.nameAr}</Badge>
           <Badge variant="info">{post.product.category.nameAr}</Badge>
         </Inline>
         {post.pros && post.pros.length > 0 ? (
           <ul className="web-point-list">
-            {post.pros.slice(0, 2).map((point) => (
+            {post.pros.slice(0, 1).map((point) => (
               <li key={point.id}>{point.body}</li>
             ))}
           </ul>
-        ) : null}
-        {post.cons && post.cons.length > 0 ? (
-          <p className="web-muted">ملاحظة: {post.cons[0]?.body}</p>
         ) : null}
         <span className="web-muted">{post._count?.comments ?? 0} تعليق</span>
       </Stack>

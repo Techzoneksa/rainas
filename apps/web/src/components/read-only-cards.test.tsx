@@ -127,7 +127,7 @@ describe("read-only web cards", () => {
     const html = renderToStaticMarkup(createElement(ProductCard, { product }));
 
     expect(html).toContain("سيروم يومي");
-    expect(html).toContain("لوما");
+    expect(html).toContain("العناية بالبشرة");
     expect(html).toContain("٨٫٥");
     expect(html).toContain("/products/product-01");
   });

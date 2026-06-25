@@ -1,13 +1,14 @@
 import type { Route } from "next";
 import Link from "next/link";
 import type { Product } from "@raina/api-contracts";
-import { Badge, EmptyState, Grid, Inline, Stack } from "@raina/ui";
+import { EmptyState, Stack } from "@raina/ui";
 
 import { PageHeader } from "@/components/page-header";
 import { PostCard } from "@/components/post-card";
 import { ProductCard } from "@/components/product-card";
 import { RemoteImage } from "@/components/remote-image";
 import { RoundedCategoryCarousel } from "@/components/rounded-category-carousel";
+import { SectionCarousel, SectionCarouselItem } from "@/components/section-carousel";
 import { ApiErrorState } from "@/components/state-views";
 import { listCategories } from "@/lib/api/categories";
 import { listPosts } from "@/lib/api/posts";
@@ -24,30 +25,76 @@ function getSettledError<T>(result: PromiseSettledResult<T>): unknown | undefine
   return result.status === "rejected" ? result.reason : undefined;
 }
 
+function HomeHeroStats({
+  categoryCount,
+  postCount,
+  productCount
+}: {
+  categoryCount: number;
+  postCount: number;
+  productCount: number;
+}) {
+  return (
+    <div className="web-hero-stats">
+      <div className="web-hero-stats__item">
+        <strong className="web-hero-stats__value">
+          {productCount > 0 ? formatCount(productCount, "") : "..."}
+        </strong>
+        <span className="web-hero-stats__label">منتج</span>
+      </div>
+      <div className="web-hero-stats__item">
+        <strong className="web-hero-stats__value">
+          {postCount > 0 ? formatCount(postCount, "") : "..."}
+        </strong>
+        <span className="web-hero-stats__label">تجربة</span>
+      </div>
+      <div className="web-hero-stats__item">
+        <strong className="web-hero-stats__value">
+          {categoryCount > 0 ? formatCount(categoryCount, "") : "..."}
+        </strong>
+        <span className="web-hero-stats__label">تصنيف</span>
+      </div>
+      <div className="web-hero-stats__item">
+        <strong className="web-hero-stats__value">10</strong>
+        <span className="web-hero-stats__label">تقييم من</span>
+      </div>
+    </div>
+  );
+}
+
 function HomeHero({
-  products
-}: Readonly<{
+  products,
+  categoryCount,
+  postCount,
+  productCount
+}: {
   products: Product[];
-}>) {
+  categoryCount: number;
+  postCount: number;
+  productCount: number;
+}) {
   const heroProducts = products.slice(0, 3);
 
   return (
     <section className="web-hero" aria-labelledby="home-title">
       <div className="web-hero__content">
-        <span className="web-eyebrow">Raina — رأينا</span>
-        <h1 id="home-title">تجارب حقيقية تساعدك تختار بثقة</h1>
-        <p>
-          اقرأ تقييمات من 10، تصفح المنتجات حسب التصنيف، وشاهد تجارب المستخدمين داخل واجهة عربية
-          مهيأة للجوال والتابلت وسطح المكتب.
+        <h1 id="home-title">رأينا — تجارب حقيقية تساعدك تختار بثقة</h1>
+        <p className="web-hero__description">
+          اكتشف المنتجات من خلال تجارب المستخدمين وتقييماتهم من 10.
         </p>
-        <Inline className="web-hero__actions" gap="8">
+        <div className="web-hero__actions">
           <Link className="web-action web-action--primary" href={"/products" as Route}>
             استكشف المنتجات
           </Link>
           <Link className="web-action" href={"/posts" as Route}>
             اقرأ التجارب
           </Link>
-        </Inline>
+        </div>
+        <HomeHeroStats
+          categoryCount={categoryCount}
+          postCount={postCount}
+          productCount={productCount}
+        />
       </div>
       <div className="web-hero__visual" aria-label="لمحة عن محتوى رأينا">
         <div className="web-hero__media-grid">
@@ -79,40 +126,11 @@ function HomeHero({
   );
 }
 
-function HomeStats({
-  categoryCount,
-  postCount,
-  productCount
-}: Readonly<{
-  categoryCount: number;
-  postCount: number;
-  productCount: number;
-}>) {
-  return (
-    <section className="web-home-stats" aria-label="ملخص محتوى رأينا">
-      <div className="web-home-stats__item">
-        <Badge variant="primary">
-          {productCount > 0 ? formatCount(productCount, "منتج") : "منتجات"}
-        </Badge>
-        <span>منتجات عامة قابلة للتصفح</span>
-      </div>
-      <div className="web-home-stats__item">
-        <Badge variant="info">{postCount > 0 ? formatCount(postCount, "تجربة") : "تجارب"}</Badge>
-        <span>تجارب وتقييمات قراءة فقط</span>
-      </div>
-      <div className="web-home-stats__item">
-        <Badge>{categoryCount > 0 ? formatCount(categoryCount, "تصنيف") : "تصنيفات"}</Badge>
-        <span>مجالات تساعدك تبدأ بسرعة</span>
-      </div>
-    </section>
-  );
-}
-
 export default async function Page() {
   const [categoriesResult, postsResult, productsResult] = await Promise.allSettled([
     listCategories({ limit: 8 }),
-    listPosts({ limit: 6 }),
-    listProducts({ limit: 6, sort: "rating_desc" })
+    listPosts({ limit: 8 }),
+    listProducts({ limit: 8, sort: "rating_desc" })
   ]);
 
   const categories = getSettledValue(categoriesResult);
@@ -124,7 +142,12 @@ export default async function Page() {
 
   return (
     <Stack className="web-home" gap="40">
-      <HomeHero products={products?.data ?? []} />
+      <HomeHero
+        products={products?.data ?? []}
+        categoryCount={categories?.meta.total ?? categories?.data.length ?? 0}
+        postCount={posts?.meta.total ?? posts?.data.length ?? 0}
+        productCount={products?.meta.total ?? products?.data.length ?? 0}
+      />
 
       <section className="web-section" aria-labelledby="home-categories">
         <PageHeader
@@ -144,12 +167,6 @@ export default async function Page() {
         )}
       </section>
 
-      <HomeStats
-        categoryCount={categories?.meta.total ?? categories?.data.length ?? 0}
-        postCount={posts?.meta.total ?? posts?.data.length ?? 0}
-        productCount={products?.meta.total ?? products?.data.length ?? 0}
-      />
-
       <section className="web-section" aria-labelledby="home-posts">
         <PageHeader
           titleId="home-posts"
@@ -159,11 +176,13 @@ export default async function Page() {
         {postsError ? (
           <ApiErrorState error={postsError} />
         ) : posts && posts.data.length > 0 ? (
-          <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
+          <SectionCarousel ariaLabel="أحدث التجارب">
             {posts.data.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <SectionCarouselItem key={post.id}>
+                <PostCard post={post} />
+              </SectionCarouselItem>
             ))}
-          </Grid>
+          </SectionCarousel>
         ) : (
           <EmptyState title="لا توجد تجارب بعد" />
         )}
@@ -178,11 +197,13 @@ export default async function Page() {
         {productsError ? (
           <ApiErrorState error={productsError} />
         ) : products && products.data.length > 0 ? (
-          <Grid className="web-card-grid web-card-grid--products" columns="3" gap="16">
+          <SectionCarousel ariaLabel="منتجات مختارة">
             {products.data.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <SectionCarouselItem key={product.id}>
+                <ProductCard product={product} />
+              </SectionCarouselItem>
             ))}
-          </Grid>
+          </SectionCarousel>
         ) : (
           <EmptyState title="لا توجد منتجات حاليا" />
         )}
