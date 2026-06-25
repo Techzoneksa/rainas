@@ -2,7 +2,7 @@
   "name": "raina",
   "version": "0.2.0",
   "private": true,
-  "packageManager": "pnpm@11.0.9",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "turbo dev --parallel",
     "build": "turbo build",
@@ -34,13 +34,5 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.1",
     "vitest": "4.1.8"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "esbuild",
-      "prisma",
-      "sharp"
-    ]
   }
 }
