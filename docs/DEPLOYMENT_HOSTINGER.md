@@ -76,6 +76,16 @@ cp apps/web/.env.example apps/web/.env
 
 ## 4. Build
 
+If the deployment environment strips execute permissions (EACCES on Turbo binary):
+
+```bash
+# Fix binary permissions if needed
+chmod -R +x node_modules/.bin
+chmod -R +x node_modules/.pnpm/**/node_modules/.bin
+```
+
+Then build:
+
 ```bash
 pnpm install
 pnpm --filter @raina/api db:generate
