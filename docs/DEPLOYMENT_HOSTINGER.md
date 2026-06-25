@@ -215,14 +215,14 @@ Hostinger uses pnpm v11.9.0 which requires explicit approval for dependency buil
 
 Build approvals are configured in `pnpm-workspace.yaml` via `onlyBuiltDependencies` + `allowBuilds`:
 
-| Package | Purpose |
-|---------|---------|
-| `esbuild` | Bundler (used by Turborepo) |
-| `prisma` | ORM CLI |
-| `@prisma/client` | Prisma client runtime |
-| `@prisma/engines` | Prisma engine binaries |
-| `sharp` | Image processing |
-| `@scarf/scarf` | Telemetry (approved for build) |
+| Package           | Purpose                        |
+| ----------------- | ------------------------------ |
+| `esbuild`         | Bundler (used by Turborepo)    |
+| `prisma`          | ORM CLI                        |
+| `@prisma/client`  | Prisma client runtime          |
+| `@prisma/engines` | Prisma engine binaries         |
+| `sharp`           | Image processing               |
+| `@scarf/scarf`    | Telemetry (approved for build) |
 
 Do **not** place `pnpm.onlyBuiltDependencies` inside `package.json` —  
 Hostinger's pnpm ignores it and prints a warning.
@@ -234,3 +234,38 @@ Hostinger's pnpm ignores it and prints a warning.
 - Use a managed PostgreSQL provider (e.g., Aiven, Supabase) for higher reliability.
 - For admin panel, deploy with the same `pnpm build` and proxy to port 3001.
 - Hostinger should pull from the `main` branch for production deployment.
+
+---
+
+## Hostinger Web App — rain.promksa.com
+
+This domain runs **Web** (`apps/web`), **not** API.
+
+### Correct Settings
+
+| Setting          | Value                            |
+| ---------------- | -------------------------------- |
+| Framework preset | Other                            |
+| Branch           | `main`                           |
+| Node version     | 22.x                             |
+| Root directory   | `./`                             |
+| Package manager  | pnpm                             |
+| Build command    | `pnpm --filter @raina/web build` |
+| Output directory | `apps/web/.next`                 |
+| Entry file       | `apps/web/server.js`             |
+
+> **Warning:** Do not use `apps/api/dist/main.js` for `rain.promksa.com`.
+> That entry file is only for the separate API app (`api.rain.promksa.com`).
+
+### Environment Variables for Production
+
+Set these in Hostinger's env vars UI (do **not** commit `.env` to git):
+
+```env
+NEXT_PUBLIC_SITE_URL=https://rain.promksa.com
+NEXT_PUBLIC_API_BASE_URL=https://api.rain.promksa.com/api/v1
+NEXT_PUBLIC_APP_ENV=production
+NODE_ENV=production
+```
+
+> If the API is not yet deployed, Web pages that depend on API data will render empty/error states gracefully (Phase 5 design).
