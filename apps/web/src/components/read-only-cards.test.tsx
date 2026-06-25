@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
-import type { Product, Post } from "@raina/api-contracts";
+import type { Category, Product, Post } from "@raina/api-contracts";
 
 import { ApiErrorState } from "./state-views";
 import { CategoryCard } from "./category-card";
@@ -11,9 +11,10 @@ import { ProductCard } from "./product-card";
 import { PostCard } from "./post-card";
 import { RatingSummary } from "./rating-summary";
 import { RemoteImage } from "./remote-image";
+import { RoundedCategoryCarousel } from "./rounded-category-carousel";
 import { RainaApiError } from "@/lib/api/errors";
 
-const category = {
+const category: Category = {
   id: "cat_skincare",
   slug: "skincare",
   nameAr: "العناية بالبشرة",
@@ -110,6 +111,16 @@ describe("read-only web cards", () => {
 
     expect(html).toContain("العناية بالبشرة");
     expect(html).toContain("/categories/skincare");
+  });
+
+  it("renders rounded category carousel without detailed card action", () => {
+    const html = renderToStaticMarkup(
+      createElement(RoundedCategoryCarousel, { categories: [category] })
+    );
+
+    expect(html).toContain("web-category-carousel__image");
+    expect(html).toContain("/categories/skincare");
+    expect(html).not.toContain("عرض التصنيف");
   });
 
   it("renders product card details", () => {

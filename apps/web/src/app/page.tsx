@@ -1,13 +1,13 @@
 import type { Route } from "next";
 import Link from "next/link";
-import type { Category, Post, Product } from "@raina/api-contracts";
+import type { Product } from "@raina/api-contracts";
 import { Badge, EmptyState, Grid, Inline, Stack } from "@raina/ui";
 
-import { CategoryCard } from "@/components/category-card";
 import { PageHeader } from "@/components/page-header";
 import { PostCard } from "@/components/post-card";
 import { ProductCard } from "@/components/product-card";
 import { RemoteImage } from "@/components/remote-image";
+import { RoundedCategoryCarousel } from "@/components/rounded-category-carousel";
 import { ApiErrorState } from "@/components/state-views";
 import { listCategories } from "@/lib/api/categories";
 import { listPosts } from "@/lib/api/posts";
@@ -25,19 +25,9 @@ function getSettledError<T>(result: PromiseSettledResult<T>): unknown | undefine
 }
 
 function HomeHero({
-  categories,
-  posts,
-  products,
-  categoryCount,
-  postCount,
-  productCount
+  products
 }: Readonly<{
-  categories: Category[];
-  posts: Post[];
   products: Product[];
-  categoryCount: number;
-  postCount: number;
-  productCount: number;
 }>) {
   const heroProducts = products.slice(0, 3);
 
@@ -84,19 +74,35 @@ function HomeHero({
             />
           )}
         </div>
-        <div className="web-hero__stats">
-          <Badge variant="primary">
-            {productCount > 0 ? formatCount(productCount, "منتج") : "منتجات وتجارب"}
-          </Badge>
-          <Badge variant="info">
-            {postCount > 0 ? formatCount(postCount, "تجربة") : "تقييمات من 10"}
-          </Badge>
-          <Badge>
-            {categoryCount > 0 ? formatCount(categoryCount, "تصنيف") : "تصنيفات متنوعة"}
-          </Badge>
-          {categories[0] ? <Badge variant="purple">{categories[0].nameAr}</Badge> : null}
-          {posts[0] ? <Badge variant="success">آخر تجربة منشورة</Badge> : null}
-        </div>
+      </div>
+    </section>
+  );
+}
+
+function HomeStats({
+  categoryCount,
+  postCount,
+  productCount
+}: Readonly<{
+  categoryCount: number;
+  postCount: number;
+  productCount: number;
+}>) {
+  return (
+    <section className="web-home-stats" aria-label="ملخص محتوى رأينا">
+      <div className="web-home-stats__item">
+        <Badge variant="primary">
+          {productCount > 0 ? formatCount(productCount, "منتج") : "منتجات"}
+        </Badge>
+        <span>منتجات عامة قابلة للتصفح</span>
+      </div>
+      <div className="web-home-stats__item">
+        <Badge variant="info">{postCount > 0 ? formatCount(postCount, "تجربة") : "تجارب"}</Badge>
+        <span>تجارب وتقييمات قراءة فقط</span>
+      </div>
+      <div className="web-home-stats__item">
+        <Badge>{categoryCount > 0 ? formatCount(categoryCount, "تصنيف") : "تصنيفات"}</Badge>
+        <span>مجالات تساعدك تبدأ بسرعة</span>
       </div>
     </section>
   );
@@ -118,32 +124,38 @@ export default async function Page() {
 
   return (
     <Stack className="web-home" gap="40">
-      <HomeHero
-        categories={categories?.data ?? []}
-        posts={posts?.data ?? []}
-        products={products?.data ?? []}
+      <HomeHero products={products?.data ?? []} />
+
+      <section className="web-section" aria-labelledby="home-categories">
+        <PageHeader
+          titleId="home-categories"
+          title="تصفح حسب التصنيف"
+          description="اختر المجال الذي يهمك."
+        />
+        {categoriesError ? (
+          <ApiErrorState error={categoriesError} />
+        ) : categories && categories.data.length > 0 ? (
+          <RoundedCategoryCarousel categories={categories.data} />
+        ) : (
+          <EmptyState
+            title="لا توجد تصنيفات حاليا"
+            description="ستظهر التصنيفات هنا عند توفرها من API."
+          />
+        )}
+      </section>
+
+      <HomeStats
         categoryCount={categories?.meta.total ?? categories?.data.length ?? 0}
         postCount={posts?.meta.total ?? posts?.data.length ?? 0}
         productCount={products?.meta.total ?? products?.data.length ?? 0}
       />
 
-      <section className="web-section" aria-labelledby="home-categories">
-        <PageHeader title="التصنيفات" description="ابدأ من المجال الذي يهمك." />
-        {categoriesError ? (
-          <ApiErrorState error={categoriesError} />
-        ) : categories && categories.data.length > 0 ? (
-          <Grid className="web-card-grid web-card-grid--categories" columns="4" gap="16">
-            {categories.data.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
-          </Grid>
-        ) : (
-          <EmptyState title="لا توجد تصنيفات حاليا" />
-        )}
-      </section>
-
       <section className="web-section" aria-labelledby="home-posts">
-        <PageHeader title="أحدث التجارب" description="قراءات سريعة من تجارب منشورة." />
+        <PageHeader
+          titleId="home-posts"
+          title="أحدث التجارب"
+          description="قراءات سريعة من تجارب منشورة."
+        />
         {postsError ? (
           <ApiErrorState error={postsError} />
         ) : posts && posts.data.length > 0 ? (
@@ -158,7 +170,11 @@ export default async function Page() {
       </section>
 
       <section className="web-section" aria-labelledby="home-products">
-        <PageHeader title="منتجات مختارة" description="منتجات مرتبة حسب التقييمات المتاحة." />
+        <PageHeader
+          titleId="home-products"
+          title="منتجات مختارة"
+          description="منتجات مرتبة حسب التقييمات المتاحة."
+        />
         {productsError ? (
           <ApiErrorState error={productsError} />
         ) : products && products.data.length > 0 ? (
