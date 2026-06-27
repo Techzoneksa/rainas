@@ -268,23 +268,45 @@ chmod -R +x node_modules/.pnpm
 
 ---
 
-## Hostinger Limited Build Command
+## Hostinger Limited Build Command (pnpm not in PATH)
 
-Hostinger does not allow a custom build command — only `pnpm run build` is available.
+Hostinger may not expose `pnpm` in `PATH` during the build phase — only `npm` is available.
 
-The root `package.json` is configured so `pnpm run build` builds the Web app only:
+### How it works
+
+The root `package.json` maps `build` to a Node script that activates pnpm via Corepack:
 
 ```json
 {
   "scripts": {
-    "build": "pnpm --filter @raina/web build",
+    "build": "node scripts/hostinger-build-web.cjs",
+    "build:web": "pnpm --filter @raina/web build",
     "build:all": "turbo build"
   }
 }
 ```
 
-- `pnpm run build` — builds `apps/web` only (used by Hostinger).
-- `pnpm run build:all` — builds full monorepo (used locally and in CI).
+- `npm run build` (Hostinger) → activates Corepack → runs `pnpm --filter @raina/web build` via `corepack pnpm`.
+- `pnpm run build:web` — direct pnpm web build (local use).
+- `pnpm run build:all` — full monorepo build (local/CI).
+
+### Why not convert to npm entirely
+
+- The project is a pnpm monorepo with `pnpm-workspace.yaml` and `pnpm-lock.yaml`.
+- `npm workspaces` field is added to root `package.json` only so Hostinger's npm can recognise the monorepo structure during `npm install` (if it runs it).
+- Corepack is the bridge: the UI uses `npm` but the build uses `pnpm` internally.
+
+### Workspaces compatibility
+
+Root `package.json` includes:
+
+```json
+{
+  "workspaces": ["apps/*", "packages/*"]
+}
+```
+
+This helps `npm install` understand the monorepo structure without removing `pnpm-workspace.yaml` or `pnpm-lock.yaml`.
 
 ## Hostinger Web App — rain.promksa.com
 
@@ -298,8 +320,8 @@ This domain runs **Web** (`apps/web`), **not** API.
 | Branch           | `main`               |
 | Node version     | 22.x                 |
 | Root directory   | `./`                 |
-| Package manager  | pnpm                 |
-| Build command    | `pnpm run build`     |
+| Package manager  | npm                  |
+| Build command    | `npm run build`      |
 | Output directory | `apps/web/.next`     |
 | Entry file       | `apps/web/server.js` |
 
