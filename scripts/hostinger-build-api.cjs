@@ -71,6 +71,97 @@ function runWithPnpm(args) {
   return false;
 }
 
+function chmodIfExists(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return false;
+
+    const stat = fs.lstatSync(filePath);
+    if (!stat.isFile() && !stat.isSymbolicLink()) return false;
+
+    fs.chmodSync(filePath, 0o755);
+    console.log(`[hostinger-build-api] chmod 755 ${filePath}`);
+    return true;
+  } catch (error) {
+    console.warn(
+      `[hostinger-build-api] Could not chmod ${filePath}: ${error.message}`,
+    );
+    return false;
+  }
+}
+
+function fixPrismaEnginePermissions() {
+  if (process.platform === "win32") {
+    console.log("[hostinger-build-api] skipped Prisma chmod on Windows");
+    return;
+  }
+
+  const candidates = new Set();
+
+  const directEnginesDir = path.join(
+    root,
+    "node_modules",
+    "@prisma",
+    "engines",
+  );
+
+  const pnpmDir = path.join(root, "node_modules", ".pnpm");
+
+  function addEnginesFromDir(dir) {
+    try {
+      if (!fs.existsSync(dir)) return;
+
+      for (const file of fs.readdirSync(dir)) {
+        if (
+          file.startsWith("schema-engine-") ||
+          file.startsWith("query-engine-") ||
+          file.startsWith("migration-engine-") ||
+          file.startsWith("introspection-engine-") ||
+          file.startsWith("libquery_engine-")
+        ) {
+          candidates.add(path.join(dir, file));
+        }
+      }
+    } catch (error) {
+      console.warn(
+        `[hostinger-build-api] Could not scan ${dir}: ${error.message}`,
+      );
+    }
+  }
+
+  addEnginesFromDir(directEnginesDir);
+
+  try {
+    if (fs.existsSync(pnpmDir)) {
+      for (const entry of fs.readdirSync(pnpmDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+
+        if (entry.name.startsWith("@prisma+engines@")) {
+          addEnginesFromDir(
+            path.join(
+              pnpmDir,
+              entry.name,
+              "node_modules",
+              "@prisma",
+              "engines",
+            ),
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.warn(
+      `[hostinger-build-api] Could not scan pnpm dir: ${error.message}`,
+    );
+  }
+
+  let fixed = 0;
+  for (const candidate of candidates) {
+    if (chmodIfExists(candidate)) fixed += 1;
+  }
+
+  console.log(`[hostinger-build-api] fixed ${fixed} Prisma engine binaries`);
+}
+
 const packageManager = readPackageManager();
 
 console.log("[hostinger-build-api] Starting Hostinger API build...");
@@ -79,6 +170,8 @@ console.log(`[hostinger-build-api] CWD: ${root}`);
 console.log(`[hostinger-build-api] packageManager=${packageManager}`);
 console.log(`[hostinger-build-api] RUN_DB_MIGRATIONS=${process.env.RUN_DB_MIGRATIONS ?? "unset"}`);
 console.log(`[hostinger-build-api] migrateOnly=${migrateOnly}`);
+
+fixPrismaEnginePermissions();
 
 if (shouldMigrate) {
   console.log("[hostinger-build-api] Running prisma migrate deploy...");

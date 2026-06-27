@@ -553,3 +553,43 @@ RUN_DB_MIGRATIONS=false ──►  tsc -p tsconfig.build.json
 
 All pnpm calls go through the 4-method fallback (local bin → local cjs → global → npx).
 No `corepack enable` is called.
+
+---
+
+## Prisma Engine EACCES on Hostinger
+
+### Problem
+
+Hostinger may strip execute permissions from Prisma engine binaries inside `node_modules/.pnpm`:
+
+```
+schema-engine-debian-openssl-1.1.x
+EACCES permission denied
+```
+
+This prevents `prisma migrate deploy` and `prisma generate` from running during the build phase.
+
+### Solution
+
+The API build script (`scripts/hostinger-build-api.cjs`) includes a `fixPrismaEnginePermissions()` function that runs **before** any Prisma command. It:
+
+1. Scans `node_modules/@prisma/engines/` for engine binaries.
+2. Scans `node_modules/.pnpm/@prisma+engines@*/node_modules/@prisma/engines/` (pnpm store paths).
+3. Runs `chmod 755` on every engine binary found (`schema-engine-*`, `query-engine-*`, `migration-engine-*`, `introspection-engine-*`, `libquery_engine-*`).
+4. Skips on Windows — only runs on Linux (Hostinger).
+5. Logs each fixed file and total count.
+6. Does **not** fail the build if no engines are found.
+
+### Build order
+
+The script now runs in this order:
+
+```
+1. fixPrismaEnginePermissions()
+2. If RUN_DB_MIGRATIONS=true → prisma migrate deploy
+3. pnpm --filter @raina/api build
+```
+
+### When to redeploy
+
+Set `RUN_DB_MIGRATIONS=true` for the first deploy. After a successful deploy, change to `RUN_DB_MIGRATIONS=false` and redeploy again.
