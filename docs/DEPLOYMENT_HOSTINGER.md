@@ -286,15 +286,17 @@ It tries multiple methods to run pnpm:
 ```json
 {
   "scripts": {
-    "build": "node scripts/hostinger-build-web.cjs",
-    "build:web": "pnpm --filter @raina/web build",
+    "build": "node scripts/hostinger-build.cjs",
+    "build:web": "node scripts/hostinger-build-web.cjs",
+    "build:api": "node scripts/hostinger-build-api.cjs",
     "build:all": "turbo build"
   }
 }
 ```
 
-- `npm run build` (Hostinger) → hostinger-build-web.cjs → local <node_modules/.bin/pnpm> → builds Web.
-- `pnpm run build:web` — direct pnpm web build (local use).
+- `npm run build` (Hostinger) → hostinger-build.cjs → dispatches to web or api build based on `HOSTINGER_APP`.
+- `pnpm run build:web` — direct web build (local use).
+- `pnpm run build:api` — direct API build (local use).
 - `pnpm run build:all` — full monorepo build (local/CI).
 
 ### Why not convert to npm entirely
@@ -315,6 +317,53 @@ Root `package.json` includes:
 
 This helps `npm install` understand the monorepo structure without removing `pnpm-workspace.yaml` or `pnpm-lock.yaml`.
 
+---
+
+## Shared Hostinger build command
+
+Hostinger's Node.js hosting UI typically only exposes a subset of scripts from `package.json` (e.g. `build`, `dev`, `postinstall`). It may **not** show `build:api` or `build:web`.
+
+Both the Web app and API app use the same build command:
+
+```bash
+pnpm run build
+```
+
+Which runs `node scripts/hostinger-build.cjs`. This dispatcher checks the `HOSTINGER_APP` environment variable to decide what to build:
+
+| `HOSTINGER_APP` | Builds                  | Script used                       |
+| --------------- | ----------------------- | --------------------------------- |
+| `web` (default) | `apps/web/.next`        | `scripts/hostinger-build-web.cjs` |
+| `api`           | `apps/api/dist/main.js` | `scripts/hostinger-build-api.cjs` |
+
+### How it works
+
+```
+pnpm run build
+  └─► node scripts/hostinger-build.cjs
+        ├─► HOSTINGER_APP=web  (or unset)  →  hostinger-build-web.cjs  →  next build
+        └─► HOSTINGER_APP=api              →  hostinger-build-api.cjs  →  prisma generate → tsc
+```
+
+### Setup per app
+
+| App | Domain                  | `HOSTINGER_APP` | Build command    | Output dir       | Entry file              |
+| --- | ----------------------- | --------------- | ---------------- | ---------------- | ----------------------- |
+| Web | `raina.promksa.com`     | `web` (default) | `pnpm run build` | `apps/web/.next` | `apps/web/server.js`    |
+| API | `api-raina.promksa.com` | `api`           | `pnpm run build` | `apps/api/dist`  | `apps/api/dist/main.js` |
+
+Both apps can now use the same build command. The environment variable determines the output.
+
+### Script reference
+
+| Script      | Command                                | When to use                               |
+| ----------- | -------------------------------------- | ----------------------------------------- |
+| `build`     | `node scripts/hostinger-build.cjs`     | Hostinger (dispatches by `HOSTINGER_APP`) |
+| `build:web` | `node scripts/hostinger-build-web.cjs` | Direct web build (local/CI)               |
+| `build:api` | `node scripts/hostinger-build-api.cjs` | Direct API build (local/CI)               |
+| `api:build` | `node scripts/hostinger-build-api.cjs` | Alias for API build                       |
+| `build:all` | `turbo build`                          | Full monorepo build (local/CI)            |
+
 ## Hostinger Web App — rain.promksa.com
 
 This domain runs **Web** (`apps/web`), **not** API.
@@ -327,8 +376,8 @@ This domain runs **Web** (`apps/web`), **not** API.
 | Branch           | `main`               |
 | Node version     | 22.x                 |
 | Root directory   | `./`                 |
-| Package manager  | npm                  |
-| Build command    | `npm run build`      |
+| Package manager  | pnpm                 |
+| Build command    | `pnpm run build`     |
 | Output directory | `apps/web/.next`     |
 | Entry file       | `apps/web/server.js` |
 
@@ -340,6 +389,7 @@ This domain runs **Web** (`apps/web`), **not** API.
 Set these in Hostinger's env vars UI (do **not** commit `.env` to git):
 
 ```env
+HOSTINGER_APP=web
 NEXT_PUBLIC_SITE_URL=https://rain.promksa.com
 NEXT_PUBLIC_API_BASE_URL=https://api.rain.promksa.com/api/v1
 NEXT_PUBLIC_APP_ENV=production
@@ -368,8 +418,8 @@ This is a **separate** Hostinger Node.js app for the **API** (`apps/api`). It mu
 | Branch           | `main`                  |
 | Node version     | 22.x                    |
 | Root directory   | `./`                    |
-| Package manager  | npm                     |
-| Build command    | `npm run build:api`     |
+| Package manager  | pnpm                    |
+| Build command    | `pnpm run build`        |
 | Output directory | `apps/api/dist`         |
 | Entry file       | `apps/api/dist/main.js` |
 
@@ -378,6 +428,7 @@ This is a **separate** Hostinger Node.js app for the **API** (`apps/api`). It mu
 Set these in Hostinger's env vars UI for this API app:
 
 ```env
+HOSTINGER_APP=api
 NODE_ENV=production
 PORT=4000
 DATABASE_URL=postgresql://raina:your_password@your-db-host:5432/raina_prod?schema=public

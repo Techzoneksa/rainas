@@ -10,7 +10,7 @@
   "scripts": {
     "postinstall": "node scripts/fix-turbo-permissions.cjs",
     "dev": "turbo dev --parallel",
-    "build": "node scripts/hostinger-build-web.cjs",
+    "build": "node scripts/hostinger-build.cjs",
     "build:web": "pnpm --filter @raina/web build",
     "build:api": "node scripts/hostinger-build-api.cjs",
     "api:build": "node scripts/hostinger-build-api.cjs",
