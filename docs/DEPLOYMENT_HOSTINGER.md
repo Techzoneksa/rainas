@@ -347,3 +347,88 @@ NODE_ENV=production
 ```
 
 > If the API is not yet deployed, Web pages that depend on API data will render empty/error states gracefully (Phase 5 design).
+
+---
+
+## Hostinger API App — api.rain.promksa.com
+
+This is a **separate** Hostinger Node.js app for the **API** (`apps/api`). It must be created as a new Hostinger project (not merged with the web app).
+
+### Create a New Hostinger App
+
+1. In Hostinger hPanel → **Node.js** → **Add new**.
+2. Choose the same domain or a subdomain (e.g. `api.rain.promksa.com`).
+3. Point the subdomain DNS A record to Hostinger's VPS IP.
+
+### Correct Settings
+
+| Setting          | Value                   |
+| ---------------- | ----------------------- |
+| Framework preset | Other                   |
+| Branch           | `main`                  |
+| Node version     | 22.x                    |
+| Root directory   | `./`                    |
+| Package manager  | npm                     |
+| Build command    | `npm run build:api`     |
+| Output directory | `apps/api/dist`         |
+| Entry file       | `apps/api/dist/main.js` |
+
+### Environment Variables for Production
+
+Set these in Hostinger's env vars UI for this API app:
+
+```env
+NODE_ENV=production
+PORT=4000
+DATABASE_URL=postgresql://raina:your_password@your-db-host:5432/raina_prod?schema=public
+WEB_ORIGIN=https://rain.promksa.com
+ADMIN_ORIGIN=https://admin.rain.promksa.com
+CORS_ORIGINS=https://rain.promksa.com
+API_PREFIX=api/v1
+REQUEST_BODY_LIMIT=1mb
+RATE_LIMIT_TTL_SECONDS=60
+RATE_LIMIT_REQUESTS=120
+```
+
+> **Note:** `PORT` is informational. Hostinger assigns a random port and expects `process.env.PORT`. If the app fails to start, confirm Hostinger publishes the port as `PORT`.
+
+### Database Migration
+
+Build does **not** run migrations. You must run this once (and on each deploy with schema changes):
+
+```bash
+# Via SSH or Hostinger remote terminal
+cd /var/www/rainas
+npm run db:migrate:deploy
+```
+
+> Do **not** run `db:seed` on production unless this is a demo/data-reset environment.
+
+### Health Checks
+
+After deployment, verify the API is running:
+
+| Endpoint                 | Expected                                                            |
+| ------------------------ | ------------------------------------------------------------------- |
+| `GET /health/live`       | `{ status: "ok", service: "raina-api", environment: "production" }` |
+| `GET /health/ready`      | `{ status: "ok", ... }` (checks database connectivity)              |
+| `GET /api/docs`          | Swagger UI page (if enabled)                                        |
+| `GET /api/v1/categories` | Array of categories (requires seeded data)                          |
+| `GET /api/v1/products`   | Array of products (requires seeded data)                            |
+| `GET /api/v1/posts`      | Array of posts (requires seeded data)                               |
+
+### Post-Deploy Checklist
+
+1. Confirm API health endpoints respond.
+2. Confirm database connectivity (`/health/ready` returns `"ok"`).
+3. Set `NEXT_PUBLIC_API_BASE_URL` on the Web app to `https://api.rain.promksa.com/api/v1`.
+4. **Redeploy** the Web app (Next.js reads `NEXT_PUBLIC_*` at build time).
+5. Verify Web pages load live API data (categories, products, posts).
+6. If migrating an existing database, run `npm run db:migrate:deploy` from SSH.
+
+### Notes
+
+- The API is a standard NestJS app. It does **not** need `next start` or custom server config.
+- Hostinger's Node.js hosting may restart the app automatically on file changes.
+- If `npm run build:api` fails, check the build logs in Hostinger → Node.js → app → Logs.
+- The build script (`scripts/hostinger-build-api.cjs`) uses the same local pnpm fallback methods as the web build script. It does **not** call `corepack enable`.
