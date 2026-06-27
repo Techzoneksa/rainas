@@ -26,6 +26,7 @@
     "db:generate": "pnpm --filter @raina/api db:generate",
     "db:migrate": "pnpm --filter @raina/api db:migrate",
     "db:migrate:deploy": "pnpm --filter @raina/api db:migrate:deploy",
+    "db:migrate:deploy:api": "node scripts/hostinger-build-api.cjs --migrate-only",
     "db:seed": "pnpm --filter @raina/api db:seed",
     "db:reset": "pnpm --filter @raina/api db:reset",
     "db:studio": "pnpm --filter @raina/api db:studio",

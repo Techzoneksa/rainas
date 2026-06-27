@@ -381,6 +381,7 @@ Set these in Hostinger's env vars UI for this API app:
 NODE_ENV=production
 PORT=4000
 DATABASE_URL=postgresql://raina:your_password@your-db-host:5432/raina_prod?schema=public
+DIRECT_URL=postgresql://raina:your_password@your-db-host:5432/raina_prod?schema=public
 WEB_ORIGIN=https://rain.promksa.com
 ADMIN_ORIGIN=https://admin.rain.promksa.com
 CORS_ORIGINS=https://rain.promksa.com
@@ -388,21 +389,35 @@ API_PREFIX=api/v1
 REQUEST_BODY_LIMIT=1mb
 RATE_LIMIT_TTL_SECONDS=60
 RATE_LIMIT_REQUESTS=120
+RUN_DB_MIGRATIONS=true
 ```
 
 > **Note:** `PORT` is informational. Hostinger assigns a random port and expects `process.env.PORT`. If the app fails to start, confirm Hostinger publishes the port as `PORT`.
 
 ### Database Migration
 
-Build does **not** run migrations. You must run this once (and on each deploy with schema changes):
+> **Important:** SSH shell on Hostinger may not have `node`/`npm` in `PATH`. You cannot run `npm run db:migrate:deploy` from SSH.
+
+Use `RUN_DB_MIGRATIONS=true` during build instead:
+
+1. Set `RUN_DB_MIGRATIONS=true` in the API app env vars (see above).
+2. Deploy / Redeploy the API app via Hostinger.
+3. The build script (`scripts/hostinger-build-api.cjs`) runs `prisma migrate deploy` **before** `tsc` build.
+4. After the first successful deploy, change `RUN_DB_MIGRATIONS=false` and redeploy again.
+5. Future deploys with schema changes: set `RUN_DB_MIGRATIONS=true`, deploy, then set back to `false`.
+
+> - Never run `db:seed` on production unless this is a demo/data-reset environment.
+> - Only `prisma migrate deploy` is used — never `prisma migrate dev`.
+
+### Migrate-Only Script
+
+You can also run migrations standalone (if `node`/`npm` is available):
 
 ```bash
-# Via SSH or Hostinger remote terminal
-cd /var/www/rainas
-npm run db:migrate:deploy
+npm run db:migrate:deploy:api
 ```
 
-> Do **not** run `db:seed` on production unless this is a demo/data-reset environment.
+This calls `node scripts/hostinger-build-api.cjs --migrate-only`, which runs `prisma migrate deploy` via the same pnpm fallback methods, then exits without building.
 
 ### Health Checks
 
@@ -424,7 +439,7 @@ After deployment, verify the API is running:
 3. Set `NEXT_PUBLIC_API_BASE_URL` on the Web app to `https://api.rain.promksa.com/api/v1`.
 4. **Redeploy** the Web app (Next.js reads `NEXT_PUBLIC_*` at build time).
 5. Verify Web pages load live API data (categories, products, posts).
-6. If migrating an existing database, run `npm run db:migrate:deploy` from SSH.
+6. If migrating an existing database, set `RUN_DB_MIGRATIONS=true`, redeploy, then set back to `false`.
 
 ### Notes
 
@@ -432,3 +447,58 @@ After deployment, verify the API is running:
 - Hostinger's Node.js hosting may restart the app automatically on file changes.
 - If `npm run build:api` fails, check the build logs in Hostinger → Node.js → app → Logs.
 - The build script (`scripts/hostinger-build-api.cjs`) uses the same local pnpm fallback methods as the web build script. It does **not** call `corepack enable`.
+
+---
+
+## Running Prisma migrations on Hostinger
+
+### Problem
+
+Hostinger SSH shell does **not** have `node` or `npm` in `PATH`:
+
+```bash
+~/domains/raina.promksa.com/nodejs$ node
+node: command not found
+```
+
+Only the Hostinger Node.js App build/deploy environment has Node.js available. Therefore traditional `npm run db:migrate:deploy` via SSH does not work.
+
+### Solution
+
+The API build script `scripts/hostinger-build-api.cjs` accepts an opt-in environment variable:
+
+```env
+RUN_DB_MIGRATIONS=true
+```
+
+When set to `true`, the script runs `prisma migrate deploy` **before** the `tsc` build, using the same pnpm fallback methods (local bin, local cjs, global, npx).
+
+### Workflow
+
+1. **First deploy**: Set `RUN_DB_MIGRATIONS=true` in the API Hostinger app env vars.
+2. Deploy/redeploy the API app — migration runs automatically before build.
+3. After successful deploy, change `RUN_DB_MIGRATIONS=false` and redeploy again (build only, no migration).
+4. **Future schema changes**: Set `RUN_DB_MIGRATIONS=true`, deploy, then set back to `false`.
+
+### Rules
+
+| Action                      | Command / Method                                        |
+| --------------------------- | ------------------------------------------------------- |
+| Migration during build      | `RUN_DB_MIGRATIONS=true`, then `npm run build:api`      |
+| Migration only (standalone) | `npm run db:migrate:deploy:api` (runs `--migrate-only`) |
+| Seed                        | **Never run in production** unless demo is intended     |
+| Migration command used      | `prisma migrate deploy` only                            |
+| Migration command banned    | `prisma migrate dev`, `prisma db push`                  |
+
+### Script details
+
+The CI/CD script in `scripts/hostinger-build-api.cjs`:
+
+```
+RUN_DB_MIGRATIONS=true  ──►  prisma migrate deploy  ──►  tsc -p tsconfig.build.json
+RUN_DB_MIGRATIONS=false ──►  tsc -p tsconfig.build.json
+--migrate-only          ──►  prisma migrate deploy  ──►  exit
+```
+
+All pnpm calls go through the 4-method fallback (local bin → local cjs → global → npx).
+No `corepack enable` is called.

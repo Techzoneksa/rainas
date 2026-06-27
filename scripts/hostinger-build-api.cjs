@@ -3,6 +3,9 @@ const fs = require("fs");
 const path = require("path");
 
 const root = process.cwd();
+const migrateOnly = process.argv.includes("--migrate-only");
+const shouldMigrate = process.env.RUN_DB_MIGRATIONS === "true" || migrateOnly;
+const shouldBuild = !migrateOnly;
 
 function readPackageManager() {
   try {
@@ -36,57 +39,73 @@ function exists(filePath) {
   }
 }
 
+function runWithPnpm(args) {
+  const pkgMgr = readPackageManager();
+  const pnpmVersion = pkgMgr.startsWith("pnpm@") ? pkgMgr : "pnpm@11.9.0";
+
+  const localBinPnpm =
+    process.platform === "win32"
+      ? path.join(root, "node_modules", ".bin", "pnpm.cmd")
+      : path.join(root, "node_modules", ".bin", "pnpm");
+
+  const localPnpmCjs = path.join(root, "node_modules", "pnpm", "bin", "pnpm.cjs");
+
+  if (exists(localBinPnpm)) {
+    console.log(`[hostinger-build-api] using local pnpm bin: ${localBinPnpm}`);
+    if (run(localBinPnpm, args)) return true;
+    console.warn("[hostinger-build-api] local pnpm bin failed, trying next method...");
+  }
+
+  if (exists(localPnpmCjs)) {
+    console.log(`[hostinger-build-api] using local pnpm cjs: ${localPnpmCjs}`);
+    if (run(process.execPath, [localPnpmCjs, ...args])) return true;
+    console.warn("[hostinger-build-api] local pnpm cjs failed, trying next method...");
+  }
+
+  console.log("[hostinger-build-api] trying global pnpm from PATH");
+  if (run("pnpm", args)) return true;
+
+  console.log(`[hostinger-build-api] trying npx ${pnpmVersion}`);
+  if (run("npx", ["--yes", pnpmVersion, ...args])) return true;
+
+  return false;
+}
+
 const packageManager = readPackageManager();
-const pnpmVersion = packageManager.startsWith("pnpm@")
-  ? packageManager
-  : "pnpm@11.9.0";
-
-const buildArgs = ["--filter", "@raina/api", "build"];
-
-const localBinPnpm =
-  process.platform === "win32"
-    ? path.join(root, "node_modules", ".bin", "pnpm.cmd")
-    : path.join(root, "node_modules", ".bin", "pnpm");
-
-const localPnpmCjs = path.join(root, "node_modules", "pnpm", "bin", "pnpm.cjs");
 
 console.log("[hostinger-build-api] Starting Hostinger API build...");
 console.log(`[hostinger-build-api] Platform: ${process.platform}`);
 console.log(`[hostinger-build-api] CWD: ${root}`);
 console.log(`[hostinger-build-api] packageManager=${packageManager}`);
-console.log("[hostinger-build-api] building @raina/api only");
+console.log(`[hostinger-build-api] RUN_DB_MIGRATIONS=${process.env.RUN_DB_MIGRATIONS ?? "unset"}`);
+console.log(`[hostinger-build-api] migrateOnly=${migrateOnly}`);
 
-if (exists(localBinPnpm)) {
-  console.log(`[hostinger-build-api] using local pnpm bin: ${localBinPnpm}`);
-  if (run(localBinPnpm, buildArgs)) {
-    console.log("[hostinger-build-api] Build completed successfully.");
-    process.exit(0);
+if (shouldMigrate) {
+  console.log("[hostinger-build-api] Running prisma migrate deploy...");
+  const migrateArgs = ["--filter", "@raina/api", "exec", "prisma", "migrate", "deploy"];
+
+  if (!runWithPnpm(migrateArgs)) {
+    console.error("[hostinger-build-api] Migration failed.");
+    process.exit(1);
   }
-  console.warn("[hostinger-build-api] local pnpm bin failed, trying next method...");
+
+  console.log("[hostinger-build-api] Migration completed successfully.");
 }
 
-if (exists(localPnpmCjs)) {
-  console.log(`[hostinger-build-api] using local pnpm cjs: ${localPnpmCjs}`);
-  if (run(process.execPath, [localPnpmCjs, ...buildArgs])) {
-    console.log("[hostinger-build-api] Build completed successfully.");
-    process.exit(0);
-  }
-  console.warn("[hostinger-build-api] local pnpm cjs failed, trying next method...");
+if (!shouldBuild) {
+  console.log("[hostinger-build-api] --migrate-only specified, skipping build.");
+  process.exit(0);
 }
 
-console.log("[hostinger-build-api] trying global pnpm from PATH");
-if (run("pnpm", buildArgs)) {
+console.log("[hostinger-build-api] Building @raina/api...");
+const buildArgs = ["--filter", "@raina/api", "build"];
+
+if (runWithPnpm(buildArgs)) {
   console.log("[hostinger-build-api] Build completed successfully.");
   process.exit(0);
 }
 
-console.log(`[hostinger-build-api] trying npx ${pnpmVersion}`);
-if (run("npx", ["--yes", pnpmVersion, ...buildArgs])) {
-  console.log("[hostinger-build-api] Build completed successfully.");
-  process.exit(0);
-}
-
-console.error("[hostinger-build-api] failed to run pnpm by all available methods");
+console.error("[hostinger-build-api] Build failed after all methods.");
 console.error("[hostinger-build-api] Hostinger should use:");
 console.error("  Package manager: npm");
 console.error("  Build command: npm run build:api");
