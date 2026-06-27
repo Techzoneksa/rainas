@@ -2,28 +2,12 @@ const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-function run(command, args, options = {}) {
-  const joined = [command, ...args].join(" ");
-  console.log(`[hostinger-build-web] $ ${joined}`);
-
-  const result = spawnSync(command, args, {
-    stdio: "inherit",
-    shell: process.platform === "win32",
-    ...options,
-  });
-
-  if (result.status !== 0) {
-    const msg = `Failed: ${joined} (exit ${result.status})`;
-    return { ok: false, error: msg, status: result.status };
-  }
-
-  return { ok: true };
-}
+const root = process.cwd();
 
 function readPackageManager() {
   try {
     const pkg = JSON.parse(
-      fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8"),
+      fs.readFileSync(path.join(root, "package.json"), "utf8"),
     );
     return pkg.packageManager || "pnpm@11.9.0";
   } catch {
@@ -31,49 +15,81 @@ function readPackageManager() {
   }
 }
 
-function detectPnpm() {
-  const result = spawnSync(
-    process.platform === "win32" ? "where" : "which",
-    ["pnpm"],
-    { encoding: "utf8" },
-  );
+function run(command, args, options = {}) {
+  console.log(`[hostinger-build-web] $ ${command} ${args.join(" ")}`);
+
+  const result = spawnSync(command, args, {
+    stdio: "inherit",
+    shell: process.platform === "win32",
+    cwd: root,
+    ...options,
+  });
+
   return result.status === 0;
 }
 
-console.log("[hostinger-build-web] Starting Hostinger web build...");
-console.log(`[hostinger-build-web] Platform: ${process.platform}`);
-console.log(`[hostinger-build-web] CWD: ${process.cwd()}`);
-
-const packageManager = readPackageManager();
-console.log(`[hostinger-build-web] packageManager: ${packageManager}`);
-
-const coreEnabled = run("corepack", ["enable"]);
-if (!coreEnabled.ok) {
-  console.warn(
-    "[hostinger-build-web] corepack enable failed (expected on some environments). Trying direct pnpm...",
-  );
-  if (detectPnpm()) {
-    console.log("[hostinger-build-web] Found pnpm in PATH, running build...");
-    run("pnpm", ["--filter", "@raina/web", "build"]);
-    console.log("[hostinger-build-web] Build completed successfully.");
-    process.exit(0);
-  } else {
-    console.error(
-      "[hostinger-build-web] pnpm not found in PATH and corepack enable failed.",
-    );
-    console.error(
-      "[hostinger-build-web] On Hostinger, corepack enable requires write access to Node.js install dir.",
-    );
-    process.exit(1);
+function exists(filePath) {
+  try {
+    return fs.existsSync(filePath);
+  } catch {
+    return false;
   }
 }
 
-const prepared = run("corepack", ["prepare", packageManager, "--activate"]);
-if (!prepared.ok) {
-  console.error("[hostinger-build-web] corepack prepare failed");
-  process.exit(1);
+const packageManager = readPackageManager();
+const pnpmVersion = packageManager.startsWith("pnpm@")
+  ? packageManager
+  : "pnpm@11.9.0";
+
+const buildArgs = ["--filter", "@raina/web", "build"];
+
+const localBinPnpm =
+  process.platform === "win32"
+    ? path.join(root, "node_modules", ".bin", "pnpm.cmd")
+    : path.join(root, "node_modules", ".bin", "pnpm");
+
+const localPnpmCjs = path.join(root, "node_modules", "pnpm", "bin", "pnpm.cjs");
+
+console.log("[hostinger-build-web] Starting Hostinger web build...");
+console.log(`[hostinger-build-web] Platform: ${process.platform}`);
+console.log(`[hostinger-build-web] CWD: ${root}`);
+console.log(`[hostinger-build-web] packageManager=${packageManager}`);
+console.log("[hostinger-build-web] building @raina/web only");
+
+if (exists(localBinPnpm)) {
+  console.log(`[hostinger-build-web] using local pnpm bin: ${localBinPnpm}`);
+  if (run(localBinPnpm, buildArgs)) {
+    console.log("[hostinger-build-web] Build completed successfully.");
+    process.exit(0);
+  }
+  console.warn("[hostinger-build-web] local pnpm bin failed, trying next method...");
 }
 
-console.log("[hostinger-build-web] Corepack ready, building Web...");
-run("corepack", ["pnpm", "--filter", "@raina/web", "build"]);
-console.log("[hostinger-build-web] Build completed successfully.");
+if (exists(localPnpmCjs)) {
+  console.log(`[hostinger-build-web] using local pnpm cjs: ${localPnpmCjs}`);
+  if (run(process.execPath, [localPnpmCjs, ...buildArgs])) {
+    console.log("[hostinger-build-web] Build completed successfully.");
+    process.exit(0);
+  }
+  console.warn("[hostinger-build-web] local pnpm cjs failed, trying next method...");
+}
+
+console.log("[hostinger-build-web] trying global pnpm from PATH");
+if (run("pnpm", buildArgs)) {
+  console.log("[hostinger-build-web] Build completed successfully.");
+  process.exit(0);
+}
+
+console.log(`[hostinger-build-web] trying npx ${pnpmVersion}`);
+if (run("npx", ["--yes", pnpmVersion, ...buildArgs])) {
+  console.log("[hostinger-build-web] Build completed successfully.");
+  process.exit(0);
+}
+
+console.error("[hostinger-build-web] failed to run pnpm by all available methods");
+console.error("[hostinger-build-web] Hostinger should use:");
+console.error("  Package manager: npm");
+console.error("  Build command: npm run build");
+console.error("  Output directory: apps/web/.next");
+console.error("  Entry file: apps/web/server.js");
+process.exit(1);

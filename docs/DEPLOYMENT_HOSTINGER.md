@@ -268,13 +268,20 @@ chmod -R +x node_modules/.pnpm
 
 ---
 
-## Hostinger Limited Build Command (pnpm not in PATH)
+## Hostinger npm + pnpm fallback
 
 Hostinger may not expose `pnpm` in `PATH` during the build phase — only `npm` is available.
+Additionally, `corepack enable` may fail because the Node.js installation directory is read-only.
 
-### How it works
+The build script (`scripts/hostinger-build-web.cjs`) does **not** call `corepack enable`.
+It tries multiple methods to run pnpm:
 
-The root `package.json` maps `build` to a Node script that activates pnpm via Corepack:
+1. Local `node_modules/.bin/pnpm` (available because `pnpm` is a root devDependency)
+2. `node_modules/pnpm/bin/pnpm.cjs` (via node)
+3. Global `pnpm` from PATH
+4. `npx --yes pnpm@11.9.0` (downloads pnpm if needed)
+
+### Scripts
 
 ```json
 {
@@ -286,7 +293,7 @@ The root `package.json` maps `build` to a Node script that activates pnpm via Co
 }
 ```
 
-- `npm run build` (Hostinger) → activates Corepack → runs `pnpm --filter @raina/web build` via `corepack pnpm`.
+- `npm run build` (Hostinger) → hostinger-build-web.cjs → local <node_modules/.bin/pnpm> → builds Web.
 - `pnpm run build:web` — direct pnpm web build (local use).
 - `pnpm run build:all` — full monorepo build (local/CI).
 
@@ -294,7 +301,7 @@ The root `package.json` maps `build` to a Node script that activates pnpm via Co
 
 - The project is a pnpm monorepo with `pnpm-workspace.yaml` and `pnpm-lock.yaml`.
 - `npm workspaces` field is added to root `package.json` only so Hostinger's npm can recognise the monorepo structure during `npm install` (if it runs it).
-- Corepack is the bridge: the UI uses `npm` but the build uses `pnpm` internally.
+- `pnpm` is added as a root devDependency so `node_modules/pnpm/bin/pnpm.cjs` exists after any package manager installs.
 
 ### Workspaces compatibility
 
