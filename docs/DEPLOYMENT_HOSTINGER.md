@@ -76,16 +76,6 @@ cp apps/web/.env.example apps/web/.env
 
 ## 4. Build
 
-If the deployment environment strips execute permissions (EACCES on Turbo binary):
-
-```bash
-# Fix binary permissions if needed
-chmod -R +x node_modules/.bin
-chmod -R +x node_modules/.pnpm/**/node_modules/.bin
-```
-
-Then build:
-
 ```bash
 pnpm install
 pnpm --filter @raina/api db:generate
@@ -234,6 +224,42 @@ Hostinger's pnpm ignores it and prints a warning.
 - Use a managed PostgreSQL provider (e.g., Aiven, Supabase) for higher reliability.
 - For admin panel, deploy with the same `pnpm build` and proxy to port 3001.
 - Hostinger should pull from the `main` branch for production deployment.
+
+---
+
+## Turbo EACCES on Hostinger
+
+### Root Cause
+
+Hostinger's environment may strip execute permissions from the Turbo binary after `pnpm install`:
+
+```
+node_modules/.pnpm/@turbo+linux-64@2.9.16/node_modules/@turbo/linux-64/bin/turbo cannot be executed
+```
+
+This affects `pnpm run build` (which invokes `turbo build`). For the Web app, use `pnpm --filter @raina/web build` instead — it runs `next build` directly without Turbo.
+
+### Project-Level Fix
+
+A `postinstall` script (`scripts/fix-turbo-permissions.cjs`) automatically fixes Turbo binary permissions after `pnpm install`. It runs on Linux/macOS only (skips Windows) and searches for Turbo binaries dynamically regardless of version.
+
+No manual action needed — it runs with every `pnpm install`.
+
+### Emergency Fix
+
+If `postinstall` does not run (e.g., `--ignore-scripts` was used):
+
+```bash
+chmod -R +x node_modules/.bin
+chmod -R +x node_modules/.pnpm
+```
+
+### Node Version
+
+| Version | Status                                                |
+| ------- | ----------------------------------------------------- |
+| 22.x    | Recommended — stable with TypeScript 6 and pnpm 11    |
+| 20.x    | Alternative — works if Hostinger's Node 22 has issues |
 
 ---
 
