@@ -222,7 +222,7 @@ Hostinger's pnpm ignores it and prints a warning.
 - `DEMO_AUTH_ENABLED` is not set by default — remove demo user guard in production.
 - Never commit `.env` files to git.
 - Use a managed PostgreSQL provider (e.g., Aiven, Supabase) for higher reliability.
-- For admin panel, deploy with the same `pnpm build` and proxy to port 3001.
+- For admin panel, deploy with `pnpm build:all` and proxy to port 3001.
 - Hostinger should pull from the `main` branch for production deployment.
 
 ---
@@ -237,7 +237,7 @@ Hostinger's environment may strip execute permissions from the Turbo binary afte
 node_modules/.pnpm/@turbo+linux-64@2.9.16/node_modules/@turbo/linux-64/bin/turbo cannot be executed
 ```
 
-This affects `pnpm run build` (which invokes `turbo build`). For the Web app, use `pnpm --filter @raina/web build` instead — it runs `next build` directly without Turbo.
+This affects `pnpm run build:all` (which invokes `turbo build`). The default `pnpm run build` now runs `next build` directly without Turbo — see "Hostinger Limited Build Command" below.
 
 ### Project-Level Fix
 
@@ -268,22 +268,40 @@ chmod -R +x node_modules/.pnpm
 
 ---
 
+## Hostinger Limited Build Command
+
+Hostinger does not allow a custom build command — only `pnpm run build` is available.
+
+The root `package.json` is configured so `pnpm run build` builds the Web app only:
+
+```json
+{
+  "scripts": {
+    "build": "pnpm --filter @raina/web build",
+    "build:all": "turbo build"
+  }
+}
+```
+
+- `pnpm run build` — builds `apps/web` only (used by Hostinger).
+- `pnpm run build:all` — builds full monorepo (used locally and in CI).
+
 ## Hostinger Web App — rain.promksa.com
 
 This domain runs **Web** (`apps/web`), **not** API.
 
 ### Correct Settings
 
-| Setting          | Value                            |
-| ---------------- | -------------------------------- |
-| Framework preset | Other                            |
-| Branch           | `main`                           |
-| Node version     | 22.x                             |
-| Root directory   | `./`                             |
-| Package manager  | pnpm                             |
-| Build command    | `pnpm --filter @raina/web build` |
-| Output directory | `apps/web/.next`                 |
-| Entry file       | `apps/web/server.js`             |
+| Setting          | Value                |
+| ---------------- | -------------------- |
+| Framework preset | Other                |
+| Branch           | `main`               |
+| Node version     | 22.x                 |
+| Root directory   | `./`                 |
+| Package manager  | pnpm                 |
+| Build command    | `pnpm run build`     |
+| Output directory | `apps/web/.next`     |
+| Entry file       | `apps/web/server.js` |
 
 > **Warning:** Do not use `apps/api/dist/main.js` for `rain.promksa.com`.
 > That entry file is only for the separate API app (`api.rain.promksa.com`).

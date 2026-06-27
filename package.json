@@ -6,7 +6,8 @@
   "scripts": {
     "postinstall": "node scripts/fix-turbo-permissions.cjs",
     "dev": "turbo dev --parallel",
-    "build": "turbo build",
+    "build": "pnpm --filter @raina/web build",
+    "build:all": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
