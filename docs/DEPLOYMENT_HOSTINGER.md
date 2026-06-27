@@ -241,7 +241,12 @@ This affects `pnpm run build` (which invokes `turbo build`). For the Web app, us
 
 ### Project-Level Fix
 
-A `postinstall` script (`scripts/fix-turbo-permissions.cjs`) automatically fixes Turbo binary permissions after `pnpm install`. It runs on Linux/macOS only (skips Windows) and searches for Turbo binaries dynamically regardless of version.
+A `postinstall` script (`scripts/fix-turbo-permissions.cjs`) automatically fixes Turbo binary permissions after `pnpm install`. It runs on Linux/macOS only (skips Windows) and searches for Turbo binaries dynamically regardless of version, covering:
+
+- `node_modules/.bin/turbo`
+- `node_modules/@turbo/linux-64/bin/turbo`
+- `node_modules/.pnpm/@turbo+linux-64@*/node_modules/@turbo/linux-64/bin/turbo`
+- Any `@turbo+*-64@*` entry in the pnpm store
 
 No manual action needed — it runs with every `pnpm install`.
 
