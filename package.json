@@ -13,6 +13,7 @@
     "build": "node scripts/hostinger-build-web.cjs",
     "build:web": "pnpm --filter @raina/web build",
     "build:api": "node scripts/hostinger-build-api.cjs",
+    "api:build": "node scripts/hostinger-build-api.cjs",
     "build:all": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
