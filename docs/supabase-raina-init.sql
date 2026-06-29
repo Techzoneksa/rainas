@@ -602,15 +602,15 @@ INSERT INTO "Profile" ("id", "userId", "username", "displayName", "bio", "city",
 ON CONFLICT ("id") DO NOTHING;
 
 -- Categories
-INSERT INTO "Category" ("id", "slug", "nameAr", "descriptionAr", "status", "sortOrder", "updatedAt") VALUES
-    ('cat_el', 'electronics', 'إلكترونيات', 'أجهزة ذكية، لابتوبات، جوالات، وملحقاتها', 'ACTIVE', 1, NOW()),
-    ('cat_bty', 'beauty', 'جمال وعناية', 'مستحضرات تجميل، عطور، ومواد عناية شخصية', 'ACTIVE', 2, NOW()),
-    ('cat_home', 'home', 'منزل ومطبخ', 'أثاث، أدوات مطبخ، ديكور المنزل', 'ACTIVE', 3, NOW()),
-    ('cat_food', 'food', 'طعام وشراب', 'منتجات غذائية، مشروبات، ووجبات خفيفة', 'ACTIVE', 4, NOW()),
-    ('cat_fash', 'fashion', 'أزياء', 'ملابس، أحذية، إكسسوارات', 'ACTIVE', 5, NOW()),
-    ('cat_kids', 'kids', 'أطفال', 'ألعاب، حاجيات الأطفال، تعليم', 'ACTIVE', 6, NOW()),
-    ('cat_sport', 'sports', 'رياضة', 'أدوات رياضية، ملابس رياضية، مكملات', 'ACTIVE', 7, NOW()),
-    ('cat_books', 'books', 'كتب', 'كتب عربية، كتب تعليمية، روايات', 'ACTIVE', 8, NOW())
+INSERT INTO "Category" ("id", "slug", "nameAr", "descriptionAr", "imageUrl", "status", "sortOrder", "updatedAt") VALUES
+    ('cat_el', 'electronics', 'إلكترونيات', 'أجهزة ذكية، لابتوبات، جوالات، وملحقاتها', 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=400&h=400&fit=crop&q=80', 'ACTIVE', 1, NOW()),
+    ('cat_bty', 'beauty', 'جمال وعناية', 'مستحضرات تجميل، عطور، ومواد عناية شخصية', 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop&q=80', 'ACTIVE', 2, NOW()),
+    ('cat_home', 'home', 'منزل ومطبخ', 'أثاث، أدوات مطبخ، ديكور المنزل', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop&q=80', 'ACTIVE', 3, NOW()),
+    ('cat_food', 'food', 'طعام وشراب', 'منتجات غذائية، مشروبات، ووجبات خفيفة', 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=400&fit=crop&q=80', 'ACTIVE', 4, NOW()),
+    ('cat_fash', 'fashion', 'أزياء', 'ملابس، أحذية، إكسسوارات', 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop&q=80', 'ACTIVE', 5, NOW()),
+    ('cat_kids', 'kids', 'أطفال', 'ألعاب، حاجيات الأطفال، تعليم', 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop&q=80', 'ACTIVE', 6, NOW()),
+    ('cat_sport', 'sports', 'رياضة', 'أدوات رياضية، ملابس رياضية، مكملات', 'https://images.unsplash.com/photo-1461896836934-bd45ba8fcf9b?w=400&h=400&fit=crop&q=80', 'ACTIVE', 7, NOW()),
+    ('cat_books', 'books', 'كتب', 'كتب عربية، كتب تعليمية، روايات', 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=400&fit=crop&q=80', 'ACTIVE', 8, NOW())
 ON CONFLICT ("id") DO NOTHING;
 
 -- Brands
