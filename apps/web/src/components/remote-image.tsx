@@ -9,6 +9,7 @@ interface RemoteImageProps {
   src?: string | null | undefined;
   alt: string;
   fallbackLabel: string;
+  fallbackSrc?: string | undefined;
   className?: string | undefined;
   sizes?: string | undefined;
 }
@@ -17,19 +18,21 @@ export function RemoteImage({
   src,
   alt,
   fallbackLabel,
+  fallbackSrc,
   className,
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
 }: Readonly<RemoteImageProps>) {
+  const resolvedSrc = src ?? fallbackSrc ?? "";
   const [hasError, setHasError] = useState(false);
 
-  if (src === undefined || src === null || src.length === 0 || hasError) {
-    return <MediaPlaceholder label={fallbackLabel} type="IMAGE" className={className} />;
+  if (!resolvedSrc || hasError) {
+    return <MediaPlaceholder label={fallbackLabel} className={className} />;
   }
 
   return (
     <div className={`web-image-frame ${className ?? ""}`}>
       <Image
-        src={src}
+        src={resolvedSrc}
         alt={alt}
         fill
         sizes={sizes}

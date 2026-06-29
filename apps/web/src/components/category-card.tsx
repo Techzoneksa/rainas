@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Category } from "@raina/api-contracts";
 import { Card } from "@raina/ui";
 
+import { getCategoryImageUrl } from "@/lib/config/category-images";
 import { RemoteImage } from "./remote-image";
 
 export function CategoryCard({ category }: Readonly<{ category: Category }>) {
@@ -22,6 +23,7 @@ export function CategoryCard({ category }: Readonly<{ category: Category }>) {
         src={category.imageUrl}
         alt={`صورة تصنيف ${category.nameAr}`}
         fallbackLabel={category.nameAr}
+        fallbackSrc={getCategoryImageUrl(category.slug, category.imageUrl)}
         className="web-category-card__media"
       />
     </Card>

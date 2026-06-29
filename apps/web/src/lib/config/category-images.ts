@@ -1,0 +1,26 @@
+const fallbackBase = (photoId: string): string =>
+  `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=200&h=200&q=80`;
+
+export const categoryFallbackImages: Record<string, string> = {
+  electronics: fallbackBase("1468495244123-6c6c332eeece"),
+  beauty: fallbackBase("1596462502278-27bfdc403348"),
+  home: fallbackBase("1556909114-f6e7ad7d3136"),
+  food: fallbackBase("1504674900247-0877df9cc836"),
+  fashion: fallbackBase("1445205170230-053b83016050"),
+  kids: fallbackBase("1546435770-a3e426bf472b"),
+  sports: fallbackBase("1461896836934-bd45ba8fcf9b"),
+  books: fallbackBase("1495446815901-a7297e633e8d"),
+  "women-fashion": fallbackBase("1581044777559-4c0e0c9f0f3c"),
+  fragrance: fallbackBase("1541643604580-e61e0fbce47a"),
+  makeup: fallbackBase("1522337360788-0ce7fd0cb18a"),
+  skincare: fallbackBase("1570194065650-d99fb4b38e16"),
+  bags: fallbackBase("1566156025215-0f63b1a1049a"),
+  shoes: fallbackBase("1595950652906-58ea8b45e48c"),
+  accessories: fallbackBase("1606761566779-6d4f029b24d8"),
+  sunglasses: fallbackBase("1572635196237-14b3f281503f"),
+};
+
+export function getCategoryImageUrl(slug: string, apiUrl: string | null | undefined): string {
+  if (apiUrl) return apiUrl;
+  return categoryFallbackImages[slug] ?? "";
+}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Category } from "@raina/api-contracts";
 import { Stack } from "@raina/ui";
 
+import { getCategoryImageUrl } from "@/lib/config/category-images";
 import { RemoteImage } from "./remote-image";
 
 export function RoundedCategoryCarousel({ categories }: Readonly<{ categories: Category[] }>) {
@@ -20,6 +21,7 @@ export function RoundedCategoryCarousel({ categories }: Readonly<{ categories: C
                 src={category.imageUrl}
                 alt={`صورة تصنيف ${category.nameAr}`}
                 fallbackLabel={category.nameAr}
+                fallbackSrc={getCategoryImageUrl(category.slug, category.imageUrl)}
                 className="web-category-carousel__image"
                 sizes="(min-width: 768px) 104px, 88px"
               />
