@@ -19,7 +19,10 @@ body {
   background: var(--raina-color-main-background);
   color: var(--raina-color-primary-text);
   font-family: var(--raina-font-arabic);
+  font-weight: var(--raina-font-weight-medium);
   text-align: start;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
 }
 
 *,
@@ -736,7 +739,7 @@ canvas {
 }
 
 .web-content-card .raina-card__header p {
-  color: var(--raina-color-text-muted);
+  color: var(--raina-color-text-secondary);
 }
 
 .web-content-card .raina-card {

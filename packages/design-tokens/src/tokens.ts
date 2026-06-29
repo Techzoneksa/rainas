@@ -1,5 +1,5 @@
 const arabicFontStack =
-  '"IBM Plex Sans Arabic", "Tajawal", "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+  '"Tajawal", "IBM Plex Sans Arabic", "Cairo", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
 export const color = {
   brand: {
@@ -17,8 +17,8 @@ export const color = {
   },
   text: {
     primary: "#171717",
-    secondary: "#6B6B66",
-    muted: "#9A9A94",
+    secondary: "#5F5F5A",
+    muted: "#777770",
     inverse: "#FFFFFF",
     link: "#3478F6"
   },
@@ -152,17 +152,17 @@ export const typography = {
   bodyLarge: {
     fontSize: "18px",
     lineHeight: "1.8",
-    fontWeight: "400"
+    fontWeight: "500"
   },
   body: {
     fontSize: "16px",
     lineHeight: "1.75",
-    fontWeight: "400"
+    fontWeight: "500"
   },
   bodySmall: {
     fontSize: "14px",
     lineHeight: "1.7",
-    fontWeight: "400"
+    fontWeight: "500"
   },
   label: {
     fontSize: "14px",

@@ -11,8 +11,8 @@
   --raina-color-surface-raised: #ffffff;
   --raina-color-surface-inverse: #171717;
   --raina-color-text-primary: #171717;
-  --raina-color-text-secondary: #6b6b66;
-  --raina-color-text-muted: #9a9a94;
+  --raina-color-text-secondary: #5f5f5a;
+  --raina-color-text-muted: #777770;
   --raina-color-text-inverse: #ffffff;
   --raina-color-text-link: #3478f6;
   --raina-color-border-subtle: #e6e6e0;
@@ -73,7 +73,7 @@
   --raina-shadow-subtle: var(--raina-shadow-sm);
   --raina-shadow-elevated: var(--raina-shadow-md);
   --raina-font-arabic:
-    "IBM Plex Sans Arabic", "Tajawal", "Cairo", system-ui, -apple-system, BlinkMacSystemFont,
+    "Tajawal", "IBM Plex Sans Arabic", "Cairo", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --raina-font-display-size: 40px;
   --raina-font-heading-1-size: 32px;
