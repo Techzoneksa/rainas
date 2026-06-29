@@ -34,3 +34,6 @@ Thumbs.db
 
 # Prototype generated output remains on disk but should not be treated as source.
 prototype/dist/
+
+# Test reports and local profiling data
+reports/

@@ -290,15 +290,6 @@ if (shouldMigrate) {
   console.log("[hostinger-build-api] >>> RUN_DB_MIGRATIONS is not true. Skipping migrations.");
 }
 
-console.log("[hostinger-build-api] >>> Step: prisma generate");
-const generateArgs = ["--filter", "@raina/api", "exec", "prisma", "generate"];
-const generateResult = runWithPnpm(generateArgs);
-if (!generateResult || generateResult.status !== 0) {
-  console.error("[hostinger-build-api] ### FAILED: prisma generate");
-  process.exit(1);
-}
-console.log("[hostinger-build-api] prisma generate completed successfully.");
-
 if (!shouldBuild) {
   console.log("[hostinger-build-api] --migrate-only specified, skipping build.");
   process.exit(0);
