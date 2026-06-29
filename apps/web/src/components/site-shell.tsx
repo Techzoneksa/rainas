@@ -1,6 +1,7 @@
 "use client";
 
 import type { Route } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { AppShell, Container } from "@raina/ui";
@@ -80,8 +81,7 @@ export function SiteShell({ children }: Readonly<{ children: React.ReactNode }>)
                   </svg>
                 </button>
                 <Link className="web-header-logo" href="/">
-                  <span className="web-header-logo__mark">R</span>
-                  <span className="web-header-logo__text">Raina — رأينا</span>
+                  <Image src="/raina_logo.svg" alt="Raina — رأينا" className="web-header-logo__img" width={90} height={36} unoptimized />
                 </Link>
                 <div className="web-header-location">
                   <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">

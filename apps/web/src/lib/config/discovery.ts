@@ -59,7 +59,7 @@ export const discoveryCircles: DiscoveryCircle[] = [
   {
     id: "skincare",
     nameAr: "عناية بالبشرة",
-    imageUrl: "https://images.unsplash.com/photo-1570194065650-d99fb4a38e8d?w=200&h=200&fit=crop&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=200&h=200&fit=crop&q=80",
     href: "/categories/beauty"
   },
   {
@@ -95,7 +95,7 @@ export const discoveryCircles: DiscoveryCircle[] = [
   {
     id: "jewelry",
     nameAr: "مجوهرات",
-    imageUrl: "https://images.unsplash.com/photo-1515562141589-7f7a8d9ba96d?w=200&h=200&fit=crop&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=200&h=200&fit=crop&q=80",
     href: "/categories/fashion"
   },
   {
@@ -113,7 +113,7 @@ export const discoveryCircles: DiscoveryCircle[] = [
   {
     id: "abayas",
     nameAr: "عبايات",
-    imageUrl: "https://images.unsplash.com/photo-1595777373136-3a51e9d22d46?w=200&h=200&fit=crop&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=200&h=200&fit=crop&q=80",
     href: "/categories/fashion"
   },
   {

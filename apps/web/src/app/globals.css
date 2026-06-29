@@ -294,21 +294,9 @@ canvas {
   white-space: nowrap;
 }
 
-.web-header-logo__mark {
-  inline-size: 36px;
+.web-header-logo__img {
   block-size: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--raina-radius-lg);
-  background: var(--raina-color-brand-secondary);
-  color: var(--raina-color-brand-primary);
-  font-weight: var(--raina-font-weight-bold);
-  font-size: var(--raina-font-body-size);
-}
-
-.web-header-logo__text {
-  font-weight: var(--raina-font-weight-bold);
-  font-size: var(--raina-font-body-size);
+  inline-size: auto;
 }
 
 .web-header-location {
