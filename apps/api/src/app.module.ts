@@ -15,7 +15,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
 import { PostsModule } from "./posts/posts.module";
 import { ProductsModule } from "./products/products.module";
 import { ProfilesModule } from "./profiles/profiles.module";
-import { ReportsModule } from "./reports/reports.module";
+
 import { SavedItemsModule } from "./saved-items/saved-items.module";
 import { SettingsModule } from "./settings/settings.module";
 import { UsersModule } from "./users/users.module";
@@ -47,7 +47,7 @@ const config = getApiRuntimeConfig();
     ListsModule,
     SavedItemsModule,
     NotificationsModule,
-    ReportsModule,
+
     SettingsModule
   ],
   providers: [
