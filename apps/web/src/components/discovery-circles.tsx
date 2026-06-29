@@ -17,24 +17,22 @@ export function DiscoveryCircles({
   return (
     <section className="web-discovery-section" aria-labelledby={title ? "home-discovery" : undefined}>
       {title ? (
-        <div className="web-section-head">
-          <h2 className="web-section-head__title">{title}</h2>
-          {description ? <p className="web-section-head__desc">{description}</p> : null}
+        <div className="web-discovery-header">
+          <div>
+            <h2>{title}</h2>
+            {description ? <p className="web-discovery-header__desc">{description}</p> : null}
+          </div>
         </div>
       ) : null}
-      <div className="web-discovery-track-wrap">
-        <ul className="web-discovery-track" aria-label="اكتشف">
-          {items.map((item) => (
-            <li key={item.id} className="web-discovery-track__item">
-              <Link href={item.href as Route} className="web-discovery-track__link" aria-label={item.nameAr}>
-                <div className="web-discovery-track__image">
-                  <Image src={item.imageUrl} alt={item.nameAr} fill sizes="88px" className="web-discovery-track__img" />
-                </div>
-                <span className="web-discovery-track__label">{item.nameAr}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <div className="web-discovery-circles" aria-label="اكتشف">
+        {items.map((item) => (
+          <Link key={item.id} href={item.href as Route} className="web-discovery-circle" aria-label={item.nameAr}>
+            <div className="web-discovery-circle__img">
+              <Image src={item.imageUrl} alt={item.nameAr} fill sizes="88px" className="web-discovery-circle__image" />
+            </div>
+            <span className="web-discovery-circle__label">{item.nameAr}</span>
+          </Link>
+        ))}
       </div>
     </section>
   );

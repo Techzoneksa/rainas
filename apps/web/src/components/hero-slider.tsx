@@ -2,6 +2,7 @@
 
 import type { Route } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import type { HeroSlide } from "@/lib/config/discovery";
 
@@ -30,13 +31,15 @@ export function HeroSlider({ slides }: Readonly<{ slides: HeroSlide[] }>) {
           <div
             key={s.id}
             className={`web-hero-slider__slide ${i === current ? "web-hero-slider__slide--active" : ""}`}
-            style={{ backgroundImage: `url(${s.imageUrl})` }}
             aria-hidden={i !== current}
           >
+            <div className="web-hero-slider__bg">
+              <Image src={s.imageUrl} alt={s.title} fill className="web-hero-slider__img" sizes="100vw" />
+            </div>
             <div className="web-hero-slider__overlay" />
-            <div className="web-hero-slider__content">
+            <div className="web-hero-slider__body">
+              <span className="web-hero-slider__subtitle">{s.subtitle}</span>
               <h2 className="web-hero-slider__title">{s.title}</h2>
-              <p className="web-hero-slider__subtitle">{s.subtitle}</p>
               <Link href={s.ctaHref as Route} className="web-hero-slider__cta">
                 {s.ctaLabel}
               </Link>
