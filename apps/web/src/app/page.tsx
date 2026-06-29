@@ -1,4 +1,6 @@
+import type { Route } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { EmptyState, Stack, Grid } from "@raina/ui";
 
 import { PageHeader } from "@/components/page-header";
@@ -6,9 +8,8 @@ import { PostCard } from "@/components/post-card";
 import { ProductCard } from "@/components/product-card";
 import { HeroSlider } from "@/components/hero-slider";
 import { DiscoveryCircles } from "@/components/discovery-circles";
-import { RoundedCategoryCarousel } from "@/components/rounded-category-carousel";
+import { SectionCarousel, SectionCarouselItem } from "@/components/section-carousel";
 import { ApiErrorState } from "@/components/state-views";
-import { listCategories } from "@/lib/api/categories";
 import { listPosts } from "@/lib/api/posts";
 import { listProducts } from "@/lib/api/products";
 import { heroSlides, discoveryCircles, womenDiscoverySections } from "@/lib/config/discovery";
@@ -35,16 +36,13 @@ function AdBanner() {
 }
 
 export default async function Page() {
-  const [categoriesResult, postsResult, productsResult] = await Promise.allSettled([
-    listCategories({ limit: 8 }),
+  const [postsResult, productsResult] = await Promise.allSettled([
     listPosts({ limit: 8 }),
     listProducts({ limit: 8, sort: "rating_desc" })
   ]);
 
-  const categories = getSettledValue(categoriesResult);
   const posts = getSettledValue(postsResult);
   const products = getSettledValue(productsResult);
-  const categoriesError = getSettledError(categoriesResult);
   const postsError = getSettledError(postsResult);
   const productsError = getSettledError(productsResult);
 
@@ -53,26 +51,8 @@ export default async function Page() {
       <HeroSlider slides={heroSlides} />
 
       <div className="web-home__sections">
-        <section className="web-section" aria-labelledby="home-categories">
+        <section className="web-section" aria-labelledby="home-discovery">
           <DiscoveryCircles items={discoveryCircles} />
-        </section>
-
-        <section className="web-section" aria-labelledby="home-categories-list">
-          <PageHeader
-            titleId="home-categories-list"
-            title="تصفح حسب التصنيف"
-            description="اختر المجال الذي يهمك."
-          />
-          {categoriesError ? (
-            <ApiErrorState error={categoriesError} />
-          ) : categories && categories.data.length > 0 ? (
-            <RoundedCategoryCarousel categories={categories.data} />
-          ) : (
-            <EmptyState
-              title="لا توجد تصنيفات حاليا"
-              description="ستظهر التصنيفات هنا عند توفرها من API."
-            />
-          )}
         </section>
 
         <section className="web-section" aria-labelledby="home-posts">
@@ -106,7 +86,33 @@ export default async function Page() {
 
         {womenDiscoverySections.map((section) => (
           <section key={section.id} className="web-section" aria-labelledby={section.id}>
-            <DiscoveryCircles items={section.circles} title={section.title} description={section.description} />
+            <PageHeader
+              titleId={section.id}
+              title={section.title}
+              description={section.description}
+            />
+            <SectionCarousel ariaLabel={section.title}>
+              {section.circles.map((item) => (
+                <SectionCarouselItem key={item.id}>
+                  <Link href={item.href as Route} className="web-discovery-card">
+                    <div className="web-discovery-card__media">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.nameAr}
+                        fill
+                        sizes="(min-width: 1024px) 320px, 280px"
+                        className="web-discovery-card__image"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="web-discovery-card__body">
+                      <h3 className="web-discovery-card__title">{item.nameAr}</h3>
+                      <span className="web-discovery-card__action">استكشف</span>
+                    </div>
+                  </Link>
+                </SectionCarouselItem>
+              ))}
+            </SectionCarousel>
           </section>
         ))}
 
