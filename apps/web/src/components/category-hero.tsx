@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Category } from "@raina/api-contracts";
-import { getCategoryHeroUrl } from "@/lib/config/category-images";
+import { getCategoryHeroUrl, getCategoryAccentColor, getCategoryDescriptionAr } from "@/lib/config/category-images";
 
 interface CategoryHeroProps {
   category: Category;
@@ -11,9 +11,11 @@ interface CategoryHeroProps {
 
 export function CategoryHero({ category, productCount, postCount, avgRating }: CategoryHeroProps) {
   const heroSrc = getCategoryHeroUrl(category.slug);
+  const accentColor = getCategoryAccentColor(category.slug);
+  const visualDescription = getCategoryDescriptionAr(category.slug);
 
   return (
-    <section className="web-cat-hero">
+    <section className="web-cat-hero" style={{ "--accent": accentColor } as React.CSSProperties}>
       <div className="web-cat-hero__bg">
         <Image
           src={heroSrc}
@@ -29,7 +31,7 @@ export function CategoryHero({ category, productCount, postCount, avgRating }: C
         <span className="web-cat-hero__eyebrow">تصنيف</span>
         <h1 className="web-cat-hero__title">{category.nameAr}</h1>
         <p className="web-cat-hero__desc">
-          {category.descriptionAr ?? "منتجات وتجارب ضمن هذا التصنيف."}
+          {(visualDescription || category.descriptionAr) ?? "منتجات وتجارب ضمن هذا التصنيف."}
         </p>
         <div className="web-cat-hero__stats">
           {productCount !== undefined ? (

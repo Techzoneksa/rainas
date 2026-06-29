@@ -1,3 +1,5 @@
+import { getCategoryCircleImage, getCategoryFallbackImage } from "@/lib/category-visuals";
+
 export interface NavCategory {
   slug: string;
   nameAr: string;
@@ -14,190 +16,277 @@ export interface DiscoveryCircle {
 export interface HeroSlide {
   id: string;
   imageUrl: string;
-  title: string;
-  subtitle: string;
-  ctaLabel: string;
-  ctaHref: string;
+}
+
+export interface SectionCard {
+  id: string;
+  nameAr: string;
+  description: string;
+  imageUrl: string;
+  href: string;
 }
 
 export const navCategories: NavCategory[] = [
   { slug: "electronics", nameAr: "إلكترونيات", href: "/categories/electronics" },
   { slug: "beauty", nameAr: "جمال وعطور", href: "/categories/beauty" },
-  { slug: "home-kitchen", nameAr: "منزل ومطبخ", href: "/categories/home" },
-  { slug: "grocery", nameAr: "بقالة", href: "/categories/food" },
-  { slug: "fashion-men", nameAr: "أزياء رجالية", href: "/categories/fashion" },
-  { slug: "fashion-women", nameAr: "أزياء نسائية", href: "/categories/fashion" },
-  { slug: "baby", nameAr: "أطفال رضع", href: "/categories/kids" },
-  { slug: "toys", nameAr: "ألعاب", href: "/categories/kids" },
-  { slug: "fashion-kids", nameAr: "أزياء أطفال", href: "/categories/kids" },
+  { slug: "home", nameAr: "منزل ومطبخ", href: "/categories/home" },
+  { slug: "grocery", nameAr: "بقالة", href: "/categories/grocery" },
+  { slug: "fashion-men", nameAr: "أزياء رجالية", href: "/categories/fashion-men" },
+  { slug: "fashion-women", nameAr: "أزياء نسائية", href: "/categories/fashion-women" },
+  { slug: "baby", nameAr: "أطفال رضع", href: "/categories/baby" },
+  { slug: "toys", nameAr: "ألعاب", href: "/categories/toys" },
+  { slug: "fashion-kids", nameAr: "أزياء أطفال", href: "/categories/fashion-kids" },
   { slug: "sports", nameAr: "رياضة وخارج المنزل", href: "/categories/sports" },
-  { slug: "health", nameAr: "صحة وتغذية", href: "/categories/sports" },
-  { slug: "stationery", nameAr: "قرطاسية", href: "/categories/books" },
+  { slug: "health", nameAr: "صحة وتغذية", href: "/categories/health" },
+  { slug: "stationery", nameAr: "قرطاسية", href: "/categories/stationery" },
   { slug: "books", nameAr: "كتب وإعلام", href: "/categories/books" },
-  { slug: "automotive", nameAr: "سيارات", href: "/categories/electronics" }
+  { slug: "automotive", nameAr: "سيارات", href: "/categories/automotive" },
 ];
+
+const unsplashBanner = (id: string, w = 1200, h = 500) =>
+  `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&q=80`;
+
+function circleImage(categorySlug: string): string {
+  return getCategoryCircleImage(categorySlug);
+}
+
+function fallbackImage(categorySlug: string, index = 0): string {
+  return getCategoryFallbackImage(categorySlug, index);
+}
 
 export const discoveryCircles: DiscoveryCircle[] = [
   {
-    id: "trending",
-    nameAr: "عروض وتجارب رائجة",
-    imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=200&h=200&fit=crop&q=80",
-    href: "/posts"
+    id: "beauty-perfumes",
+    nameAr: "عطور",
+    imageUrl: circleImage("beauty"),
+    href: "/categories/beauty",
   },
   {
-    id: "perfumes",
-    nameAr: "عطور نسائية",
-    imageUrl: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=200&h=200&fit=crop&q=80",
-    href: "/categories/beauty"
-  },
-  {
-    id: "makeup",
+    id: "beauty-makeup",
     nameAr: "مكياج",
-    imageUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200&h=200&fit=crop&q=80",
-    href: "/categories/beauty"
+    imageUrl: fallbackImage("beauty", 1),
+    href: "/categories/beauty",
   },
   {
-    id: "skincare",
+    id: "beauty-skincare",
     nameAr: "عناية بالبشرة",
-    imageUrl: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=200&h=200&fit=crop&q=80",
-    href: "/categories/beauty"
+    imageUrl: fallbackImage("beauty", 2),
+    href: "/categories/beauty",
   },
   {
-    id: "haircare",
-    nameAr: "عناية بالشعر",
-    imageUrl: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=200&h=200&fit=crop&q=80",
-    href: "/categories/beauty"
-  },
-  {
-    id: "bags",
+    id: "fashion-bags",
     nameAr: "شنط",
-    imageUrl: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
+    imageUrl: fallbackImage("fashion-women", 0),
+    href: "/categories/fashion-women",
   },
   {
-    id: "shoes",
+    id: "fashion-shoes",
     nameAr: "أحذية",
-    imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
+    imageUrl: fallbackImage("fashion-women", 1),
+    href: "/categories/fashion-women",
   },
   {
-    id: "sunglasses",
-    nameAr: "نظارات",
-    imageUrl: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
-  },
-  {
-    id: "accessories",
-    nameAr: "إكسسوارات",
-    imageUrl: "https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
-  },
-  {
-    id: "jewelry",
-    nameAr: "مجوهرات",
-    imageUrl: "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
-  },
-  {
-    id: "watches",
-    nameAr: "ساعات",
-    imageUrl: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=200&h=200&fit=crop&q=80",
-    href: "/categories/electronics"
-  },
-  {
-    id: "dresses",
-    nameAr: "فساتين",
-    imageUrl: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
-  },
-  {
-    id: "abayas",
+    id: "fashion-abayas",
     nameAr: "عبايات",
-    imageUrl: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=200&h=200&fit=crop&q=80",
-    href: "/categories/fashion"
+    imageUrl: fallbackImage("fashion-women", 2),
+    href: "/categories/fashion-women",
   },
   {
-    id: "baby-products",
-    nameAr: "منتجات أطفال",
-    imageUrl: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200&h=200&fit=crop&q=80",
-    href: "/categories/kids"
+    id: "fashion-accessories",
+    nameAr: "إكسسوارات",
+    imageUrl: fallbackImage("fashion-women", 3),
+    href: "/categories/fashion-women",
   },
   {
-    id: "health-wellness",
+    id: "home-kitchen",
+    nameAr: "منزل ومطبخ",
+    imageUrl: circleImage("home"),
+    href: "/categories/home",
+  },
+  {
+    id: "sports",
+    nameAr: "رياضة",
+    imageUrl: circleImage("sports"),
+    href: "/categories/sports",
+  },
+  {
+    id: "health",
     nameAr: "صحة وتغذية",
-    imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop&q=80",
-    href: "/categories/sports"
-  },
-  {
-    id: "home-tools",
-    nameAr: "أدوات منزلية",
-    imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&q=80",
-    href: "/categories/home"
+    imageUrl: circleImage("health"),
+    href: "/categories/health",
   },
   {
     id: "electronics",
     nameAr: "إلكترونيات",
-    imageUrl: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=200&h=200&fit=crop&q=80",
-    href: "/categories/electronics"
+    imageUrl: circleImage("electronics"),
+    href: "/categories/electronics",
+  },
+  {
+    id: "baby",
+    nameAr: "أطفال رضع",
+    imageUrl: circleImage("baby"),
+    href: "/categories/baby",
+  },
+  {
+    id: "toys",
+    nameAr: "ألعاب",
+    imageUrl: circleImage("toys"),
+    href: "/categories/toys",
   },
   {
     id: "books",
-    nameAr: "كتب",
-    imageUrl: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=200&h=200&fit=crop&q=80",
-    href: "/categories/books"
-  }
+    nameAr: "كتب وإعلام",
+    imageUrl: circleImage("books"),
+    href: "/categories/books",
+  },
 ];
 
 export const heroSlides: HeroSlide[] = [
   {
     id: "slide-1",
-    imageUrl: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=500&fit=crop&q=80",
-    title: "اكتشفي أحدث صيحات الموضة",
-    subtitle: "تجارب حقيقية من نساء مثلك عن المنتجات التي تستحق",
-    ctaLabel: "استعرضي التجارب",
-    ctaHref: "/posts"
+    imageUrl: unsplashBanner("1483985988355-763728e1935b", 1200, 500),
   },
   {
     id: "slide-2",
-    imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=500&fit=crop&q=80",
-    title: "منتجات العناية الأكثر تقييماً",
-    subtitle: "اكتشفي تجارب المستخدمين لمستحضرات التجميل والعطور",
-    ctaLabel: "تصفحي التصنيفات",
-    ctaHref: "/categories/beauty"
+    imageUrl: unsplashBanner("1523275335684-37898b6baf30", 1200, 500),
   },
   {
     id: "slide-3",
-    imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=500&fit=crop&q=80",
-    title: "تجارب إلكترونيات بتقييمات دقيقة",
-    subtitle: "أحدث الهواتف والسماعات والأجهزة تحت مجهر المستخدمين",
-    ctaLabel: "اقرأ التجارب",
-    ctaHref: "/categories/electronics"
-  }
+    imageUrl: unsplashBanner("1556742049-0cfed4f6a45d", 1200, 500),
+  },
 ];
 
-export const womenDiscoverySections = [
+export const womenDiscoveryCards: SectionCard[] = [
   {
-    id: "women-trending",
-    title: "الأكثر تداولًا لدى النساء",
-    description: "منتجات وتجارب تهم المرأة العربية",
-    circles: discoveryCircles.filter((c) =>
-      ["perfumes", "makeup", "skincare", "haircare", "bags", "shoes", "sunglasses", "accessories", "jewelry", "watches", "dresses", "abayas"].includes(c.id)
-    )
+    id: "beauty-perfumes",
+    nameAr: "عطور نسائية",
+    description: "أجمل العطور العربية والفرنسية بانطباعات حقيقية",
+    imageUrl: fallbackImage("beauty", 0),
+    href: "/categories/beauty",
   },
   {
-    id: "beauty",
-    title: "جمال وعطور",
-    description: "مستحضرات التجميل والعناية والعطور",
-    circles: discoveryCircles.filter((c) =>
-      ["perfumes", "makeup", "skincare", "haircare"].includes(c.id)
-    )
+    id: "beauty-makeup",
+    nameAr: "مكياج يومي",
+    description: "أساسيات المكياج وأفضل المنتجات لتجربتها",
+    imageUrl: fallbackImage("beauty", 1),
+    href: "/categories/beauty",
+  },
+  {
+    id: "beauty-skincare",
+    nameAr: "عناية بالبشرة",
+    description: "منتجات العناية الأكثر تداولاً بين البنات",
+    imageUrl: fallbackImage("beauty", 2),
+    href: "/categories/beauty",
+  },
+  {
+    id: "beauty-haircare",
+    nameAr: "عناية بالشعر",
+    description: "شامبوهات وزيوت ومنتجات تصفيف موثوقة",
+    imageUrl: fallbackImage("beauty", 3),
+    href: "/categories/beauty",
+  },
+  {
+    id: "fashion-bags",
+    nameAr: "شنط",
+    description: "أحدث صيحات الشنط والمحافظ النسائية",
+    imageUrl: fallbackImage("fashion-women", 0),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-shoes",
+    nameAr: "أحذية",
+    description: "أحذية عصرية بتنوع يناسب كل الإطلالات",
+    imageUrl: fallbackImage("fashion-women", 1),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-abayas",
+    nameAr: "عبايات",
+    description: "تشكيلة عبايات عصرية ومحتشمة",
+    imageUrl: fallbackImage("fashion-women", 2),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-jewelry",
+    nameAr: "مجوهرات",
+    description: "قطع مميزة من المجوهرات والإكسسوارات",
+    imageUrl: fallbackImage("fashion-women", 4),
+    href: "/categories/fashion-women",
+  },
+];
+
+export const beautyCards: SectionCard[] = [
+  {
+    id: "beauty-perfumes",
+    nameAr: "عطور نسائية",
+    description: "أفضل العطور العربية والفرنسية",
+    imageUrl: fallbackImage("beauty", 0),
+    href: "/categories/beauty",
+  },
+  {
+    id: "beauty-makeup",
+    nameAr: "مكياج",
+    description: "أساسيات المكياج اليومي",
+    imageUrl: fallbackImage("beauty", 1),
+    href: "/categories/beauty",
+  },
+  {
+    id: "beauty-skincare",
+    nameAr: "عناية بالبشرة",
+    description: "منتجات العناية والروتين اليومي",
+    imageUrl: fallbackImage("beauty", 2),
+    href: "/categories/beauty",
+  },
+  {
+    id: "beauty-haircare",
+    nameAr: "عناية بالشعر",
+    description: "شامبوهات وزيوت ومنتجات تصفيف",
+    imageUrl: fallbackImage("beauty", 3),
+    href: "/categories/beauty",
+  },
+];
+
+export const fashionCards: SectionCard[] = [
+  {
+    id: "fashion-abayas",
+    nameAr: "عبايات",
+    description: "تشكيلة عبايات عصرية ومحتشمة",
+    imageUrl: fallbackImage("fashion-women", 2),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-dresses",
+    nameAr: "فساتين",
+    description: "تصاميم فساتين تناسب كل الأوقات",
+    imageUrl: fallbackImage("fashion-women", 3),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-bags",
+    nameAr: "شنط",
+    description: "أحدث صيحات الشنط والمحافظ",
+    imageUrl: fallbackImage("fashion-women", 0),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-shoes",
+    nameAr: "أحذية",
+    description: "أحذية عصرية لكل الإطلالات",
+    imageUrl: fallbackImage("fashion-women", 1),
+    href: "/categories/fashion-women",
   },
   {
     id: "fashion-accessories",
-    title: "إكسسوارات وأزياء",
-    description: "أحدث صيحات الإكسسوارات والموضة",
-    circles: discoveryCircles.filter((c) =>
-      ["bags", "shoes", "sunglasses", "accessories", "jewelry", "watches", "dresses", "abayas"].includes(c.id)
-    )
-  }
+    nameAr: "إكسسوارات",
+    description: "قطع مميزة تكمل إطلالتك",
+    imageUrl: fallbackImage("fashion-women", 3),
+    href: "/categories/fashion-women",
+  },
+  {
+    id: "fashion-jewelry",
+    nameAr: "مجوهرات",
+    description: "قطع مميزة من المجوهرات",
+    imageUrl: fallbackImage("fashion-women", 4),
+    href: "/categories/fashion-women",
+  },
 ];
