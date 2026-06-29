@@ -40,7 +40,13 @@ app
   .prepare()
   .then(() => {
     createServer((req, res) => {
-      handle(req, res);
+      handle(req, res).catch((err) => {
+        console.error(`[server] Request error: ${req.method} ${req.url}:`, err);
+        if (!res.headersSent) {
+          res.writeHead(500);
+          res.end("Internal Server Error");
+        }
+      });
     }).listen(port, hostname, () => {
       console.log(`[server] Raina web ready http://${hostname}:${port}`);
     });
