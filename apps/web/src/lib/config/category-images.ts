@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+=======
+import {
+  getCategoryFallbackImage,
+  getCategoryBanner,
+  getCategoryAccentColor as getAccentColor,
+  getCategoryDescription,
+  getVisualByUrlSlug,
+} from "@/lib/category-visuals";
+
+export { getVisualByUrlSlug };
+
+>>>>>>> f79a2f1 (fix: correctly bind category visuals and filtered content)
 export const DEFAULT_IMAGE_URL =
   "https://images.unsplash.com/photo-1585381299351-7a5e29ca6f8d?w=1200&h=800&fit=crop&q=80";
 
@@ -53,11 +66,27 @@ export function getCategoryImageUrl(slug: string, apiUrl: string | null | undefi
   return DEFAULT_IMAGE_URL;
 }
 
+<<<<<<< HEAD
 export function getCategoryHeroUrl(slug: string): string {
   return heroFallbackImages[slug] ?? DEFAULT_IMAGE_URL;
+=======
+export function getCategoryHeroUrl(urlSlug: string): string {
+  return getCategoryBanner(urlSlug);
+>>>>>>> f79a2f1 (fix: correctly bind category visuals and filtered content)
 }
 
 export function safeImageUrl(url: string | null | undefined): string {
   if (url && url.length > 0 && url !== "/image") return url;
   return DEFAULT_IMAGE_URL;
 }
+<<<<<<< HEAD
+=======
+
+export function getCategoryAccentColor(urlSlug: string): string {
+  return getAccentColor(urlSlug);
+}
+
+export function getCategoryDescriptionAr(urlSlug: string): string {
+  return getCategoryDescription(urlSlug);
+}
+>>>>>>> f79a2f1 (fix: correctly bind category visuals and filtered content)
