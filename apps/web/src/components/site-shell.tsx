@@ -4,9 +4,10 @@ import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { AppShell, Container } from "@raina/ui";
+import { AppShell, Container, Avatar } from "@raina/ui";
 
 import { navCategories } from "@/lib/config/discovery";
+import { useAuth } from "@/lib/auth/auth-context";
 
 const bottomNavLinks: { href: Route; label: string; icon: BottomNavIconName }[] = [
   { href: "/" as Route, label: "الرئيسية", icon: "home" },
@@ -62,6 +63,7 @@ function BottomNavIcon({ name }: Readonly<{ name: BottomNavIconName }>) {
 
 export function SiteShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { session, isLoggedIn } = useAuth();
 
   return (
     <AppShell
@@ -112,11 +114,19 @@ export function SiteShell({ children }: Readonly<{ children: React.ReactNode }>)
                     <path d="M13.73 21a2 2 0 01-3.46 0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
-                <Link href="/" className="web-header-icon-btn" aria-label="حسابي">
-                  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
-                    <path d="M4 21v-1a6 6 0 0112 0v1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
+                <Link
+                  href={isLoggedIn ? "/account" : "/login"}
+                  className="web-header-icon-btn"
+                  aria-label={isLoggedIn ? session?.displayName : "حسابي"}
+                >
+                  {isLoggedIn ? (
+                    <Avatar size="sm" name={session?.displayName ?? "ر"} />
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
+                      <path d="M4 21v-1a6 6 0 0112 0v1" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  )}
                 </Link>
               </div>
             </Container>
@@ -172,10 +182,10 @@ export function SiteShell({ children }: Readonly<{ children: React.ReactNode }>)
                 <span>{link.label}</span>
               </Link>
             ))}
-            <span aria-disabled="true">
+            <Link href={isLoggedIn ? "/account" : "/login"}>
               <BottomNavIcon name="account" />
               <span>حسابي</span>
-            </span>
+            </Link>
           </nav>
         </Container>
       }

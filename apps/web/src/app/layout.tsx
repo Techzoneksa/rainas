@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Tajawal } from "next/font/google";
 
 import { SiteShell } from "@/components/site-shell";
+import { Providers } from "./providers";
 
 import "./globals.css";
 
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ar" dir="rtl">
       <body className={tajawal.variable}>
-        <SiteShell>{children}</SiteShell>
+        <Providers>
+          <SiteShell>{children}</SiteShell>
+        </Providers>
       </body>
     </html>
   );

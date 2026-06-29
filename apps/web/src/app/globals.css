@@ -2343,3 +2343,198 @@ canvas {
     block-size: 68px;
   }
 }
+
+/* ===== Auth: Login Page ===== */
+.web-login {
+  padding-block: 48px 80px;
+  min-block-size: 100dvh;
+  display: flex;
+  align-items: center;
+}
+
+.web-login__card {
+  padding: 32px 24px;
+}
+
+.web-login__header {
+  text-align: center;
+  margin-block-end: 24px;
+}
+
+.web-login__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #171717;
+}
+
+.web-login__subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.web-login__tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-block-start: 8px;
+}
+
+.web-login__submit {
+  inline-size: 100%;
+  margin-block-start: 4px;
+}
+
+.web-login__hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: center;
+  margin: 0;
+  direction: ltr;
+}
+
+.web-otp-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: #f3f4f6;
+  border-radius: 12px;
+  margin-block-end: 8px;
+}
+
+.web-otp-display__label {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.web-otp-display__code {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #171717;
+  letter-spacing: 4px;
+}
+
+.web-login__resend {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px;
+  text-align: center;
+  align-self: center;
+}
+
+.web-login__resend:hover {
+  text-decoration: underline;
+}
+
+/* ===== Auth: Account Page ===== */
+.web-account {
+  padding-block: 32px 80px;
+}
+
+.web-account__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-block-end: 24px;
+}
+
+.web-account__avatar {
+  inline-size: 56px;
+  block-size: 56px;
+  border-radius: 50%;
+  background: #ffce00;
+  color: #171717;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.web-account__name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+  color: #171717;
+}
+
+.web-account__display-name {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.web-account__sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.web-account__section {
+  padding: 20px;
+}
+
+.web-account__section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #171717;
+  margin-block-end: 8px;
+}
+
+.web-account__section-desc {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.web-account__info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block-start: 8px;
+}
+
+.web-account__info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.web-account__info-label {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.web-account__info-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #171717;
+}
+
+.web-account__logout {
+  inline-size: 100%;
+  margin-block-start: 8px;
+}
+
+@media (min-width: 640px) {
+  .web-login {
+    padding-block: 64px 96px;
+  }
+
+  .web-login__card {
+    padding: 40px 32px;
+  }
+
+  .web-account {
+    padding-block: 48px 96px;
+  }
+}
