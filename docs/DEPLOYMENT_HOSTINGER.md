@@ -364,7 +364,7 @@ Both apps can now use the same build command. The environment variable determine
 | `api:build` | `node scripts/hostinger-build-api.cjs` | Alias for API build                       |
 | `build:all` | `turbo build`                          | Full monorepo build (local/CI)            |
 
-## Hostinger Web App — rain.promksa.com
+## Hostinger Web App — raina.promksa.com
 
 This domain runs **Web** (`apps/web`), **not** API.
 
@@ -381,8 +381,8 @@ This domain runs **Web** (`apps/web`), **not** API.
 | Output directory | `apps/web/.next`     |
 | Entry file       | `apps/web/server.js` |
 
-> **Warning:** Do not use `apps/api/dist/main.js` for `rain.promksa.com`.
-> That entry file is only for the separate API app (`api.rain.promksa.com`).
+> **Warning:** Do not use `apps/api/dist/main.js` for `raina.promksa.com`.
+> That entry file is only for the separate API app (`api-raina.promksa.com`).
 
 ### Environment Variables for Production
 
@@ -390,8 +390,8 @@ Set these in Hostinger's env vars UI (do **not** commit `.env` to git):
 
 ```env
 HOSTINGER_APP=web
-NEXT_PUBLIC_SITE_URL=https://rain.promksa.com
-NEXT_PUBLIC_API_BASE_URL=https://api.rain.promksa.com/api/v1
+NEXT_PUBLIC_SITE_URL=https://raina.promksa.com
+NEXT_PUBLIC_API_BASE_URL=https://api-raina.promksa.com/api/v1
 NEXT_PUBLIC_APP_ENV=production
 NODE_ENV=production
 ```
@@ -400,14 +400,14 @@ NODE_ENV=production
 
 ---
 
-## Hostinger API App — api.rain.promksa.com
+## Hostinger API App — api-raina.promksa.com
 
 This is a **separate** Hostinger Node.js app for the **API** (`apps/api`). It must be created as a new Hostinger project (not merged with the web app).
 
 ### Create a New Hostinger App
 
 1. In Hostinger hPanel → **Node.js** → **Add new**.
-2. Choose the same domain or a subdomain (e.g. `api.rain.promksa.com`).
+2. Choose the same domain or a subdomain (e.g. `api-raina.promksa.com`).
 3. Point the subdomain DNS A record to Hostinger's VPS IP.
 
 ### Correct Settings
@@ -433,9 +433,9 @@ NODE_ENV=production
 PORT=4000
 DATABASE_URL=postgresql://raina:your_password@your-db-host:5432/raina_prod?schema=public
 DIRECT_URL=postgresql://raina:your_password@your-db-host:5432/raina_prod?schema=public
-WEB_ORIGIN=https://rain.promksa.com
-ADMIN_ORIGIN=https://admin.rain.promksa.com
-CORS_ORIGINS=https://rain.promksa.com
+WEB_ORIGIN=https://raina.promksa.com
+ADMIN_ORIGIN=https://admin.raina.promksa.com
+CORS_ORIGINS=https://raina.promksa.com
 API_PREFIX=api/v1
 REQUEST_BODY_LIMIT=1mb
 RATE_LIMIT_TTL_SECONDS=60
@@ -485,7 +485,7 @@ After deployment, verify the API is running:
 
 1. Confirm API health endpoints respond.
 2. Confirm database connectivity (`/health/ready` returns `"ok"`).
-3. Set `NEXT_PUBLIC_API_BASE_URL` on the Web app to `https://api.rain.promksa.com/api/v1`.
+3. Set `NEXT_PUBLIC_API_BASE_URL` on the Web app to `https://api-raina.promksa.com/api/v1`.
 4. **Redeploy** the Web app (Next.js reads `NEXT_PUBLIC_*` at build time).
 5. Verify Web pages load live API data (categories, products, posts).
 6. If migrating an existing database, set `RUN_DB_MIGRATIONS=true`, redeploy, then set back to `false`.
