@@ -34,7 +34,7 @@ export function HeroSlider({ slides }: Readonly<{ slides: HeroSlide[] }>) {
             aria-hidden={i !== current}
           >
             <div className="web-hero-slider__bg">
-              <Image src={s.imageUrl} alt={s.title} fill className="web-hero-slider__img" sizes="100vw" />
+              <Image src={s.imageUrl} alt={s.title} fill className="web-hero-slider__img" sizes="100vw" unoptimized />
             </div>
             <div className="web-hero-slider__overlay" />
             <div className="web-hero-slider__body">

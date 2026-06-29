@@ -28,7 +28,7 @@ export function DiscoveryCircles({
         {items.map((item) => (
           <Link key={item.id} href={item.href as Route} className="web-discovery-circle" aria-label={item.nameAr}>
             <div className="web-discovery-circle__img">
-              <Image src={item.imageUrl} alt={item.nameAr} fill sizes="88px" className="web-discovery-circle__image" />
+              <Image src={item.imageUrl} alt={item.nameAr} fill sizes="88px" className="web-discovery-circle__image" unoptimized />
             </div>
             <span className="web-discovery-circle__label">{item.nameAr}</span>
           </Link>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
+import { DEFAULT_IMAGE_URL } from "@/lib/config/category-images";
 import { MediaPlaceholder } from "./media-placeholder";
 
 interface RemoteImageProps {
@@ -22,10 +23,10 @@ export function RemoteImage({
   className,
   sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
 }: Readonly<RemoteImageProps>) {
-  const resolvedSrc = src ?? fallbackSrc ?? "";
+  const resolvedSrc = src || fallbackSrc || DEFAULT_IMAGE_URL;
   const [hasError, setHasError] = useState(false);
 
-  if (!resolvedSrc || hasError) {
+  if (hasError) {
     return <MediaPlaceholder label={fallbackLabel} className={className} />;
   }
 

@@ -1,3 +1,6 @@
+export const DEFAULT_IMAGE_URL =
+  "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&h=800&fit=crop&q=80";
+
 const fallbackBase = (photoId: string): string =>
   `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=200&h=200&q=80`;
 
@@ -22,5 +25,10 @@ export const categoryFallbackImages: Record<string, string> = {
 
 export function getCategoryImageUrl(slug: string, apiUrl: string | null | undefined): string {
   if (apiUrl) return apiUrl;
-  return categoryFallbackImages[slug] ?? "";
+  return categoryFallbackImages[slug] ?? DEFAULT_IMAGE_URL;
+}
+
+export function safeImageUrl(url: string | null | undefined): string {
+  if (url && url.length > 0 && url !== "/image") return url;
+  return DEFAULT_IMAGE_URL;
 }

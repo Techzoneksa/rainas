@@ -404,7 +404,6 @@ canvas {
   align-items: center;
   gap: var(--raina-space-8);
   block-size: 44px;
-  overflow: hidden;
 }
 
 .web-header-nav__menu {
@@ -647,6 +646,7 @@ canvas {
 
 .web-hero-slider__track {
   position: relative;
+  inline-size: 100%;
   overflow: hidden;
 }
 
@@ -666,6 +666,7 @@ canvas {
   position: relative;
   opacity: 1;
   visibility: visible;
+  block-size: 100%;
 }
 
 .web-hero-slider__bg {
