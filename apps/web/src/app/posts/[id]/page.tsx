@@ -1,14 +1,15 @@
-import type { Metadata, Route } from "next";
-import Link from "next/link";
-import { Avatar, Badge, Card, EmptyState, Grid, Inline, Stack } from "@raina/ui";
+import type { Metadata } from "next";
+import type { Post } from "@raina/api-contracts";
 
-import { MediaGallery } from "@/components/media-gallery";
-import { PageHeader } from "@/components/page-header";
-import { RatingBadge } from "@/components/rating-badge";
+import { ReviewHero } from "@/components/review-hero";
+import { ProsConsSection } from "@/components/pros-cons-section";
+import { ProductSummaryCard } from "@/components/product-summary-card";
+import { CommentsSection } from "@/components/comments-section";
+import { ReviewActions } from "@/components/review-actions";
+import { RelatedReviews } from "@/components/related-reviews";
 import { ApiErrorState, NotFoundState } from "@/components/state-views";
 import { isRainaApiError } from "@/lib/api/errors";
-import { getPostById, listPostComments } from "@/lib/api/posts";
-import { formatDate, formatPrice, formatRating } from "@/lib/format";
+import { getPostById, listPostComments, listPosts } from "@/lib/api/posts";
 
 export const dynamic = "force-dynamic";
 
@@ -22,11 +23,11 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     const post = await getPostById(id);
     return {
       title: `${post.title} | Raina — رأينا`,
-      description: post.body
+      description: post.body,
     };
   } catch {
     return {
-      title: "منشور | Raina — رأينا"
+      title: "منشور | Raina — رأينا",
     };
   }
 }
@@ -37,106 +38,35 @@ export default async function PostPage({ params }: PostPageProps) {
   try {
     const post = await getPostById(id);
     const comments = await listPostComments(post.id, { limit: 50 });
-    const profile = post.author.profile;
+    const allPosts = await listPosts({ limit: 8 }).catch(() => ({ data: [] as Post[] }));
+
     const media =
-      post.media && post.media.length > 0 ? post.media : post.product.media?.slice(0, 1);
+      post.media && post.media.length > 0
+        ? post.media.map((m) => ({ url: m.url, ...(m.altAr ? { alt: m.altAr } : {}) }))
+        : post.product.media?.slice(0, 1).map((m) => ({ url: m.url, ...(m.altAr ? { alt: m.altAr } : {}) })) ?? [];
+
+    const relatedPosts = allPosts.data
+      .filter((p) => p.id !== post.id && p.product.categoryId === post.product.categoryId)
+      .slice(0, 4);
 
     return (
-      <Stack gap="24">
-        <PageHeader
-          eyebrow="تجربة"
-          title={post.title}
-          description={post.body}
-          badge={formatRating(post.rating)}
-        />
-        <Card>
-          <Stack gap="16">
-            <Inline gap="12" align="center">
-              <Avatar
-                name={profile?.displayName ?? "ناشر رأينا"}
-                imageUrl={profile?.avatarUrl ?? undefined}
-              />
-              <Stack gap="4">
-                <strong>{profile?.displayName ?? "ناشر رأينا"}</strong>
-                <span className="web-muted">{formatDate(post.publishedAt ?? post.createdAt)}</span>
-              </Stack>
-            </Inline>
-            <MediaGallery
-              items={media ?? []}
-              fallbackLabel={post.product.nameAr}
-              className="web-post-detail__media"
-            />
-            <Inline gap="8">
-              <RatingBadge value={post.rating} />
-              <Badge>{post.product.nameAr}</Badge>
-              <Badge variant="info">{post.product.brand.name}</Badge>
-            </Inline>
-            <dl className="web-detail-list">
-              <div>
-                <dt>السعر ومكان الشراء</dt>
-                <dd>
-                  {formatPrice(post.product.priceMin, post.product.priceMax, post.product.currency)}
-                </dd>
-              </div>
-              <div>
-                <dt>المنتج</dt>
-                <dd>
-                  <Link className="web-link" href={`/products/${post.product.slug}` as Route}>
-                    {post.product.nameAr}
-                  </Link>
-                </dd>
-              </div>
-            </dl>
-          </Stack>
-        </Card>
+      <article className="web-review-page">
+        <ReviewHero post={post} media={media} fallbackLabel={post.product.nameAr} />
 
-        <Grid columns="2" gap="16">
-          <Card title="الإيجابيات">
-            {post.pros && post.pros.length > 0 ? (
-              <ul className="web-point-list">
-                {post.pros.map((point) => (
-                  <li key={point.id}>{point.body}</li>
-                ))}
-              </ul>
-            ) : (
-              <EmptyState title="لا توجد إيجابيات مدونة" />
-            )}
-          </Card>
-          <Card title="الملاحظات">
-            {post.cons && post.cons.length > 0 ? (
-              <ul className="web-point-list">
-                {post.cons.map((point) => (
-                  <li key={point.id}>{point.body}</li>
-                ))}
-              </ul>
-            ) : (
-              <EmptyState title="لا توجد ملاحظات مدونة" />
-            )}
-          </Card>
-        </Grid>
+        <div className="web-review-page__body">
+          <p className="web-review-page__text">{post.body}</p>
+        </div>
 
-        <section className="web-section" aria-labelledby="post-comments">
-          <PageHeader title="التعليقات" description="تعليقات قراءة فقط في هذه المرحلة." />
-          {comments.data.length > 0 ? (
-            <Stack gap="12">
-              {comments.data.map((comment) => (
-                <Card key={comment.id}>
-                  <Inline gap="8" align="center">
-                    <Avatar
-                      name={comment.author.profile?.displayName ?? "مستخدم رأينا"}
-                      imageUrl={comment.author.profile?.avatarUrl ?? undefined}
-                    />
-                    <strong>{comment.author.profile?.displayName ?? "مستخدم رأينا"}</strong>
-                  </Inline>
-                  <p>{comment.body}</p>
-                </Card>
-              ))}
-            </Stack>
-          ) : (
-            <EmptyState title="لا توجد تعليقات بعد" />
-          )}
-        </section>
-      </Stack>
+        <ProsConsSection pros={post.pros} cons={post.cons} />
+
+        <ProductSummaryCard product={post.product} />
+
+        <ReviewActions postId={post.id} postTitle={post.title} />
+
+        <CommentsSection comments={comments.data} />
+
+        <RelatedReviews posts={relatedPosts} />
+      </article>
     );
   } catch (error) {
     if (isRainaApiError(error) && error.status === 404) {
