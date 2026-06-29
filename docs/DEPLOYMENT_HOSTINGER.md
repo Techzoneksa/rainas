@@ -440,35 +440,33 @@ API_PREFIX=api/v1
 REQUEST_BODY_LIMIT=1mb
 RATE_LIMIT_TTL_SECONDS=60
 RATE_LIMIT_REQUESTS=120
-RUN_DB_MIGRATIONS=true
+RUN_DB_MIGRATIONS=false
 ```
 
 > **Note:** `PORT` is informational. Hostinger assigns a random port and expects `process.env.PORT`. If the app fails to start, confirm Hostinger publishes the port as `PORT`.
 
-### Database Migration
+### Database Setup (Manual via SQL)
 
-> **Important:** SSH shell on Hostinger may not have `node`/`npm` in `PATH`. You cannot run `npm run db:migrate:deploy` from SSH.
+Hostinger builds **cannot** run Prisma migrations (SSH shell lacks `node`/`npm` in `PATH`). Instead, database setup is manual using the provided SQL file.
 
-Use `RUN_DB_MIGRATIONS=true` during build instead:
+**Prerequisites:**
+- A Supabase project (or any PostgreSQL 14+) with your database URL
+- Access to Supabase SQL Editor (or `psql` client)
 
-1. Set `RUN_DB_MIGRATIONS=true` in the API app env vars (see above).
-2. Deploy / Redeploy the API app via Hostinger.
-3. The build script (`scripts/hostinger-build-api.cjs`) runs `prisma migrate deploy` **before** `tsc` build.
-4. After the first successful deploy, change `RUN_DB_MIGRATIONS=false` and redeploy again.
-5. Future deploys with schema changes: set `RUN_DB_MIGRATIONS=true`, deploy, then set back to `false`.
+**Steps:**
 
-> - Never run `db:seed` on production unless this is a demo/data-reset environment.
-> - Only `prisma migrate deploy` is used — never `prisma migrate dev`.
+1. Open your Supabase project → **SQL Editor**.
+2. Open `docs/supabase-raina-init.sql` and copy its contents.
+3. Paste into SQL Editor and **Run**.
+4. Verify: run `SELECT COUNT(*) FROM "Category";` — should return 8.
 
-### Migrate-Only Script
+The SQL file is safe to run multiple times (uses `IF NOT EXISTS` and `ON CONFLICT DO NOTHING`).
 
-You can also run migrations standalone (if `node`/`npm` is available):
+**After any schema changes** (e.g., after pulling new migrations from the repo):
 
-```bash
-npm run db:migrate:deploy:api
-```
-
-This calls `node scripts/hostinger-build-api.cjs --migrate-only`, which runs `prisma migrate deploy` via the same pnpm fallback methods, then exits without building.
+1. Generate an updated SQL script using `prisma migrate diff` locally.
+2. Run it manually via Supabase SQL Editor.
+3. Deploy the API app normally (`RUN_DB_MIGRATIONS=false` always).
 
 ### Health Checks
 
@@ -501,7 +499,7 @@ After deployment, verify the API is running:
 
 ---
 
-## Running Prisma migrations on Hostinger
+## Database Setup via SQL
 
 ### Problem
 
@@ -512,47 +510,23 @@ Hostinger SSH shell does **not** have `node` or `npm` in `PATH`:
 node: command not found
 ```
 
-Only the Hostinger Node.js App build/deploy environment has Node.js available. Therefore traditional `npm run db:migrate:deploy` via SSH does not work.
+Only the Hostinger Node.js App build/deploy environment has Node.js available. This means `prisma migrate deploy` cannot run via SSH.
 
 ### Solution
 
-The API build script `scripts/hostinger-build-api.cjs` accepts an opt-in environment variable:
+Database setup is done **once** via Supabase SQL Editor using `docs/supabase-raina-init.sql`.
 
-```env
-RUN_DB_MIGRATIONS=true
-```
+The build script (`scripts/hostinger-build-api.cjs`) now always uses `RUN_DB_MIGRATIONS=false`. The `--migrate-only` flag exists but is **not** used for Hostinger deployments.
 
-When set to `true`, the script runs `prisma migrate deploy` **before** the `tsc` build, using the same pnpm fallback methods (local bin, local cjs, global, npx).
-
-### Workflow
-
-1. **First deploy**: Set `RUN_DB_MIGRATIONS=true` in the API Hostinger app env vars.
-2. Deploy/redeploy the API app — migration runs automatically before build.
-3. After successful deploy, change `RUN_DB_MIGRATIONS=false` and redeploy again (build only, no migration).
-4. **Future schema changes**: Set `RUN_DB_MIGRATIONS=true`, deploy, then set back to `false`.
-
-### Rules
-
-| Action                      | Command / Method                                        |
-| --------------------------- | ------------------------------------------------------- |
-| Migration during build      | `RUN_DB_MIGRATIONS=true`, then `npm run build:api`      |
-| Migration only (standalone) | `npm run db:migrate:deploy:api` (runs `--migrate-only`) |
-| Seed                        | **Never run in production** unless demo is intended     |
-| Migration command used      | `prisma migrate deploy` only                            |
-| Migration command banned    | `prisma migrate dev`, `prisma db push`                  |
-
-### Script details
-
-The CI/CD script in `scripts/hostinger-build-api.cjs`:
+### Build order
 
 ```
-RUN_DB_MIGRATIONS=true  ──►  prisma migrate deploy  ──►  tsc -p tsconfig.build.json
-RUN_DB_MIGRATIONS=false ──►  tsc -p tsconfig.build.json
---migrate-only          ──►  prisma migrate deploy  ──►  exit
+1. fixPrismaEnginePermissions()
+2. prisma generate
+3. tsc -p tsconfig.build.json
 ```
 
-All pnpm calls go through the 4-method fallback (local bin → local cjs → global → npx).
-No `corepack enable` is called.
+Migrations are **not** part of the Hostinger build. All schema management is manual via SQL.
 
 ---
 
@@ -582,14 +556,12 @@ The API build script (`scripts/hostinger-build-api.cjs`) includes a `fixPrismaEn
 
 ### Build order
 
-The script now runs in this order:
+The script runs in this order:
 
 ```
 1. fixPrismaEnginePermissions()
-2. If RUN_DB_MIGRATIONS=true → prisma migrate deploy
-3. pnpm --filter @raina/api build
+2. prisma generate
+3. tsc -p tsconfig.build.json
 ```
 
-### When to redeploy
-
-Set `RUN_DB_MIGRATIONS=true` for the first deploy. After a successful deploy, change to `RUN_DB_MIGRATIONS=false` and redeploy again.
+Migrations are handled manually via `docs/supabase-raina-init.sql`. Set `RUN_DB_MIGRATIONS=false` (default).
