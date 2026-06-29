@@ -1426,6 +1426,10 @@ canvas {
     display: none;
   }
 
+  .web-header-top__center {
+    display: none;
+  }
+
   .web-bottom-nav {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1488,7 +1492,7 @@ canvas {
 
   .web-header-top__inner {
     padding-block: var(--raina-space-4);
-    min-block-size: 48px;
+    min-block-size: 44px;
   }
 }
 
