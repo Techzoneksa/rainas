@@ -1,10 +1,12 @@
 import {
   getCategoryFallbackImage,
   getCategoryBanner,
-  getCategoryVisual,
+  getCategoryAccentColor as getAccentColor,
+  getCategoryDescription,
+  getVisualByUrlSlug,
 } from "@/lib/category-visuals";
 
-export { getCategoryVisual, getCategoryFallbackImage } from "@/lib/category-visuals";
+export { getVisualByUrlSlug };
 
 export const DEFAULT_IMAGE_URL =
   "https://images.unsplash.com/photo-1585381299351-7a5e29ca6f8d?w=1200&h=800&fit=crop&q=80";
@@ -19,8 +21,8 @@ export function getCategoryImageUrl(
   return DEFAULT_IMAGE_URL;
 }
 
-export function getCategoryHeroUrl(slug: string): string {
-  return getCategoryBanner(slug);
+export function getCategoryHeroUrl(urlSlug: string): string {
+  return getCategoryBanner(urlSlug);
 }
 
 export function safeImageUrl(url: string | null | undefined): string {
@@ -28,12 +30,10 @@ export function safeImageUrl(url: string | null | undefined): string {
   return DEFAULT_IMAGE_URL;
 }
 
-export function getCategoryAccentColor(slug: string): string {
-  const visual = getCategoryVisual(slug);
-  return visual?.accentColor ?? "#FFCE00";
+export function getCategoryAccentColor(urlSlug: string): string {
+  return getAccentColor(urlSlug);
 }
 
-export function getCategoryDescriptionAr(slug: string): string {
-  const visual = getCategoryVisual(slug);
-  return visual?.descriptionAr ?? "";
+export function getCategoryDescriptionAr(urlSlug: string): string {
+  return getCategoryDescription(urlSlug);
 }
