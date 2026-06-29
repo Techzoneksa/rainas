@@ -10,7 +10,11 @@ const nextConfig = {
     ]
   },
   transpilePackages: ["@raina/ui", "@raina/api-contracts", "@raina/shared-types"],
-  typedRoutes: true
+  typedRoutes: true,
+  env: {
+    NEXT_PUBLIC_API_BASE_URL:
+      process.env.NEXT_PUBLIC_API_BASE_URL || "https://api-raina.promksa.com/api/v1"
+  }
 };
 
 export default nextConfig;
