@@ -15,10 +15,10 @@ export function getCategoryImageUrl(
   slug: string,
   apiUrl: string | null | undefined,
 ): string {
-  const fallback = getCategoryFallbackImage(slug, 0);
-  if (fallback) return fallback;
-  if (apiUrl && apiUrl.length > 0 && apiUrl !== "/image") return apiUrl;
-  return DEFAULT_IMAGE_URL;
+  if (apiUrl && typeof apiUrl === "string" && apiUrl.length > 0 && apiUrl !== "/image") {
+    return apiUrl;
+  }
+  return getCategoryFallbackImage(slug, 0);
 }
 
 export function getCategoryHeroUrl(urlSlug: string): string {
