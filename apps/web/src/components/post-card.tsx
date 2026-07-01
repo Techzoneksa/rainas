@@ -35,7 +35,7 @@ export function PostCard({ post }: Readonly<{ post: Post }>) {
             ) : null}
           </div>
           <h3 className="web-social-card__title">{post.title}</h3>
-          <p className="web-social-card__excerpt">{excerpt(post.body, 120)}</p>
+          <p className="web-social-card__excerpt">{excerpt(post.body, 80)}</p>
           <div className="web-social-card__author">
             <Avatar
               size="sm"

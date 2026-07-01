@@ -10,10 +10,9 @@ interface ReviewHeroProps {
   post: Post;
   media: { url: string; alt?: string }[];
   fallbackLabel: string;
-  categorySlug?: string;
 }
 
-export function ReviewHero({ post, media, fallbackLabel, categorySlug }: ReviewHeroProps) {
+export function ReviewHero({ post, media, fallbackLabel }: ReviewHeroProps) {
   const profile = post.author.profile;
   const primaryMedia = media[0];
 

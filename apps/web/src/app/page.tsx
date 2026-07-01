@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EmptyState, Grid } from "@raina/ui";
+import { EmptyState } from "@raina/ui";
 
 import { HeroSlider } from "@/components/hero-slider";
 import { DiscoveryCircles } from "@/components/discovery-circles";
@@ -162,15 +162,11 @@ export default async function Page() {
             {productsError ? (
               <ApiErrorState error={productsError} />
             ) : (
-              <Grid
-                className="web-card-grid web-card-grid--products"
-                columns="4"
-                gap="16"
-              >
+              <div className="web-products-carousel">
                 {products.data.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
-              </Grid>
+              </div>
             )}
           </section>
         ) : null}
