@@ -1,6 +1,7 @@
 export interface MediaPlaceholderProps {
   label: string;
   className?: string | undefined;
+  fallbackSrc?: string | undefined;
 }
 
 function MediaIcon() {
@@ -15,8 +16,17 @@ function MediaIcon() {
 
 export function MediaPlaceholder({
   label,
-  className
+  className,
+  fallbackSrc,
 }: Readonly<MediaPlaceholderProps>) {
+  if (fallbackSrc) {
+    return (
+      <div className={`web-image-frame ${className ?? ""}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={fallbackSrc} alt={label} className="web-image-frame__image" />
+      </div>
+    );
+  }
   return (
     <div className={`web-media ${className ?? ""}`} role="img" aria-label={label}>
       <MediaIcon />

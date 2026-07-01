@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { DEFAULT_IMAGE_URL } from "@/lib/config/category-images";
+import { safeCategoryImage } from "@/lib/category-visuals";
 import { MediaPlaceholder } from "./media-placeholder";
 
 interface RemoteImageProps {
@@ -13,6 +14,8 @@ interface RemoteImageProps {
   fallbackSrc?: string | undefined;
   className?: string | undefined;
   sizes?: string | undefined;
+  categorySlug?: string | undefined;
+  categoryFallbackIndex?: number | undefined;
 }
 
 export function RemoteImage({
@@ -21,13 +24,18 @@ export function RemoteImage({
   fallbackLabel,
   fallbackSrc,
   className,
-  sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+  sizes = "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw",
+  categorySlug,
+  categoryFallbackIndex = 0,
 }: Readonly<RemoteImageProps>) {
-  const resolvedSrc = src || fallbackSrc || DEFAULT_IMAGE_URL;
+  const resolvedSrc = src || fallbackSrc || (categorySlug ? safeCategoryImage(categorySlug, null, categoryFallbackIndex) : null) || DEFAULT_IMAGE_URL;
   const [hasError, setHasError] = useState(false);
 
   if (hasError) {
-    return <MediaPlaceholder label={fallbackLabel} className={className} />;
+    const fallbackSrcOnError = categorySlug
+      ? safeCategoryImage(categorySlug, null, categoryFallbackIndex)
+      : DEFAULT_IMAGE_URL;
+    return <MediaPlaceholder label={fallbackLabel} className={className} fallbackSrc={fallbackSrcOnError} />;
   }
 
   return (

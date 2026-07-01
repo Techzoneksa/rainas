@@ -1,18 +1,21 @@
-import type { Route } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import { EmptyState, Stack, Grid } from "@raina/ui";
+import { EmptyState } from "@raina/ui";
 
-import { PageHeader } from "@/components/page-header";
-import { PostCard } from "@/components/post-card";
-import { ProductCard } from "@/components/product-card";
 import { HeroSlider } from "@/components/hero-slider";
 import { DiscoveryCircles } from "@/components/discovery-circles";
-import { SectionCarousel, SectionCarouselItem } from "@/components/section-carousel";
+import { PostCard } from "@/components/post-card";
+import { ProductCard } from "@/components/product-card";
+import { DiscoveryCards } from "@/components/discovery-cards";
 import { ApiErrorState } from "@/components/state-views";
 import { listPosts } from "@/lib/api/posts";
 import { listProducts } from "@/lib/api/products";
-import { heroSlides, discoveryCircles, womenDiscoverySections } from "@/lib/config/discovery";
+import {
+  heroSlides,
+  discoveryCircles,
+  womenDiscoveryCards,
+  beautyCards,
+  fashionCards,
+} from "@/lib/config/discovery";
 
 export const dynamic = "force-dynamic";
 
@@ -20,25 +23,16 @@ function getSettledValue<T>(result: PromiseSettledResult<T>): T | undefined {
   return result.status === "fulfilled" ? result.value : undefined;
 }
 
-function getSettledError<T>(result: PromiseSettledResult<T>): unknown | undefined {
+function getSettledError<T>(
+  result: PromiseSettledResult<T>,
+): unknown | undefined {
   return result.status === "rejected" ? result.reason : undefined;
-}
-
-function AdBanner() {
-  return (
-    <section className="web-ad-banner" aria-label="مساحة إعلانية">
-      <div className="web-ad-banner__inner">
-        <span className="web-ad-banner__label">إعلان</span>
-        <p className="web-ad-banner__text">مساحة إعلانية</p>
-      </div>
-    </section>
-  );
 }
 
 export default async function Page() {
   const [postsResult, productsResult] = await Promise.allSettled([
-    listPosts({ limit: 8 }),
-    listProducts({ limit: 8, sort: "rating_desc" })
+    listPosts({ limit: 12 }),
+    listProducts({ limit: 8, sort: "rating_desc" }),
   ]);
 
   const posts = getSettledValue(postsResult);
@@ -47,33 +41,36 @@ export default async function Page() {
   const productsError = getSettledError(productsResult);
 
   return (
-    <Stack className="web-home" gap="0">
+    <main className="web-home">
       <HeroSlider slides={heroSlides} />
 
-      <div className="web-home__sections">
-        <section className="web-section" aria-labelledby="home-discovery">
+      <div className="web-home__inner">
+        <section className="web-home-section" aria-label="اكتشفي">
           <DiscoveryCircles items={discoveryCircles} />
         </section>
 
-        <section className="web-section" aria-labelledby="home-posts">
-          <PageHeader
-            titleId="home-posts"
-            title="أحدث التجارب"
-            description="قراءات سريعة من تجارب منشورة."
-            action={
-              <Link href="/posts" className="web-link">
-                عرض الكل
-              </Link>
-            }
-          />
+        <section className="web-home-section" aria-labelledby="h-latest">
+          <div className="web-section-header">
+            <div>
+              <h2 id="h-latest" className="web-section-header__title">
+                أحدث التجارب
+              </h2>
+              <p className="web-section-header__desc">
+                قراءات سريعة من تجارب منشورة عن منتجات حقيقية
+              </p>
+            </div>
+            <Link href="/posts" className="web-section-header__action">
+              عرض الكل
+            </Link>
+          </div>
           {postsError ? (
             <ApiErrorState error={postsError} />
           ) : posts && posts.data.length > 0 ? (
-            <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
+            <div className="web-social-cards-row">
               {posts.data.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
-            </Grid>
+            </div>
           ) : (
             <EmptyState
               title="لا توجد تجارب منشورة"
@@ -82,79 +79,118 @@ export default async function Page() {
           )}
         </section>
 
-        <AdBanner />
+        <section className="web-home-section" aria-labelledby="h-women">
+          <div className="web-section-header">
+            <div>
+              <h2 id="h-women" className="web-section-header__title">
+                الأكثر تداولًا لدى البنات
+              </h2>
+              <p className="web-section-header__desc">
+                تجارب ومنتجات يتكلم عنها المستخدمون في العطور، المكياج، العناية،
+                والأزياء.
+              </p>
+            </div>
+          </div>
+          <DiscoveryCards cards={womenDiscoveryCards} />
+        </section>
 
-        {womenDiscoverySections.map((section) => (
-          <section key={section.id} className="web-section" aria-labelledby={section.id}>
-            <PageHeader
-              titleId={section.id}
-              title={section.title}
-              description={section.description}
-            />
-            <SectionCarousel ariaLabel={section.title}>
-              {section.circles.map((item) => (
-                <SectionCarouselItem key={item.id}>
-                  <Link href={item.href as Route} className="web-discovery-card">
-                    <div className="web-discovery-card__media">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.nameAr}
-                        fill
-                        sizes="(min-width: 1024px) 320px, 280px"
-                        className="web-discovery-card__image"
-                        unoptimized
-                      />
-                    </div>
-                    <div className="web-discovery-card__body">
-                      <h3 className="web-discovery-card__title">{item.nameAr}</h3>
-                      <span className="web-discovery-card__action">استكشف</span>
-                    </div>
-                  </Link>
-                </SectionCarouselItem>
-              ))}
-            </SectionCarousel>
-          </section>
-        ))}
+        <section className="web-home-section" aria-labelledby="h-beauty">
+          <div className="web-section-header">
+            <div>
+              <h2 id="h-beauty" className="web-section-header__title">
+                جمال وعطور
+              </h2>
+              <p className="web-section-header__desc">
+                تجارب حقيقية حول العطور، المكياج، والعناية بالبشرة والشعر
+              </p>
+            </div>
+            <Link
+              href="/categories/beauty"
+              className="web-section-header__action"
+            >
+              عرض الكل
+            </Link>
+          </div>
+          <DiscoveryCards cards={beautyCards} />
+        </section>
 
-        <section className="web-section" aria-labelledby="home-electronics">
-          <PageHeader
-            titleId="home-electronics"
-            title="تجارب إلكترونيات"
-            description="أحدث تقييمات الأجهزة الذكية والجوالات."
-            action={
-              <Link href="/categories/electronics" className="web-link">
-                عرض الكل
-              </Link>
-            }
-          />
-          {posts && posts.data.length > 0 ? (
-            <Grid className="web-card-grid web-card-grid--posts" columns="3" gap="16">
-              {posts.data.slice(0, 3).map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </Grid>
-          ) : null}
+        <section className="web-home-section" aria-label="مساحة إعلانية">
+          <div className="web-ad-banner">
+            <span className="web-ad-banner__label">إعلان</span>
+            <p className="web-ad-banner__text">مساحة إعلانية</p>
+          </div>
+        </section>
+
+        <section className="web-home-section" aria-labelledby="h-fashion">
+          <div className="web-section-header">
+            <div>
+              <h2 id="h-fashion" className="web-section-header__title">
+                إكسسوارات وأزياء
+              </h2>
+              <p className="web-section-header__desc">
+                شنط، أحذية، نظارات، مجوهرات، وفساتين بتقييمات دقيقة
+              </p>
+            </div>
+            <Link
+              href="/categories/fashion"
+              className="web-section-header__action"
+            >
+              عرض الكل
+            </Link>
+          </div>
+          <DiscoveryCards cards={fashionCards} />
         </section>
 
         {products && products.data.length > 0 ? (
-          <section className="web-section" aria-labelledby="home-products">
-            <PageHeader
-              titleId="home-products"
-              title="منتجات مختارة"
-              description="منتجات مرتبة حسب التقييمات المتاحة."
-            />
+          <section className="web-home-section" aria-labelledby="h-products">
+            <div className="web-section-header">
+              <div>
+                <h2 id="h-products" className="web-section-header__title">
+                  منتجات مختارة
+                </h2>
+                <p className="web-section-header__desc">
+                  منتجات مرتبة حسب تقييمات المستخدمين
+                </p>
+              </div>
+              <Link
+                href="/products"
+                className="web-section-header__action"
+              >
+                عرض الكل
+              </Link>
+            </div>
             {productsError ? (
               <ApiErrorState error={productsError} />
             ) : (
-              <Grid className="web-card-grid web-card-grid--products" columns="4" gap="16">
+              <div className="web-products-carousel">
                 {products.data.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
-              </Grid>
+              </div>
             )}
           </section>
         ) : null}
+
+        {posts && posts.data.length > 0 ? (
+          <section className="web-home-section" aria-labelledby="h-more">
+            <div className="web-section-header">
+              <div>
+                <h2 id="h-more" className="web-section-header__title">
+                  تجارب مقترحة
+                </h2>
+                <p className="web-section-header__desc">
+                  تجارب إضافية قد تهمك
+                </p>
+              </div>
+            </div>
+            <div className="web-social-cards-row">
+              {posts.data.slice(0, 6).map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
-    </Stack>
+    </main>
   );
 }
